@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { UserRole } from '../types/index.js';
 import {
   LayoutDashboard,
   FolderGit2,
@@ -65,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     icon: any;
     badge?: number;
     badgeColor?: string;
-    roles: ('MP' | 'ADMIN' | 'AGENCY' | 'PUBLIC')[];
+    roles: UserRole[];
     section?: string;
   }
 

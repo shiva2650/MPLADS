@@ -126,7 +126,6 @@ const MainAppContent: React.FC = () => {
         {/* Modal for Project details preview from Landing Page */}
         <ProjectModal
           project={selectedProject}
-          isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
           userRole="PUBLIC"
         />
@@ -237,7 +236,7 @@ const MainAppContent: React.FC = () => {
                   </div>
                   <GISMap
                     projects={projects}
-                    selectedProject={selectedProject}
+                    selectedProjectId={selectedProject?.id}
                     onSelectProject={p => setSelectedProject(p)}
                   />
                 </div>
@@ -348,7 +347,6 @@ const MainAppContent: React.FC = () => {
       {/* 1. Project Detailed Audit & Photo Verification Modal */}
       <ProjectModal
         project={selectedProject}
-        isOpen={!!selectedProject}
         onClose={() => setSelectedProject(null)}
         userRole={effectiveRole}
       />
