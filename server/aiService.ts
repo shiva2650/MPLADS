@@ -1,19 +1,7 @@
-import { Project, DuplicateProjectCandidate, RiskLevel } from '../src/types/index.js';
+import { Project, DuplicateProjectCandidate, RiskLevel, CATEGORY_COST_BENCHMARKS } from '../src/types/index.js';
 import { GoogleGenAI } from '@google/genai';
 
-// Standard benchmarks for category costs in Lakhs (INR)
-export const CATEGORY_COST_BENCHMARKS: Record<string, { min: number; max: number; typical: number; unitDescription: string }> = {
-  'Community Infrastructure': { min: 1500000, max: 2500000, typical: 2000000, unitDescription: 'Standard plinth community center (2000-3000 sq ft)' },
-  'Drinking Water & Sanitation': { min: 1200000, max: 2000000, typical: 1600000, unitDescription: '2000 LPH RO water filtration plant or OHSR unit' },
-  'Education & Schools': { min: 1800000, max: 3000000, typical: 2400000, unitDescription: 'Govt high school modernization & digital classroom package' },
-  'Renewable Energy': { min: 2500000, max: 4000000, typical: 3200000, unitDescription: '50-100 high-mast solar LED poles or 50kWp rooftop solar' },
-  'Healthcare & Wellness': { min: 2500000, max: 4500000, typical: 3500000, unitDescription: 'Primary health sub-centre or mobile ambulance life support unit' },
-  'Roads, Bridges & Pathways': { min: 1500000, max: 2800000, typical: 2200000, unitDescription: 'Cement concrete road with cover drains (approx. 500m)' },
-  'Child & Women Welfare': { min: 1000000, max: 1800000, typical: 1400000, unitDescription: 'Anganwadi building or SHG training facility' },
-  'Skill Development & IT': { min: 1500000, max: 2500000, typical: 2000000, unitDescription: '40-terminal IT computer lab with UPS & networking' },
-  'Public Safety & Security': { min: 3000000, max: 5000000, typical: 4000000, unitDescription: '100+ CCTV camera network and control room integration' },
-  'Sports & Recreation': { min: 1200000, max: 2200000, typical: 1700000, unitDescription: 'Open outdoor gym with 12 equipment pedestals & walking track' }
-};
+export { CATEGORY_COST_BENCHMARKS };
 
 // Haversine distance calculator in meters
 export function calculateHaversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {

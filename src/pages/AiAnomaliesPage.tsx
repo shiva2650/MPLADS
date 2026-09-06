@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   Compass
 } from 'lucide-react';
-import { CATEGORY_COST_BENCHMARKS } from '../../server/aiService.js';
+import { CATEGORY_COST_BENCHMARKS } from '../types/index.js';
 
 interface AiAnomaliesPageProps {
   projects: Project[];
