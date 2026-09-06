@@ -13,6 +13,26 @@ declare global {
   }
 }
 
+/**
+ * =========================================================================================
+ * STATUTORY MPLADS ROLE-BASED ACCESS CONTROL (RBAC) MATRIX
+ * Mandated under MoSPI (Ministry of Statistics and Programme Implementation) Framework
+ * =========================================================================================
+ * Action / Capability               | MP        | District Authority (ADMIN) | Implementing Agency | Citizen (PUBLIC)
+ * ----------------------------------+-----------+----------------------------+---------------------+-----------------
+ * Recommend Project                 | ALLOWED   | ALLOWED (Co-sign)          | BLOCKED (403)       | BLOCKED (401/403)
+ * Approve / Reject Project          | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
+ * Sanction Funds & Set Ceiling      | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
+ * Assign Contractor / Agency        | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
+ * Disburse Payment Installment      | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
+ * Request Payment Voucher           | BLOCKED   | ALLOWED                    | ALLOWED             | BLOCKED (401/403)
+ * Submit Site Photos / Progress %   | BLOCKED   | ALLOWED (Override)         | ALLOWED             | BLOCKED (401/403)
+ * Dismiss / Review Risk Flag Alerts | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
+ * Submit Grievance / Feedback       | ALLOWED   | ALLOWED                    | ALLOWED             | ALLOWED
+ * View Public Project Register      | ALLOWED   | ALLOWED                    | ALLOWED             | ALLOWED
+ * =========================================================================================
+ */
+
 // Enterprise role alias mapping (SUPER_ADMIN -> ADMIN, PROJECT_MANAGER -> AGENCY, VIEWER -> PUBLIC)
 export const ROLE_ALIASES: Record<string, UserRole> = {
   SUPER_ADMIN: 'ADMIN',

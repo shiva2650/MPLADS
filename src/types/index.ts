@@ -53,6 +53,21 @@ export interface ProjectPhoto {
   isAiVerified: boolean;
   aiVerificationNotes?: string;
   similarityAlert?: boolean;
+  perceptualHash?: string;
+  exifTimestamp?: string;
+  verificationStatus?: 'VERIFIED' | 'UNVERIFIABLE' | 'LOCATION_MISMATCH' | 'DUPLICATE_REUSE' | 'PENDING';
+  distanceFromSiteMeters?: number;
+  gpsDistanceMeters?: number; // alias for distanceFromSiteMeters
+  isGpsVerified?: boolean;
+  cameraMakeModel?: string;
+  cameraModel?: string; // alias for cameraMakeModel
+  duplicateMatchDetails?: {
+    matchedProjectId: string;
+    matchedProjectCode: string;
+    matchedPhotoId: string;
+    similarityPercentage: number;
+    hammingDistance?: number;
+  };
 }
 
 export interface ProjectDocument {
@@ -89,6 +104,35 @@ export interface AiRiskAnalysis {
   reasons: string[];
   recommendations: string[];
   disclaimer: string;
+  // Rigorous statistical baseline & confidence metrics (Areas 1 & 3)
+  costBaseline?: {
+    mean: number;
+    cohortMean?: number;
+    stdDev: number;
+    cohortStdDev?: number;
+    zScore: number;
+    cohortSize: number;
+    category: string;
+    state: string;
+    zThreshold: number;
+    isAnomaly: boolean;
+    reason: string;
+  };
+  delayMetrics?: {
+    delayDays: number;
+    confidenceScore: number; // e.g. 78%
+    marginOfErrorDays: number; // e.g. 14 days
+    confidenceInterval: string; // "78% confidence, ± 14 days"
+    confidenceIntervalString?: string; // alias
+    modelTrainingStatus: string; // "Model trained on synthetic data — validation pending"
+    holdoutValidation?: {
+      precision: number;
+      recall: number;
+      f1Score: number;
+      accuracy: number;
+      sampleSize: number;
+    };
+  };
 }
 
 export interface Project {

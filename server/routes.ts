@@ -674,19 +674,26 @@ apiRouter.post('/projects/:id/progress', requireRole(['AGENCY', 'ADMIN']), async
   });
 });
 
-// Payments - Request (Agency) or Disburse (Admin)
+// Payments - Request Voucher (Agency) or Disburse Funds (District Authority / Admin only)
 apiRouter.post('/projects/:id/payments', requireRole(['AGENCY', 'ADMIN']), (req: Request, res: Response) => {
   const project = db.projects.find(p => p.id === req.params.id);
   if (!project) return res.status(404).json({ error: 'Project not found.' });
 
-  const { amount, sanctionOrderNo, remarks } = req.body;
+  const { amount, sanctionOrderNo, remarks, action, status } = req.body;
   const numAmount = Number(amount);
 
   if (!numAmount || numAmount <= 0) {
     return res.status(400).json({ error: 'Valid payment amount is required.' });
   }
 
-  const isDisbursal = req.user!.role === 'ADMIN';
+  // Statutory Guard: Only District Authority (ADMIN) can disburse funds
+  if ((action === 'DISBURSE' || status === 'Disbursed') && req.user!.role !== 'ADMIN') {
+    return res.status(403).json({
+      error: `Unauthorized: Role '${req.user!.role}' cannot disburse public funds. Only District Authority (ADMIN) can sanction disbursements.`
+    });
+  }
+
+  const isDisbursal = req.user!.role === 'ADMIN' && action !== 'REQUEST';
 
   const newPayment = {
     id: `pay_${Date.now()}`,
@@ -713,6 +720,46 @@ apiRouter.post('/projects/:id/payments', requireRole(['AGENCY', 'ADMIN']), (req:
     targetEntity: 'Project',
     targetId: project.id,
     newValue: `Amount: ₹${(numAmount / 100000).toFixed(2)} Lakh | Status: ${newPayment.status}`,
+    ipAddressMasked: '10.14.02.***'
+  });
+
+  return res.json({ success: true, payment: newPayment, project });
+});
+
+// Dedicated Administrator Fund Disbursal Endpoint (Strictly ADMIN only)
+apiRouter.post('/projects/:id/payments/disburse', requireRole(['ADMIN']), (req: Request, res: Response) => {
+  const project = db.projects.find(p => p.id === req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found.' });
+
+  const { amount, sanctionOrderNo, remarks } = req.body;
+  const numAmount = Number(amount);
+
+  if (!numAmount || numAmount <= 0) {
+    return res.status(400).json({ error: 'Valid payment amount is required.' });
+  }
+
+  const newPayment = {
+    id: `pay_${Date.now()}`,
+    installmentNo: project.payments.length + 1,
+    amount: numAmount,
+    sanctionOrderNo: sanctionOrderNo || `SAN/MPLADS/2025/${Math.floor(100 + Math.random() * 900)}`,
+    paidAt: new Date().toISOString().split('T')[0],
+    status: 'Disbursed' as const,
+    beneficiaryAgency: project.implementingAgencyName,
+    remarks: remarks || 'Sanctioned milestone disbursement'
+  };
+
+  project.payments.push(newPayment);
+  project.fundsUtilized = (project.fundsUtilized || 0) + numAmount;
+
+  db.addAuditLog({
+    userId: req.user!.userId,
+    userName: req.user!.name,
+    userRole: req.user!.role,
+    action: 'PAYMENT_DISBURSED',
+    targetEntity: 'Project',
+    targetId: project.id,
+    newValue: `Amount: ₹${(numAmount / 100000).toFixed(2)} Lakh | Status: Disbursed`,
     ipAddressMasked: '10.14.02.***'
   });
 

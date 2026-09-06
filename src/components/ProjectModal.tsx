@@ -28,6 +28,7 @@ interface ProjectModalProps {
   onRefresh?: () => void;
   userRole: UserRole | 'PUBLIC';
   duplicateCandidates?: DuplicateProjectCandidate[];
+  initialTab?: 'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report';
 }
 
 export const ProjectModal: React.FC<ProjectModalProps> = ({
@@ -35,13 +36,21 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   onClose,
   onRefresh,
   userRole,
-  duplicateCandidates = []
+  duplicateCandidates = [],
+  initialTab = 'overview'
 }) => {
   if (!project) return null;
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report'>(initialTab);
   const [isGeneratingAiReport, setIsGeneratingAiReport] = useState(false);
   const [aiReportContent, setAiReportContent] = useState<string | null>(null);
+  const [inspectingPhoto, setInspectingPhoto] = useState<any | null>(null);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, project?.id]);
 
   const handleGenerateReport = async () => {
     setIsGeneratingAiReport(true);
@@ -327,20 +336,39 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
               {/* Risk Score Breakdown Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-xs font-bold text-[#588157] uppercase tracking-wider">Cost Anomaly Index</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#588157] uppercase tracking-wider">Cost Anomaly Index</span>
+                    {project.riskAnalysis.costBaseline && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#FAF3E0] text-[#935D26] font-bold border border-[#E8DAB2]">
+                        Z-Score: {project.riskAnalysis.costBaseline.zScore > 0 ? `+${project.riskAnalysis.costBaseline.zScore}σ` : `${project.riskAnalysis.costBaseline.zScore}σ`}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-2xl font-bold text-[#1B3022] mt-1">
                     {project.riskAnalysis.costAnomalyScore}
                     <span className="text-xs text-[#588157] font-normal"> / 100</span>
                   </div>
-                  <div className="mt-2 text-xs text-[#588157]">
-                    Category benchmark: ₹18 - 25 Lakh.
-                    {project.sanctionedAmount > 2500000 && (
-                      <span className="text-[#E07A5F] font-bold block mt-1">
-                        Proposed cost exceeds standard benchmark by +
-                        {Math.round(((project.sanctionedAmount - 2000000) / 2000000) * 100)}%
-                      </span>
-                    )}
-                  </div>
+                  
+                  {project.riskAnalysis.costBaseline ? (
+                    <div className="mt-2 space-y-1 text-xs">
+                      <div className="text-[11px] text-[#588157]">
+                        Cohort Baseline: <strong>₹{(project.riskAnalysis.costBaseline.cohortMean / 100000).toFixed(2)}L</strong> (±₹{(project.riskAnalysis.costBaseline.cohortStdDev / 100000).toFixed(2)}L)
+                      </div>
+                      <div className={`text-[11px] p-2 rounded-lg font-medium ${project.riskAnalysis.costBaseline.isAnomaly ? 'bg-[#FDF0EC] text-[#B85338] border border-[#FAD2D2]' : 'bg-[#EAF0E6] text-[#395C40]'}`}>
+                        {project.riskAnalysis.costBaseline.reason}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 text-xs text-[#588157]">
+                      Category benchmark: ₹18 - 25 Lakh.
+                      {project.sanctionedAmount > 2500000 && (
+                        <span className="text-[#E07A5F] font-bold block mt-1">
+                          Proposed cost exceeds standard benchmark by +
+                          {Math.round(((project.sanctionedAmount - 2000000) / 2000000) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
@@ -356,15 +384,27 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 </div>
 
                 <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-xs font-bold text-[#588157] uppercase tracking-wider">Delay Forecast Probability</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#588157] uppercase tracking-wider">Delay Forecast</span>
+                    {project.riskAnalysis.delayMetrics && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#FAF3E0] text-[#935D26] font-bold">
+                        {project.riskAnalysis.delayMetrics.confidenceIntervalString}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-2xl font-bold text-[#1B3022] mt-1">
                     {project.riskAnalysis.delayProbability}%
                   </div>
-                  <div className="mt-2 text-xs text-[#588157]">
+                  <div className="mt-2 space-y-1 text-xs text-[#588157]">
                     {project.riskAnalysis.delayProbability > 60 ? (
-                      <span className="text-[#E07A5F] font-bold">High risk of schedule overrun</span>
+                      <span className="text-[#E07A5F] font-bold block">High risk of schedule overrun</span>
                     ) : (
-                      <span className="text-[#395C40] font-bold">Trajectory conforms to scheduled target</span>
+                      <span className="text-[#395C40] font-bold block">Trajectory conforms to scheduled target</span>
+                    )}
+                    {project.riskAnalysis.delayMetrics && (
+                      <div className="text-[10px] text-[#8C7A6B] italic pt-1 border-t border-[#F0F2ED]">
+                        {project.riskAnalysis.delayMetrics.modelTrainingStatus}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -502,14 +542,33 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                           </div>
                         </div>
 
-                        <div className="pt-2 border-t border-[#F0F2ED] text-[11px] space-y-1">
+                        <div className="pt-2 border-t border-[#F0F2ED] text-[11px] space-y-1.5">
                           {photo.latitude && photo.longitude ? (
-                            <div className="flex items-center gap-1 font-mono text-[#588157]">
-                              <Compass className="w-3 h-3 text-[#395C40]" />
-                              <span>{photo.latitude.toFixed(4)}°, {photo.longitude.toFixed(4)}°</span>
+                            <div className="flex items-center justify-between font-mono text-[#588157]">
+                              <div className="flex items-center gap-1">
+                                <Compass className="w-3 h-3 text-[#395C40]" />
+                                <span>{photo.latitude.toFixed(4)}°, {photo.longitude.toFixed(4)}°</span>
+                              </div>
+                              {typeof photo.gpsDistanceMeters === 'number' && (
+                                <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${photo.isGpsVerified === false || photo.gpsDistanceMeters > 500 ? 'bg-[#FDF0EC] text-[#B85338]' : 'bg-[#EAF0E6] text-[#395C40]'}`}>
+                                  Δ {photo.gpsDistanceMeters}m
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <div className="text-[#A3B18A] italic">No GPS coordinates in EXIF</div>
+                          )}
+
+                          {photo.cameraModel && (
+                            <div className="text-[10px] text-[#588157]">
+                              Hardware: <strong className="text-[#1B3022]">{photo.cameraModel}</strong>
+                            </div>
+                          )}
+
+                          {photo.duplicateMatchDetails && (
+                            <div className="text-[10px] p-1.5 rounded-lg bg-[#FDF0EC] text-[#B85338] border border-[#FAD2D2]">
+                              Matched Archive: <strong>{photo.duplicateMatchDetails.matchedProjectCode}</strong> (Hamming Dist: {photo.duplicateMatchDetails.hammingDistance})
+                            </div>
                           )}
 
                           {photo.aiVerificationNotes && (

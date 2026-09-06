@@ -54,8 +54,14 @@ const MainAppContent: React.FC = () => {
 
   // Active Modals State
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProjectInitialTab, setSelectedProjectInitialTab] = useState<'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report'>('overview');
   const [isRecommendOpen, setIsRecommendOpen] = useState<boolean>(false);
   const [activeAlertForAction, setActiveAlertForAction] = useState<RiskAlert | null>(null);
+
+  const handleSelectProject = (p: Project | null, tab?: 'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report') => {
+    setSelectedProject(p);
+    setSelectedProjectInitialTab(tab || 'overview');
+  };
 
   const effectiveRole = isPublicMode ? 'PUBLIC' : effectiveUser?.role || 'PUBLIC';
 
@@ -246,7 +252,7 @@ const MainAppContent: React.FC = () => {
                 <ProjectsPage
                   projects={projects}
                   userRole={effectiveRole}
-                  onSelectProject={p => setSelectedProject(p)}
+                  onSelectProject={p => handleSelectProject(p)}
                   onNavigateToRecommend={() => setIsRecommendOpen(true)}
                 />
               )}
@@ -255,7 +261,7 @@ const MainAppContent: React.FC = () => {
                 <AiAnomaliesPage
                   projects={projects}
                   alerts={alerts}
-                  onSelectProject={p => setSelectedProject(p)}
+                  onSelectProject={(p, tab) => handleSelectProject(p, tab)}
                   onOpenAlertAction={a => setActiveAlertForAction(a)}
                 />
               )}
@@ -265,7 +271,7 @@ const MainAppContent: React.FC = () => {
                   alerts={alerts}
                   projects={projects}
                   onOpenAlertAction={a => setActiveAlertForAction(a)}
-                  onSelectProject={p => setSelectedProject(p)}
+                  onSelectProject={p => handleSelectProject(p)}
                 />
               )}
 
@@ -349,6 +355,7 @@ const MainAppContent: React.FC = () => {
         project={selectedProject}
         onClose={() => setSelectedProject(null)}
         userRole={effectiveRole}
+        initialTab={selectedProjectInitialTab}
       />
 
       {/* 2. MP New Project Recommendation Modal */}
