@@ -10,7 +10,8 @@ import {
   Bell,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Home
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -18,13 +19,21 @@ interface NavbarProps {
   isSidebarOpen?: boolean;
   onNavigateToAlerts?: () => void;
   pendingAlertsCount?: number;
+  criticalAlertsCount?: number;
+  onOpenRecommend?: () => void;
+  onNavigateToHome?: () => void;
+  onOpenLogin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
   isSidebarOpen,
   onNavigateToAlerts,
-  pendingAlertsCount = 4
+  pendingAlertsCount = 4,
+  criticalAlertsCount,
+  onOpenRecommend,
+  onNavigateToHome,
+  onOpenLogin
 }) => {
   const { user, role, logout, switchDemoRole } = useAuth();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
@@ -93,7 +102,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Emblem representation in Natural Tones */}
-            <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center gap-3 ${onNavigateToHome ? 'cursor-pointer hover:opacity-90' : ''}`}
+              onClick={onNavigateToHome}
+              title={onNavigateToHome ? 'Return to Scheme Portal Home' : undefined}
+            >
               <div className="bg-white p-1 rounded shadow-xs">
                 <div className="w-8 h-8 bg-[#1B3022] rounded-xs flex items-center justify-center font-bold text-white text-xs border border-[#C8D5B9]">
                   AI
@@ -237,13 +250,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="hidden sm:inline">Logout</span>
               </button>
             ) : (
-              <button
-                id="navbar-login-btn"
-                onClick={() => switchDemoRole('ADMIN')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#395C40] hover:bg-[#4a7251] border border-[#C8D5B9] shadow-xs transition-colors"
-              >
-                <span>Officer Login</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {onNavigateToHome && (
+                  <button
+                    id="navbar-home-btn"
+                    onClick={onNavigateToHome}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#DDE5D4] hover:text-white hover:bg-[#263D2E] border border-[#C8D5B9]/30 transition-colors cursor-pointer"
+                    title="Return to Scheme Home & Overview"
+                  >
+                    <Home className="w-3.5 h-3.5 text-[#A3B18A]" />
+                    <span className="hidden sm:inline">Portal Home</span>
+                  </button>
+                )}
+                <button
+                  id="navbar-login-btn"
+                  onClick={() => onOpenLogin ? onOpenLogin() : switchDemoRole('ADMIN')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#395C40] hover:bg-[#4a7251] border border-[#C8D5B9] shadow-xs transition-colors cursor-pointer"
+                >
+                  <span>Officer Login</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

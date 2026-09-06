@@ -1,7 +1,43 @@
+import crypto from 'crypto';
 import { Project, RiskAlert, CitizenFeedback, AuditLogEntry, User } from '../src/types/index.js';
 
 // Pre-seeded Users
 export const users: (User & { passwordHash: string })[] = [
+  {
+    id: 'user_super_01',
+    userId: 'SUPER001',
+    passwordHash: 'Super@123',
+    name: 'MoSPI Central Vigilance Directorate',
+    role: 'SUPER_ADMIN',
+    designation: 'Central Vigilance Director General',
+    district: 'New Delhi',
+    email: 'vigilance.dg@mospi.gov.in',
+    phone: '+91 011 2338 1234'
+  },
+  {
+    id: 'user_pm_01',
+    userId: 'PM001',
+    passwordHash: 'Pm@123',
+    name: 'Er. S. Venkat Reddy',
+    role: 'PROJECT_MANAGER',
+    designation: 'Project Manager & Executive Engineer',
+    agencyId: 'AGENCY001',
+    agencyName: 'TSUDA - Hyderabad Zone',
+    district: 'Hyderabad',
+    email: 'pm.tsuda@telangana.gov.in',
+    phone: '+91 94400 11223'
+  },
+  {
+    id: 'user_viewer_01',
+    userId: 'VIEWER001',
+    passwordHash: 'Viewer@123',
+    name: 'Citizen Transparency Auditor',
+    role: 'VIEWER',
+    designation: 'Public Open Data Auditor',
+    district: 'Hyderabad',
+    email: 'transparency.auditor@citizen.org.in',
+    phone: '+91 98480 99887'
+  },
   {
     id: 'user_mp_01',
     userId: 'MP001',
@@ -2091,14 +2127,87 @@ export class DataStore {
     };
   }
 
-  addAuditLog(entry: Omit<AuditLogEntry, 'id' | 'timestamp'>) {
+  private latestLogHash: string = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
+
+  addAuditLog(entry: Omit<AuditLogEntry, 'id' | 'timestamp' | 'entryHash' | 'prevHash'>): AuditLogEntry {
+    const id = `LOG-${Date.now().toString().slice(-5)}-${Math.floor(Math.random() * 900 + 100)}`;
+    const timestamp = new Date().toISOString();
+    const prevHash = this.latestLogHash;
+
+    const hashPayload = `${prevHash}|${id}|${timestamp}|${entry.userId}|${entry.userRole}|${entry.action}|${entry.targetEntity}|${entry.targetId}|${entry.previousValue || ''}|${entry.newValue || ''}|${entry.ipAddressMasked}`;
+    const entryHash = crypto.createHash('sha256').update(hashPayload).digest('hex');
+
     const log: AuditLogEntry = {
       ...entry,
-      id: `LOG-${Date.now().toString().slice(-5)}`,
-      timestamp: new Date().toISOString()
+      id,
+      timestamp,
+      prevHash,
+      entryHash
     };
+
+    this.latestLogHash = entryHash;
     this.auditLogs.unshift(log);
     return log;
+  }
+
+  verifyAuditLogIntegrity(): { isValid: boolean; verifiedCount: number; brokenAtId?: string } {
+    const logsChronological = [...this.auditLogs].reverse();
+    let prev = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
+
+    for (const log of logsChronological) {
+      if (log.prevHash && log.prevHash !== prev) {
+        return { isValid: false, verifiedCount: logsChronological.indexOf(log), brokenAtId: log.id };
+      }
+      if (log.entryHash) {
+        const hashPayload = `${log.prevHash || prev}|${log.id}|${log.timestamp}|${log.userId}|${log.userRole}|${log.action}|${log.targetEntity}|${log.targetId}|${log.previousValue || ''}|${log.newValue || ''}|${log.ipAddressMasked}`;
+        const recomputed = crypto.createHash('sha256').update(hashPayload).digest('hex');
+        if (recomputed !== log.entryHash) {
+          return { isValid: false, verifiedCount: logsChronological.indexOf(log), brokenAtId: log.id };
+        }
+        prev = log.entryHash;
+      }
+    }
+    return { isValid: true, verifiedCount: this.auditLogs.length };
+  }
+
+  // Backup snapshot for restoring after hackathon tamper simulation
+  private backupLogsSnapshot: AuditLogEntry[] | null = null;
+
+  simulateTamperAuditLog(targetId?: string): { tamperedLogId: string; modifiedField: string; originalValue: string; maliciousValue: string } {
+    if (!this.backupLogsSnapshot) {
+      this.backupLogsSnapshot = JSON.parse(JSON.stringify(this.auditLogs));
+    }
+
+    // Pick record to maliciously alter (e.g. index 2 or 3)
+    const target = targetId
+      ? this.auditLogs.find(l => l.id === targetId)
+      : (this.auditLogs[Math.min(3, this.auditLogs.length - 1)] || this.auditLogs[0]);
+
+    if (!target) {
+      throw new Error('No audit log available to tamper with.');
+    }
+
+    const originalValue = target.newValue || target.action;
+    const maliciousValue = 'UNAUTHORIZED_ALTERATION: Status fraudulently marked Approved & Funds Released';
+    
+    // Intentionally mutate content WITHOUT recalculating hash or prevHash to prove cryptographic detection
+    target.newValue = maliciousValue;
+
+    return {
+      tamperedLogId: target.id,
+      modifiedField: 'newValue',
+      originalValue,
+      maliciousValue
+    };
+  }
+
+  restoreAuditLogChain(): { restoredCount: number; message: string } {
+    if (this.backupLogsSnapshot) {
+      this.auditLogs = JSON.parse(JSON.stringify(this.backupLogsSnapshot));
+      this.backupLogsSnapshot = null;
+      return { restoredCount: this.auditLogs.length, message: 'Audit log chain restored to pristine cryptographic state.' };
+    }
+    return { restoredCount: this.auditLogs.length, message: 'Audit chain already in verified state.' };
   }
 }
 

@@ -12,6 +12,7 @@ import { RecommendModal } from './components/RecommendModal.js';
 import { AlertActionModal } from './components/AlertActionModal.js';
 
 // Pages
+import { LandingPage } from './pages/LandingPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
 import { ProjectsPage } from './pages/ProjectsPage.js';
@@ -24,12 +25,20 @@ import { VendorAnalyticsPage } from './pages/VendorAnalyticsPage.js';
 import { CitizenFeedbackPage } from './pages/CitizenFeedbackPage.js';
 import { ReportsPage } from './pages/ReportsPage.js';
 import { AuditLogPage } from './pages/AuditLogPage.js';
+import { SatelliteVerificationPage } from './pages/SatelliteVerificationPage.js';
+import { ContractorNetworkFraudPage } from './pages/ContractorNetworkFraudPage.js';
+import { DataIngestionImpactPage } from './pages/DataIngestionImpactPage.js';
+import { CitizenChatbotDrawer } from './components/CitizenChatbotDrawer.js';
 
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
-  const { user, currentUser, isPublicMode, enterPublicMode, logout, loading: authLoading } = useAuth();
+  const { user, currentUser, isPublicMode, enterPublicMode, exitPublicMode, logout, loading: authLoading } = useAuth();
   const effectiveUser = user || currentUser;
+
+  // View state before login: 'landing' (Home page & dashboard) or 'login' (Official login)
+  const [unauthenticatedView, setUnauthenticatedView] = useState<'landing' | 'login'>('landing');
+  const [loginPresetRole, setLoginPresetRole] = useState<'MP' | 'ADMIN' | 'AGENCY' | undefined>(undefined);
 
   // Navigation State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -74,10 +83,8 @@ const MainAppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (effectiveUser || isPublicMode) {
-      fetchData();
-    }
-  }, [effectiveUser, isPublicMode, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
   // While restoring session from localStorage, show gentle loader
   if (authLoading) {
@@ -91,9 +98,40 @@ const MainAppContent: React.FC = () => {
     );
   }
 
-  // If user is not logged in and not in public transparency mode, show Login Page
+  // If user is not logged in and not in public transparency mode, show Home Page & Dashboard or Login Page
   if (!effectiveUser && !isPublicMode) {
-    return <LoginPage onEnterPublic={enterPublicMode} />;
+    if (unauthenticatedView === 'login') {
+      return (
+        <LoginPage
+          onBackToHome={() => setUnauthenticatedView('landing')}
+          onEnterPublic={enterPublicMode}
+          initialRole={loginPresetRole}
+        />
+      );
+    }
+
+    return (
+      <>
+        <LandingPage
+          summary={summary}
+          projects={projects}
+          onOpenLogin={(role) => {
+            setLoginPresetRole(role);
+            setUnauthenticatedView('login');
+          }}
+          onEnterPublic={enterPublicMode}
+          onSelectProject={(p) => setSelectedProject(p)}
+        />
+
+        {/* Modal for Project details preview from Landing Page */}
+        <ProjectModal
+          project={selectedProject}
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+          userRole="PUBLIC"
+        />
+      </>
+    );
   }
 
   const criticalAlertsCount = alerts.filter(
@@ -107,6 +145,18 @@ const MainAppContent: React.FC = () => {
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onOpenRecommend={() => setIsRecommendOpen(true)}
         criticalAlertsCount={criticalAlertsCount}
+        onNavigateToHome={() => {
+          if (isPublicMode) {
+            exitPublicMode();
+          }
+          setUnauthenticatedView('landing');
+        }}
+        onOpenLogin={() => {
+          if (isPublicMode) {
+            exitPublicMode();
+          }
+          setUnauthenticatedView('login');
+        }}
       />
 
       {/* Ticker / Priority Alert Banner (when critical issues exist) */}
@@ -142,6 +192,12 @@ const MainAppContent: React.FC = () => {
           pendingAlertsCount={alerts.filter(a => a.status === 'New').length}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onNavigateToHome={() => {
+            if (isPublicMode) {
+              exitPublicMode();
+            }
+            setUnauthenticatedView('landing');
+          }}
         />
 
         {/* Dynamic Main Stage */}
@@ -265,10 +321,28 @@ const MainAppContent: React.FC = () => {
               {(currentTab === 'audit' || currentTab === 'audit-logs') && (
                 <AuditLogPage />
               )}
+
+              {currentTab === 'satellite' && (
+                <SatelliteVerificationPage
+                  projects={projects}
+                  onSelectProject={p => setSelectedProject(p)}
+                />
+              )}
+
+              {currentTab === 'network-fraud' && (
+                <ContractorNetworkFraudPage />
+              )}
+
+              {currentTab === 'data-ingestion' && (
+                <DataIngestionImpactPage />
+              )}
             </>
           )}
         </main>
       </div>
+
+      {/* Global Citizen Chatbot Drawer */}
+      <CitizenChatbotDrawer />
 
       {/* Global Modals */}
       {/* 1. Project Detailed Audit & Photo Verification Modal */}

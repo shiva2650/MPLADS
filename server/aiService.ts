@@ -47,7 +47,7 @@ export function calculateTextSimilarity(text1: string, text2: string): number {
   return Math.round((intersection.size / union.size) * 100);
 }
 
-// 1. Cost Anomaly Detection
+// 1. Cost Anomaly Detection (Hardened against negative, zero, NaN, and excessive budgets)
 export function evaluateCostAnomaly(project: Project) {
   const benchmark = CATEGORY_COST_BENCHMARKS[project.category] || {
     min: 1500000,
@@ -56,7 +56,37 @@ export function evaluateCostAnomaly(project: Project) {
     unitDescription: 'Standard public civil infrastructure'
   };
 
-  const cost = project.sanctionedAmount || project.estimatedCost;
+  const rawCost = project.sanctionedAmount || project.estimatedCost;
+  const cost = Number(rawCost);
+
+  // Boundary Case & Input Validation: Negative, Zero, or Non-Numeric Budgets
+  if (isNaN(cost) || cost <= 0) {
+    return {
+      isAnomaly: true,
+      costScore: 99,
+      benchmarkMin: benchmark.min,
+      benchmarkMax: benchmark.max,
+      typicalCost: benchmark.typical,
+      percentageVariance: -100,
+      explanation: 'Critical Anomaly: Non-positive or invalid budget value submitted. Financial integrity validation failed.',
+      unitDescription: benchmark.unitDescription
+    };
+  }
+
+  // Extreme Outlier (> 50 Crore for an individual MPLADS work)
+  if (cost > 500000000) {
+    return {
+      isAnomaly: true,
+      costScore: 98,
+      benchmarkMin: benchmark.min,
+      benchmarkMax: benchmark.max,
+      typicalCost: benchmark.typical,
+      percentageVariance: 999,
+      explanation: `Critical Anomaly: Proposed cost (₹${(cost / 10000000).toFixed(2)} Cr) exceeds statutory MPLADS single-project allocation limits.`,
+      unitDescription: benchmark.unitDescription
+    };
+  }
+
   const isHigherThanMax = cost > benchmark.max;
   const percentageOverTypical = Math.round(((cost - benchmark.typical) / benchmark.typical) * 100);
 
@@ -137,7 +167,7 @@ export function findDuplicateCandidates(project: Project, allProjects: Project[]
   return duplicates.sort((a, b) => b.similarityScore - a.similarityScore);
 }
 
-// 3. Delay Prediction
+// 3. Delay Prediction (Hardened against invalid dates, zero durations, and boundary progress)
 export function calculateDelayPrediction(project: Project) {
   if (project.status === 'Completed') {
     return {
@@ -167,11 +197,24 @@ export function calculateDelayPrediction(project: Project) {
   const expectedEnd = new Date(project.expectedCompletionDate).getTime();
   const now = Date.now();
 
+  // Validate dates are valid numbers
+  if (isNaN(start) || isNaN(expectedEnd) || expectedEnd <= start) {
+    return {
+      statusClass: 'Invalid Schedule',
+      color: '🔴',
+      delayProbability: 75,
+      predictedCompletionDate: 'TBD',
+      delayDays: 0,
+      velocityRating: 'Schedule Error',
+      explanation: 'Project has invalid start/completion timestamps. Administrative review needed.'
+    };
+  }
+
   const totalDurationDays = Math.max(1, Math.round((expectedEnd - start) / (1000 * 3600 * 24)));
   const elapsedDays = Math.max(1, Math.round((now - start) / (1000 * 3600 * 24)));
 
-  const expectedProgress = Math.min(100, Math.round((elapsedDays / totalDurationDays) * 100));
-  const currentProgress = project.completionPercentage;
+  const expectedProgress = Math.min(100, Math.max(0, Math.round((elapsedDays / totalDurationDays) * 100)));
+  const currentProgress = Math.min(100, Math.max(0, Number(project.completionPercentage) || 0));
   const progressGap = expectedProgress - currentProgress;
 
   let delayProbability = 15;
@@ -180,7 +223,7 @@ export function calculateDelayPrediction(project: Project) {
 
   if (now > expectedEnd && currentProgress < 100) {
     // Project is past its scheduled deadline
-    const overdueDays = Math.round((now - expectedEnd) / (1000 * 3600 * 24));
+    const overdueDays = Math.max(1, Math.round((now - expectedEnd) / (1000 * 3600 * 24)));
     delayProbability = Math.min(96, 75 + Math.round(overdueDays / 30) * 5);
     statusClass = 'Delayed';
     color = '🔴';
@@ -218,25 +261,47 @@ export function calculateDelayPrediction(project: Project) {
   };
 }
 
-// 4. GPS Location Verification
+// 4. GPS Location Verification (Hardened against coordinate spoofing and boundary violations)
 export function verifyLocationCoordinates(
   projectLat: number,
   projectLon: number,
   photoLat?: number,
   photoLon?: number
 ) {
-  if (photoLat === undefined || photoLon === undefined) {
+  if (photoLat === undefined || photoLon === undefined || isNaN(photoLat) || isNaN(photoLon)) {
     return {
-      verified: true,
+      verified: false,
       hasMetadata: false,
       distanceMeters: 0,
-      isMismatch: false,
-      message: 'Photo uploaded without embedded EXIF geotag coordinates.'
+      isMismatch: true,
+      message: 'Photo uploaded without embedded EXIF geotag coordinates or contains invalid values.'
+    };
+  }
+
+  // Check valid geospatial coordinate ranges: Lat [-90, 90], Lon [-180, 180]
+  if (photoLat < -90 || photoLat > 90 || photoLon < -180 || photoLon > 180) {
+    return {
+      verified: false,
+      hasMetadata: true,
+      distanceMeters: 999999,
+      isMismatch: true,
+      message: 'Critical: Photo contains impossible GPS latitude/longitude values outside Earth coordinates.'
+    };
+  }
+
+  // Detect 0,0 Null Island spoofing
+  if (photoLat === 0 && photoLon === 0) {
+    return {
+      verified: false,
+      hasMetadata: true,
+      distanceMeters: 999999,
+      isMismatch: true,
+      message: 'Critical: Photo GPS coordinates point to Null Island (0.0, 0.0). Mock location spoofing suspected.'
     };
   }
 
   const distance = calculateHaversineDistanceMeters(projectLat, projectLon, photoLat, photoLon);
-  const isMismatch = distance > 250; // Threshold of 250 meters for city GPS drift
+  const isMismatch = distance > 500; // Standard 500m threshold
 
   return {
     verified: !isMismatch,

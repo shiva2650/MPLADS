@@ -10,6 +10,7 @@ import {
   Landmark,
   UserCheck,
   ArrowRight,
+  ArrowLeft,
   Info,
   AlertTriangle,
   WifiOff
@@ -17,6 +18,8 @@ import {
 
 interface LoginPageProps {
   onEnterPublic: () => void;
+  onBackToHome?: () => void;
+  initialRole?: 'MP' | 'ADMIN' | 'AGENCY';
 }
 
 interface AuthError {
@@ -71,11 +74,18 @@ const parseAuthError = (err: any): AuthError => {
   };
 };
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, initialRole }) => {
   const { login } = useAuth();
 
-  const [userId, setUserId] = useState('ADMIN001');
-  const [password, setPassword] = useState('Admin@123');
+  const getInitialCreds = (r?: 'MP' | 'ADMIN' | 'AGENCY') => {
+    if (r === 'MP') return { id: 'MP001', pass: 'MP@123' };
+    if (r === 'AGENCY') return { id: 'AGENCY001', pass: 'Agency@123' };
+    return { id: 'ADMIN001', pass: 'Admin@123' };
+  };
+
+  const initial = getInitialCreds(initialRole);
+  const [userId, setUserId] = useState(initial.id);
+  const [password, setPassword] = useState(initial.pass);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<AuthError | null>(null);
@@ -125,6 +135,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic }) => {
       <header className="bg-white border-b border-[#DDE5D4] py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {onBackToHome && (
+              <button
+                onClick={onBackToHome}
+                className="p-1.5 rounded-lg bg-[#EAF0E6] hover:bg-[#DDE5D4] text-[#1B3022] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mr-1"
+                title="Return to Scheme Home & Public Dashboard"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back to Home</span>
+              </button>
+            )}
             <div className="w-10 h-10 rounded-full bg-[#1B3022] text-[#A3B18A] flex items-center justify-center font-serif text-sm font-bold border-2 border-[#395C40]">
               GOI
             </div>
@@ -138,13 +158,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic }) => {
             </div>
           </div>
 
-          <button
-            onClick={onEnterPublic}
-            className="text-xs font-bold text-[#395C40] hover:text-[#1B3022] underline flex items-center gap-1 cursor-pointer transition-colors"
-          >
-            <span>Skip to Citizen Public Transparency Portal</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-3">
+            {onBackToHome && (
+              <button
+                onClick={onBackToHome}
+                className="text-xs font-semibold text-[#588157] hover:text-[#1B3022] sm:hidden cursor-pointer"
+              >
+                Home
+              </button>
+            )}
+            <button
+              onClick={onEnterPublic}
+              className="text-xs font-bold text-[#395C40] hover:text-[#1B3022] underline flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <span>Skip to Citizen Public Transparency Portal</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -153,6 +183,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic }) => {
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#DDE5D4] overflow-hidden">
           {/* Card Header */}
           <div className="p-6 bg-[#1B3022] text-white text-center">
+            {onBackToHome && (
+              <div className="flex justify-start mb-3">
+                <button
+                  onClick={onBackToHome}
+                  className="text-[11px] font-medium text-[#A3B18A] hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <ArrowLeft className="w-3 h-3" />
+                  <span>Return to Scheme Home</span>
+                </button>
+              </div>
+            )}
             <div className="inline-flex p-2.5 rounded-xl bg-[#395C40]/50 text-[#DDE5D4] mb-2 border border-[#395C40]">
               <ShieldCheck className="w-6 h-6" />
             </div>

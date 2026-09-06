@@ -1,4 +1,4 @@
-export type UserRole = 'MP' | 'ADMIN' | 'AGENCY' | 'PUBLIC';
+export type UserRole = 'MP' | 'ADMIN' | 'AGENCY' | 'PUBLIC' | 'SUPER_ADMIN' | 'PROJECT_MANAGER' | 'VIEWER';
 
 export interface User {
   id: string;
@@ -188,6 +188,65 @@ export interface AuditLogEntry {
   previousValue?: string;
   newValue?: string;
   ipAddressMasked: string;
+  entryHash?: string;
+  prevHash?: string;
+}
+
+export interface EvidenceAuditFlag {
+  category: 'PHOTO' | 'VIDEO' | 'GPS' | 'CONTENT' | 'METADATA';
+  code: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  title: string;
+  reason: string;
+  confidence: number;
+  metadata?: Record<string, any>;
+}
+
+export interface EvidenceVerificationResult {
+  integrityScore: number;
+  isApproved: boolean;
+  requiresManualReview: boolean;
+  flags: EvidenceAuditFlag[];
+  exifData: {
+    hasExif: boolean;
+    latitude?: number;
+    longitude?: number;
+    timestamp?: string;
+    cameraMake?: string;
+    cameraModel?: string;
+    software?: string;
+    isStrippedOrMissing: boolean;
+  };
+  perceptualHash: {
+    aHash: string;
+    dHash: string;
+    duplicateMatch?: {
+      matchedProjectId: string;
+      matchedPhotoId: string;
+      hammingDistance: number;
+    };
+  };
+  tamperAnalysis: {
+    isTampered: boolean;
+    elaVariance: number;
+    noiseInconsistencyScore: number;
+    editingSoftwareDetected?: string;
+  };
+  gpsVerification: {
+    distanceFromSiteMeters: number;
+    isWithinThreshold: boolean;
+    isSpoofedPattern: boolean;
+    isWithinConstituency: boolean;
+    calculatedTravelSpeedKmh?: number;
+    isImpossibleTravel?: boolean;
+  };
+  contentVerification: {
+    categoryMatches: boolean;
+    detectedInfrastructureType: string;
+    isAiGenerated: boolean;
+    aiConfidence: number;
+    analysisNotes: string;
+  };
 }
 
 export interface DashboardSummary {

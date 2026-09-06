@@ -13,7 +13,11 @@ import {
   FileSpreadsheet,
   ScrollText,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Home,
+  Satellite,
+  Network,
+  Calculator
 } from 'lucide-react';
 
 export type NavTab =
@@ -22,6 +26,8 @@ export type NavTab =
   | 'recommend'
   | 'anomalies'
   | 'alerts'
+  | 'satellite'
+  | 'network-fraud'
   | 'map'
   | 'funds'
   | 'agency-workdesk'
@@ -29,6 +35,7 @@ export type NavTab =
   | 'feedback'
   | 'reports'
   | 'audit-logs'
+  | 'data-ingestion'
   | 'public-portal';
 
 interface SidebarProps {
@@ -38,6 +45,7 @@ interface SidebarProps {
   unreadFeedbackCount?: number;
   isOpen?: boolean;
   onClose?: () => void;
+  onNavigateToHome?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,7 +54,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   pendingAlertsCount = 0,
   unreadFeedbackCount = 0,
   isOpen = false,
-  onClose
+  onClose,
+  onNavigateToHome
 }) => {
   const { role } = useAuth();
 
@@ -80,6 +89,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       section: 'AI Vigilance & Risk'
     },
     {
+      id: 'satellite',
+      label: 'Satellite Verification',
+      icon: Satellite,
+      roles: ['MP', 'ADMIN', 'AGENCY', 'PUBLIC'],
+      section: 'AI Vigilance & Risk'
+    },
+    {
+      id: 'network-fraud',
+      label: 'Contractor Collusion Graph',
+      icon: Network,
+      roles: ['ADMIN', 'MP'],
+      section: 'AI Vigilance & Risk'
+    },
+    {
       id: 'alerts',
       label: 'Alert Management',
       icon: ShieldCheck,
@@ -105,7 +128,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       section: 'Public Transparency'
     },
     { id: 'reports', label: 'Reports & Audit Briefs', icon: FileSpreadsheet, roles: ['MP', 'ADMIN', 'AGENCY', 'PUBLIC'], section: 'Governance' },
-    { id: 'audit-logs', label: 'System Audit Trail', icon: ScrollText, roles: ['ADMIN'], section: 'Governance' }
+    { id: 'audit-logs', label: 'System Audit Trail', icon: ScrollText, roles: ['ADMIN'], section: 'Governance' },
+    { id: 'data-ingestion', label: 'eSAKSHI & Impact Metrics', icon: Calculator, roles: ['ADMIN', 'MP', 'AGENCY', 'PUBLIC'], section: 'Governance' }
   ];
 
   const filteredItems = navItems.filter(item => item.roles.includes(role));
@@ -125,6 +149,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Navigation List */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {onNavigateToHome && (
+          <button
+            onClick={onNavigateToHome}
+            className="w-full mb-3 flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-[#DDE5D4] bg-[#1B3022] hover:bg-[#395C40] hover:text-white transition-colors cursor-pointer border border-[#395C40]"
+          >
+            <Home className="w-4 h-4 text-[#A3B18A]" />
+            <span>Portal Home & Overview</span>
+          </button>
+        )}
+
         {filteredItems.map(item => {
           const Icon = item.icon;
           // Support alias matches

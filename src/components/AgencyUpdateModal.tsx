@@ -10,14 +10,11 @@ interface AgencyUpdateModalProps {
   onSuccess: () => void;
 }
 
-export const AgencyUpdateModal: React.FC<AgencyUpdateModalProps> = ({
-  project,
-  isOpen,
-  onClose,
-  onSuccess
-}) => {
-  if (!isOpen || !project) return null;
-
+const AgencyUpdateModalContent: React.FC<{
+  project: Project;
+  onClose: () => void;
+  onSuccess: () => void;
+}> = ({ project, onClose, onSuccess }) => {
   const [progress, setProgress] = useState(project.completionPercentage);
   const [fundsUtilizedLakh, setFundsUtilizedLakh] = useState(
     (project.fundsUtilized / 100000).toFixed(2)
@@ -28,8 +25,8 @@ export const AgencyUpdateModal: React.FC<AgencyUpdateModalProps> = ({
   const [photoUrl, setPhotoUrl] = useState(
     'https://images.unsplash.com/photo-1541888946425-d0fbb180c5f2?w=800&auto=format&fit=crop&q=60'
   );
-  const [photoLat, setPhotoLat] = useState(project.latitude.toString());
-  const [photoLon, setPhotoLon] = useState(project.longitude.toString());
+  const [photoLat, setPhotoLat] = useState((project.latitude ?? 17.4120).toString());
+  const [photoLon, setPhotoLon] = useState((project.longitude ?? 78.4982).toString());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -216,7 +213,7 @@ export const AgencyUpdateModal: React.FC<AgencyUpdateModalProps> = ({
             </div>
 
             <div className="text-[11px] text-[#395C40] bg-[#EAF0E6] p-2.5 rounded-xl border border-[#C8D5B9]">
-              💡 <strong>AI Verification Note:</strong> The system automatically verifies that the photo EXIF coordinates fall within 250 meters of the sanctioned site ({project.latitude.toFixed(4)}°, {project.longitude.toFixed(4)}°). If you enter distant coordinates, a location mismatch alert will be triggered automatically.
+              💡 <strong>AI Verification Note:</strong> The system automatically verifies that the photo EXIF coordinates fall within 250 meters of the sanctioned site ({project.latitude ? project.latitude.toFixed(4) : '17.4120'}°, {project.longitude ? project.longitude.toFixed(4) : '78.4982'}°). If you enter distant coordinates, a location mismatch alert will be triggered automatically.
             </div>
           </div>
 
@@ -240,5 +237,22 @@ export const AgencyUpdateModal: React.FC<AgencyUpdateModalProps> = ({
         </form>
       </div>
     </div>
+  );
+};
+
+export const AgencyUpdateModal: React.FC<AgencyUpdateModalProps> = ({
+  project,
+  isOpen,
+  onClose,
+  onSuccess
+}) => {
+  if (!isOpen || !project) return null;
+
+  return (
+    <AgencyUpdateModalContent
+      project={project}
+      onClose={onClose}
+      onSuccess={onSuccess}
+    />
   );
 };

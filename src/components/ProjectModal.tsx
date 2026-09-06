@@ -260,7 +260,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                     <div>
                       <span className="text-[#588157]">Sanctioned Site Coordinates:</span>
                       <div className="font-mono font-bold text-[#1B3022]">
-                        {project.latitude.toFixed(4)}° N, {project.longitude.toFixed(4)}° E
+                        {project.latitude ? `${project.latitude.toFixed(4)}° N, ${project.longitude ? project.longitude.toFixed(4) : '78.4982'}° E` : 'Coordinates Pending Geotagging'}
                       </div>
                     </div>
                     <div>

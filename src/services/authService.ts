@@ -4,22 +4,66 @@ import { clientMockDb } from './clientMockDb.js';
 const TOKEN_KEY = 'mplads_auth_token';
 const USER_KEY = 'mplads_auth_user';
 
-export const authStorage = {
-  getToken: () => localStorage.getItem(TOKEN_KEY),
-  setToken: (token: string) => localStorage.setItem(TOKEN_KEY, token),
-  removeToken: () => {
+// In-memory fallback if sessionStorage is blocked
+let inMemoryToken: string | null = null;
+let inMemoryUser: User | null = null;
+
+// Clean up any legacy persistent localStorage tokens to mitigate XSS persistence
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+  } catch {}
+}
+
+export const authStorage = {
+  getToken: (): string | null => {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        return sessionStorage.getItem(TOKEN_KEY) || inMemoryToken;
+      } catch {
+        return inMemoryToken;
+      }
+    }
+    return inMemoryToken;
   },
-  getUser: (): User | null => {
-    const raw = localStorage.getItem(USER_KEY);
-    try {
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
+  setToken: (token: string) => {
+    inMemoryToken = token;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        sessionStorage.setItem(TOKEN_KEY, token);
+      } catch {}
     }
   },
-  setUser: (user: User) => localStorage.setItem(USER_KEY, JSON.stringify(user))
+  removeToken: () => {
+    inMemoryToken = null;
+    inMemoryUser = null;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+      } catch {}
+    }
+  },
+  getUser: (): User | null => {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        const raw = sessionStorage.getItem(USER_KEY);
+        return raw ? JSON.parse(raw) : inMemoryUser;
+      } catch {
+        return inMemoryUser;
+      }
+    }
+    return inMemoryUser;
+  },
+  setUser: (user: User) => {
+    inMemoryUser = user;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+      } catch {}
+    }
+  }
 };
 
 export interface LoginResponse {

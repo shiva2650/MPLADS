@@ -71,6 +71,7 @@ export const GISMap: React.FC<GISMapProps> = ({
     const bounds = L.latLngBounds([]);
 
     filtered.forEach(project => {
+      if (!project) return;
       const lat = project.latitude;
       const lon = project.longitude;
 
