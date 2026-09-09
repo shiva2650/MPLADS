@@ -32,18 +32,24 @@ import {
   ShieldCheck,
   Phone,
   User,
+  UserCog,
+  LogOut,
   ThumbsUp,
   ShieldAlert,
-  Satellite,
   Network,
   Bot
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface LandingPageProps {
   summary: DashboardSummary | null;
   projects: Project[];
+  currentUser?: any;
+  userRole?: string;
   onOpenLogin: (role?: 'MP' | 'ADMIN' | 'AGENCY') => void;
   onEnterPublic: () => void;
+  onReturnToWorkspace?: () => void;
+  onLogout?: () => void;
   onSelectProject: (project: Project) => void;
 }
 
@@ -65,10 +71,29 @@ interface MpRecord {
 export const LandingPage: React.FC<LandingPageProps> = ({
   summary,
   projects,
+  currentUser,
+  userRole,
   onOpenLogin,
   onEnterPublic,
+  onReturnToWorkspace,
+  onLogout,
   onSelectProject
 }) => {
+  const { language, setLanguage, t } = useLanguage();
+
+  const roleLabel = useMemo(() => {
+    switch (userRole) {
+      case 'ADMIN':
+        return 'District Admin';
+      case 'MP':
+        return 'Member of Parliament';
+      case 'AGENCY':
+        return 'Implementing Agency';
+      default:
+        return userRole || 'Officer';
+    }
+  }, [userRole]);
+
   // Chamber tab: Lok Sabha vs Rajya Sabha
   const [activeChamber, setActiveChamber] = useState<'Lok Sabha' | 'Rajya Sabha'>('Lok Sabha');
 
@@ -704,7 +729,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <body>
       <table border="1">
         <thead>
-          <tr style="background-color:#1B3022; color:#ffffff; font-weight:bold;">
+          <tr style="background-color:#0F5C3C; color:#ffffff; font-weight:bold;">
             <th>Sr. No.</th>
             <th>State</th>
             <th>Hon'ble Member of Parliament</th>
@@ -767,13 +792,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <head>
         <title>MPLADS - Details of ${activeChamber} MPs</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1B3022; }
-          .header { border-bottom: 2px solid #1B3022; padding-bottom: 12px; margin-bottom: 16px; }
-          .title { font-size: 18px; font-weight: bold; margin: 0; }
-          .sub { font-size: 12px; color: #588157; margin-top: 4px; }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1F2933; }
+          .header { border-bottom: 2px solid #0F5C3C; padding-bottom: 12px; margin-bottom: 16px; }
+          .title { font-size: 18px; font-weight: bold; margin: 0; color: #0F5C3C; }
+          .sub { font-size: 12px; color: #5A6472; margin-top: 4px; }
           table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 12px; }
-          th, td { border: 1px solid #DDE5D4; padding: 6px 8px; text-align: left; }
-          th { background-color: #F8F9F7; font-weight: bold; }
+          th, td { border: 1px solid #E2E8F0; padding: 6px 8px; text-align: left; }
+          th { background-color: #F8FAFC; font-weight: bold; color: #1F2933; }
           .num { text-align: right; }
           .footer { font-size: 10px; color: #888; margin-top: 20px; text-align: right; }
         </style>
@@ -822,7 +847,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               .join('')}
           </tbody>
         </table>
-        <div class="footer">Generated from eSAKSHI Digital Governance Transparency Registry on ${new Date().toLocaleDateString('en-IN')}</div>
+        <div class="footer">Generated from Official Digital Governance Transparency Registry on ${new Date().toLocaleDateString('en-IN')}</div>
       </body>
       </html>
     `;
@@ -905,89 +930,185 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [summary, projects]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9F7] flex flex-col font-sans text-[#1B3022]">
+    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans text-slate-body">
       {/* Top National Tricolor Accent Strip */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
+      <div className="h-1 w-full bg-linear-to-r from-[#FF9933] via-white to-[#138808]" />
 
-      {/* 1. COMPACT PROFESSIONAL GOVERNMENT HEADER */}
-      <header className="bg-white border-b border-[#DDE5D4] sticky top-0 z-30 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
-            {/* LEFT: GOI Emblem & MoSPI details */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#1B3022] text-[#A3B18A] flex flex-col items-center justify-center font-serif text-xs font-bold border border-[#395C40] shrink-0 shadow-2xs">
-                <span className="text-[9px] tracking-widest text-white font-bold">GOI</span>
-                <span className="text-[7px] text-[#A3B18A] font-sans">MoSPI</span>
+      {/* 1. REFINED GOVERNMENT OF INDIA MASTHEAD */}
+      <header className="bg-govt-navy text-white sticky top-0 z-30 border-b border-govt-navy-dark shadow-sm w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
+          <div className="flex items-center justify-between min-h-[44px] sm:min-h-[50px] gap-3 sm:gap-6">
+            {/* LEFT: Government Emblem & Two-Line Ministry Identification */}
+            <div
+              className="flex items-center gap-3 sm:gap-3.5 min-w-0"
+              title={t.mpladsFullName}
+            >
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0 shadow-xs">
+                <Landmark className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-govt-saffron" />
               </div>
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wider text-[#588157] font-semibold leading-tight flex items-center gap-1.5">
-                  <span>भारत सरकार</span>
-                  <span className="text-[#A3B18A]">•</span>
-                  <span>Government of India</span>
+                {/* Line 1: Bilingual National Sovereign Eyebrow */}
+                <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-panel-bg/80 font-semibold leading-tight flex items-center gap-1.5 truncate">
+                  <span>{language === 'hi' ? t.govIndia : 'भारत सरकार'}</span>
+                  <span className="text-white/40">•</span>
+                  <span>{language === 'hi' ? 'Government of India' : t.govIndia}</span>
                 </div>
-                <div className="text-sm sm:text-base font-bold text-[#1B3022] tracking-tight truncate leading-tight">
-                  Ministry of Statistics and Programme Implementation (MoSPI)
-                </div>
-                <div className="text-[11px] text-[#588157] font-medium truncate leading-tight hidden sm:block">
-                  Members of Parliament Local Area Development Scheme
+                {/* Line 2: Ministry Title (Hover/tooltip shows full MPLADS scheme with plain language explainer) */}
+                <div className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate leading-snug">
+                  {t.mospiTitle} {t.mospiTitle.includes('(MoSPI)') ? '' : '(MoSPI)'}
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: Compact clean navigation */}
+            {/* RIGHT: Tidy Unified Action Cluster */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Bilingual Language Switcher (EN | हिन्दी) */}
+              <div className="flex items-center bg-govt-navy-dark rounded-lg p-0.5 border border-white/20 text-xs shrink-0">
+                <button
+                  onClick={() => setLanguage('en')}
+                  aria-label="Switch to English"
+                  className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                    language === 'en'
+                      ? 'bg-white text-govt-navy shadow-xs'
+                      : 'text-panel-bg/80 hover:text-white'
+                  }`}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLanguage('hi')}
+                  aria-label="हिन्दी भाषा चुनें"
+                  className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                    language === 'hi'
+                      ? 'bg-white text-govt-navy shadow-xs'
+                      : 'text-panel-bg/80 hover:text-white'
+                  }`}
+                >
+                  हिन्दी
+                </button>
+              </div>
+
+              {/* Home Link */}
               <a
                 href="#top"
-                className="px-3 py-1.5 rounded-md text-xs font-semibold text-[#1B3022] hover:bg-[#EAF0E6] transition-colors"
+                className="hidden md:inline-flex px-3 py-1.5 rounded-lg text-xs font-semibold text-panel-bg/90 hover:text-white hover:bg-white/10 transition-colors"
               >
-                Home
+                {t.home ? t.home.split('/')[0].trim() : 'Home'}
               </a>
-              <button
-                id="header-public-portal-btn"
-                onClick={onEnterPublic}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#2D4A32] bg-[#EAF0E6] hover:bg-[#DCE7D6] border border-[#C8D5B9] transition-colors cursor-pointer"
-                title="Enter citizen public transparency mode"
-              >
-                <Eye className="w-3.5 h-3.5 text-[#395C40]" />
-                <span className="hidden sm:inline">Public Portal</span>
-              </button>
-              <button
-                id="header-official-login-btn"
-                onClick={() => onOpenLogin()}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold bg-[#1B3022] hover:bg-[#284431] text-white shadow-2xs transition-colors cursor-pointer"
-              >
-                <Lock className="w-3.5 h-3.5 text-[#A3B18A]" />
-                <span>Official Login</span>
-              </button>
+
+              {currentUser && userRole !== 'PUBLIC' ? (
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  {/* Single rounded chip showing name + role */}
+                  <div
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white text-xs border border-white/20 shadow-xs max-w-[150px] sm:max-w-[240px] md:max-w-[320px]"
+                    title={`${currentUser.name} · ${roleLabel}`}
+                  >
+                    <User className="w-3.5 h-3.5 text-govt-saffron shrink-0" />
+                    <div className="truncate text-left leading-tight">
+                      <span className="font-semibold">{currentUser.name.split(',')[0]}</span>
+                      <span className="text-white/50 mx-1.5 hidden sm:inline">·</span>
+                      <span className="text-panel-bg/80 font-normal hidden sm:inline">{roleLabel}</span>
+                    </div>
+                  </div>
+
+                  {/* Clearly Primary Workspace Button */}
+                  {onReturnToWorkspace && (
+                    <button
+                      id="header-workspace-btn"
+                      onClick={onReturnToWorkspace}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold bg-govt-saffron hover:bg-govt-saffron-hover text-govt-navy-dark shadow-xs transition-colors cursor-pointer shrink-0"
+                      title="Open operational workspace"
+                    >
+                      <span className="hidden sm:inline">Workspace</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-govt-navy-dark shrink-0" />
+                    </button>
+                  )}
+
+                  {/* Quieter Icon + Text Logout Action */}
+                  {onLogout && (
+                    <button
+                      id="header-logout-btn"
+                      onClick={onLogout}
+                      className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-medium text-panel-bg/80 hover:text-white hover:bg-white/10 border border-white/15 transition-colors cursor-pointer shrink-0"
+                      title="Sign out of officer session"
+                      aria-label="Logout"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-panel-bg/80 shrink-0" />
+                      <span className="hidden sm:inline">Logout</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    id="header-public-portal-btn"
+                    onClick={onEnterPublic}
+                    className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors cursor-pointer shrink-0"
+                    title="Enter citizen public transparency mode"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-govt-saffron shrink-0" />
+                    <span className="hidden sm:inline">{t.publicView ? 'Citizen View' : 'Citizen Portal'}</span>
+                  </button>
+                  <button
+                    id="header-official-login-btn"
+                    onClick={() => onOpenLogin()}
+                    className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-govt-saffron hover:bg-govt-saffron-hover text-govt-navy-dark shadow-xs transition-colors cursor-pointer shrink-0"
+                    title="Sign in as an authorized MP, District Authority, or Agency Officer"
+                  >
+                    <UserCog className="w-3.5 h-3.5 text-govt-navy-dark shrink-0" />
+                    <span>{t.officerLogin}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
+      {/* ACTIVE OFFICIAL SESSION BANNER */}
+      {currentUser && userRole !== 'PUBLIC' && onReturnToWorkspace && (
+        <div className="bg-panel-bg border-b border-slate-border px-4 py-2 text-xs">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2 text-govt-navy">
+              <span className="w-2 h-2 rounded-full bg-status-verified animate-pulse"></span>
+              <span className="font-semibold">Signed in as:</span>
+              <span>{currentUser.name} &bull; <strong className="uppercase">{roleLabel}</strong></span>
+            </div>
+            <button
+              onClick={onReturnToWorkspace}
+              className="text-govt-navy font-bold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>Go to Workspace</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* MAIN CONTAINER */}
       <main id="top" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-6">
         {/* 2. DASHBOARD TITLE & CHAMBER TABS */}
-        <div id="dashboard-section" className="bg-white rounded-xl border border-[#DDE5D4] p-4 sm:p-5 shadow-2xs">
+        <div id="dashboard-section" className="bg-panel-bg rounded-xl border border-slate-border p-4 sm:p-5 shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-[#1B3022] tracking-tight">
-                  Dashboard
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-body tracking-tight">
+                  National Transparency Overview
                 </h1>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF0E6] text-[#2D4A32] font-semibold border border-[#C8D5B9]">
-                  Live Governance Feed
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-govt-navy font-semibold border border-emerald-200">
+                  Live MoSPI Feed
                 </span>
               </div>
-              <h2 className="text-sm sm:text-base font-semibold text-[#395C40] mt-0.5">
-                Details of {activeChamber === 'Lok Sabha' ? '18th Lok Sabha' : 'Rajya Sabha'} MPs
+              <h2 className="text-sm sm:text-base font-semibold text-govt-navy mt-0.5">
+                MP Allocations &amp; Works: {activeChamber === 'Lok Sabha' ? '18th Lok Sabha' : 'Rajya Sabha'}
               </h2>
-              <p className="text-xs text-[#588157] mt-1 max-w-3xl leading-relaxed">
-                eSAKSHI Portal displays data of works recommended online by Hon'ble Members of Parliament under MPLADS.
+              <p className="text-xs text-slate-muted mt-1 max-w-3xl leading-relaxed">
+                National portal displays data of works recommended online by Hon'ble Members of Parliament under MPLADS.
               </p>
             </div>
 
             {/* Functional Lok Sabha / Rajya Sabha Tabs */}
-            <div className="flex items-center bg-[#F8F9F7] p-1 rounded-lg border border-[#DDE5D4] shrink-0 self-start md:self-auto">
+            <div className="flex items-center bg-white p-1 rounded-lg border border-slate-border shrink-0 self-start md:self-auto shadow-2xs">
               <button
                 id="chamber-tab-loksabha"
                 onClick={() => {
@@ -996,8 +1117,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   activeChamber === 'Lok Sabha'
-                    ? 'bg-[#1B3022] text-white shadow-2xs'
-                    : 'text-[#588157] hover:text-[#1B3022] hover:bg-white'
+                    ? 'bg-govt-navy text-white shadow-xs'
+                    : 'text-slate-muted hover:text-slate-body hover:bg-panel-bg'
                 }`}
               >
                 Lok Sabha
@@ -1010,8 +1131,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   activeChamber === 'Rajya Sabha'
-                    ? 'bg-[#1B3022] text-white shadow-2xs'
-                    : 'text-[#588157] hover:text-[#1B3022] hover:bg-white'
+                    ? 'bg-govt-navy text-white shadow-xs'
+                    : 'text-slate-muted hover:text-slate-body hover:bg-panel-bg'
                 }`}
               >
                 Rajya Sabha
@@ -1023,127 +1144,127 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* 3. TOP STATISTICS CARDS (Horizontal, clean, compact, equal height) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {/* Card 1: Allocated Limit */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
-            <span className="text-[11px] font-semibold text-[#588157] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
+            <span className="text-[11px] font-semibold text-slate-muted leading-snug">
               Allocated Limit for Hon'ble MPs
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
-                ₹8,333.67 <span className="text-xs font-medium text-[#588157]">Cr</span>
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
+                ₹8,333.67 <span className="text-xs font-medium text-slate-muted">Cr</span>
               </div>
-              <div className="text-[10px] text-[#A3B18A] mt-0.5">National Scheme Limit</div>
+              <div className="text-[10px] text-slate-muted mt-0.5">National Scheme Limit</div>
             </div>
           </div>
 
           {/* Card 2: Calamity Consented */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
-            <span className="text-[11px] font-semibold text-[#588157] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
+            <span className="text-[11px] font-semibold text-slate-muted leading-snug">
               Amount Consented for Calamity
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
-                ₹4.06 <span className="text-xs font-medium text-[#588157]">Cr</span>
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
+                ₹4.06 <span className="text-xs font-medium text-slate-muted">Cr</span>
               </div>
-              <div className="text-[10px] text-[#A3B18A] mt-0.5">Disaster Aid Consent</div>
+              <div className="text-[10px] text-slate-muted mt-0.5">Disaster Aid Consent</div>
             </div>
           </div>
 
           {/* Card 3: Works Recommended */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
-            <span className="text-[11px] font-semibold text-[#588157] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
+            <span className="text-[11px] font-semibold text-slate-muted leading-snug">
               Works Recommended
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
                 {summary?.totalProjects ?? projects.length}
               </div>
-              <div className="text-[11px] font-semibold text-[#395C40] mt-0.5">
+              <div className="text-[11px] font-semibold text-govt-navy mt-0.5">
                 ₹{actualSanctionedFundsCr} Cr
               </div>
             </div>
           </div>
 
           {/* Card 4: Works Sanctioned (ACTUAL DB VALUE) */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px] bg-gradient-to-br from-white to-[#F2F6F0]">
-            <span className="text-[11px] font-semibold text-[#395C40] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px] bg-gradient-to-br from-white to-emerald-50/30">
+            <span className="text-[11px] font-semibold text-govt-navy leading-snug">
               Works Sanctioned
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
                 {actualSanctionedWorksCount}
               </div>
-              <div className="text-[11px] font-semibold text-[#395C40] mt-0.5">
+              <div className="text-[11px] font-semibold text-govt-navy mt-0.5">
                 ₹{actualSanctionedFundsCr} Cr
               </div>
             </div>
           </div>
 
           {/* Card 5: Works Completed (ACTUAL DB VALUE) */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px] bg-gradient-to-br from-white to-[#F2F6F0]">
-            <span className="text-[11px] font-semibold text-[#395C40] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px] bg-gradient-to-br from-white to-emerald-50/40">
+            <span className="text-[11px] font-semibold text-status-verified leading-snug">
               Works Completed
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
                 {actualCompletedWorksCount}
               </div>
-              <div className="text-[11px] font-semibold text-[#395C40] mt-0.5">
+              <div className="text-[11px] font-semibold text-status-verified mt-0.5">
                 ₹{actualCompletedFundsCr} Cr
               </div>
             </div>
           </div>
 
           {/* Card 6: Expenditure */}
-          <div className="bg-white rounded-xl border border-[#DDE5D4] p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
-            <span className="text-[11px] font-semibold text-[#588157] leading-snug">
+          <div className="bg-white rounded-xl border border-slate-border p-3.5 flex flex-col justify-between shadow-2xs min-h-[110px]">
+            <span className="text-[11px] font-semibold text-slate-muted leading-snug">
               Expenditure on Works
             </span>
             <div className="mt-2">
-              <div className="text-base sm:text-lg font-bold text-[#1B3022] tracking-tight">
-                ₹{actualExpenditureCr} <span className="text-xs font-medium text-[#588157]">Cr</span>
+              <div className="text-base sm:text-lg font-bold text-slate-body tracking-tight">
+                ₹{actualExpenditureCr} <span className="text-xs font-medium text-slate-muted">Cr</span>
               </div>
-              <div className="text-[10px] text-[#A3B18A] mt-0.5">Bench: ₹2,778.82 Cr</div>
+              <div className="text-[10px] text-slate-muted mt-0.5">Bench: ₹2,778.82 Cr</div>
             </div>
           </div>
         </div>
 
-        {/* AI VIGILANCE & eSAKSHI OVERLAY IMPACT BAR */}
-        <div className="bg-gradient-to-r from-[#1B3022] via-[#263D2E] to-[#1B3022] rounded-xl p-4 text-white shadow-xs border border-[#395C40]">
+        {/* AI VIGILANCE & ACTIVE OVERSIGHT IMPACT BAR */}
+        <div className="bg-govt-navy rounded-xl p-4 text-white shadow-xs border border-govt-navy-dark">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-[#395C40] text-white shrink-0 mt-0.5">
-                <ShieldCheck className="w-5 h-5 text-[#A3B18A]" />
+              <div className="p-2 rounded-lg bg-govt-navy-light text-white shrink-0 mt-0.5">
+                <ShieldCheck className="w-5 h-5 text-panel-bg/90" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#A3B18A]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-panel-bg/90">
                     AI Vigilance & Oversight Layer Active
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E07A5F] text-white font-bold">
-                    eSAKSHI Overlay
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-govt-navy text-white font-bold border border-white/20">
+                    Active Oversight
                   </span>
                 </div>
                 <div className="text-sm font-semibold text-white mt-0.5">
-                  Sentinel-2 Multi-Temporal Verification & Graph Collusion Analysis Operational
+                  Automated Cryptographic Hash-Chain & Forensic Graph Collusion Analysis Operational
                 </div>
-                <p className="text-[11px] text-[#DDE5D4] mt-0.5">
-                  Non-invasive verification engine cross-referencing satellite edge delta, shell company director overlaps, and multilingual grievances.
+                <p className="text-[11px] text-panel-bg/80 mt-0.5">
+                  High-precision verification engine cross-referencing ledger integrity, shell company director overlaps, and multilingual grievances.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <div className="text-right hidden lg:block border-r border-[#395C40] pr-4">
-                <div className="text-[10px] text-[#A3B18A] uppercase font-semibold">Flagged Discrepancy</div>
-                <div className="text-base font-bold text-[#E07A5F]">₹14.85 Cr</div>
+              <div className="text-right hidden lg:block border-r border-white/20 pr-4">
+                <div className="text-[10px] text-panel-bg/80 uppercase font-semibold">Flagged Discrepancy</div>
+                <div className="text-base font-bold text-red-300">₹14.85 Cr</div>
               </div>
-              <div className="text-right hidden lg:block border-r border-[#395C40] pr-4">
-                <div className="text-[10px] text-[#A3B18A] uppercase font-semibold">Estimated Recovery</div>
+              <div className="text-right hidden lg:block border-r border-white/20 pr-4">
+                <div className="text-[10px] text-panel-bg/80 uppercase font-semibold">Estimated Recovery</div>
                 <div className="text-base font-bold text-white">₹4.85 Cr</div>
               </div>
               <button
                 onClick={onEnterPublic}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[#A3B18A] hover:bg-[#b5c29e] text-[#1B3022] transition-colors cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-govt-navy transition-colors cursor-pointer shadow-xs"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Explore Live Intelligence</span>
@@ -1153,23 +1274,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* 4. PRECISE SEARCH + FILTER SYSTEM */}
-        <div className="bg-white rounded-xl border border-[#DDE5D4] p-4 shadow-2xs space-y-3">
+        <div className="bg-white rounded-xl border border-slate-border p-4 shadow-2xs space-y-3">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
             {/* Prominent Search Bar */}
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-[#588157] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-slate-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 id="portal-search-input"
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search by MP name, constituency, state, work ID, work title..."
-                className="w-full pl-10 pr-10 py-2.5 bg-[#F8F9F7] hover:bg-white focus:bg-white text-xs text-[#1B3022] placeholder:text-[#8FA391] border border-[#DDE5D4] rounded-lg focus:outline-hidden focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40] transition-colors"
+                className="w-full pl-10 pr-10 py-2.5 bg-panel-bg hover:bg-white focus:bg-white text-xs text-slate-body placeholder:text-[#94A3B8] border border-slate-border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-govt-navy focus:border-govt-navy transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8FA391] hover:text-[#1B3022] p-1 rounded-full cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-slate-body p-1 rounded-full cursor-pointer"
                   title="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -1183,14 +1304,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               onClick={() => setIsFilterModalOpen(true)}
               className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer shrink-0 ${
                 activeFiltersCount > 0
-                  ? 'bg-[#1B3022] text-white border-[#1B3022]'
-                  : 'bg-white hover:bg-[#F8F9F7] text-[#1B3022] border-[#DDE5D4]'
+                  ? 'bg-govt-navy text-white border-govt-navy'
+                  : 'bg-white hover:bg-panel-bg text-slate-body border-slate-border'
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span>Filters</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#A3B18A] text-[#1B3022] text-[10px] font-bold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-emerald-100 text-govt-navy text-[10px] font-bold flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -1200,13 +1321,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Filter badges / Active state chips */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[#588157] font-medium text-[11px]">
-                Showing: <strong className="text-[#1B3022]">{sortedMpRecords.length} MPs</strong> &bull; <strong className="text-[#1B3022]">{filteredWorks.length} Matching Works</strong>
+              <span className="text-slate-muted font-medium text-[11px]">
+                Showing: <strong className="text-slate-body">{sortedMpRecords.length} MPs</strong> &bull; <strong className="text-slate-body">{filteredWorks.length} Matching Works</strong>
               </span>
 
               {/* Active Filter Chips */}
               {selectedState !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-[11px] font-medium border border-[#C8D5B9]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-govt-navy text-[11px] font-medium border border-emerald-200">
                   State: {selectedState}
                   <button onClick={() => setSelectedState('All')} className="hover:text-red-700 cursor-pointer">
                     <X className="w-3 h-3" />
@@ -1214,7 +1335,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               )}
               {selectedConstituency !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-[11px] font-medium border border-[#C8D5B9]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-govt-navy text-[11px] font-medium border border-emerald-200">
                   Const: {selectedConstituency}
                   <button onClick={() => setSelectedConstituency('All')} className="hover:text-red-700 cursor-pointer">
                     <X className="w-3 h-3" />
@@ -1222,7 +1343,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               )}
               {selectedStatus !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-[11px] font-medium border border-[#C8D5B9]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-govt-navy text-[11px] font-medium border border-emerald-200">
                   Status: {selectedStatus}
                   <button onClick={() => setSelectedStatus('All')} className="hover:text-red-700 cursor-pointer">
                     <X className="w-3 h-3" />
@@ -1230,7 +1351,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               )}
               {selectedSector !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-[11px] font-medium border border-[#C8D5B9]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-govt-navy text-[11px] font-medium border border-emerald-200">
                   Sector: {selectedSector}
                   <button onClick={() => setSelectedSector('All')} className="hover:text-red-700 cursor-pointer">
                     <X className="w-3 h-3" />
@@ -1238,7 +1359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               )}
               {selectedFinYear !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-[11px] font-medium border border-[#C8D5B9]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-govt-navy text-[11px] font-medium border border-emerald-200">
                   FY: {selectedFinYear}
                   <button onClick={() => setSelectedFinYear('All')} className="hover:text-red-700 cursor-pointer">
                     <X className="w-3 h-3" />
@@ -1249,7 +1370,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {activeFiltersCount > 0 && (
                 <button
                   onClick={handleResetFilters}
-                  className="text-[11px] text-[#B85338] hover:underline font-semibold ml-1 cursor-pointer"
+                  className="text-[11px] text-red-600 hover:underline font-semibold ml-1 cursor-pointer"
                 >
                   Clear all filters
                 </button>
@@ -1257,13 +1378,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Tab switch between MP allocation view and Developmental Works view */}
-            <div className="flex items-center gap-1 bg-[#F8F9F7] p-0.5 rounded-lg border border-[#DDE5D4]">
+            <div className="flex items-center gap-1 bg-panel-bg p-0.5 rounded-lg border border-slate-border">
               <button
                 onClick={() => setActiveViewTab('mps')}
                 className={`px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                   activeViewTab === 'mps'
-                    ? 'bg-white text-[#1B3022] shadow-2xs'
-                    : 'text-[#588157] hover:text-[#1B3022]'
+                    ? 'bg-white text-slate-body shadow-2xs'
+                    : 'text-slate-muted hover:text-slate-body'
                 }`}
               >
                 MP Allocations ({sortedMpRecords.length})
@@ -1272,8 +1393,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={() => setActiveViewTab('works')}
                 className={`px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                   activeViewTab === 'works'
-                    ? 'bg-white text-[#1B3022] shadow-2xs'
-                    : 'text-[#588157] hover:text-[#1B3022]'
+                    ? 'bg-white text-slate-body shadow-2xs'
+                    : 'text-slate-muted hover:text-slate-body'
                 }`}
               >
                 Detailed Works ({filteredWorks.length})
@@ -1284,46 +1405,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* 5. MP DATA TABLE ("Allocated Limit for Hon'ble MPs") */}
         {activeViewTab === 'mps' ? (
-          <div className="bg-white rounded-xl border border-[#DDE5D4] overflow-hidden shadow-2xs">
+          <div className="bg-white rounded-xl border border-slate-border overflow-hidden shadow-2xs">
             {/* Table Header with Title & Export Actions */}
-            <div className="px-4 py-3 bg-[#F8F9F7] border-b border-[#DDE5D4] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="px-4 py-3 bg-[#F8FAFC] border-b border-slate-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-[#1B3022]">
+                <h3 className="text-sm font-bold text-slate-body">
                   Allocated Limit for Hon'ble MPs
                 </h3>
-                <p className="text-[11px] text-[#588157]">
+                <p className="text-[11px] text-slate-muted">
                   {activeChamber} &bull; State-wise & MP-wise Allocation, Recommendation and Utilization
                 </p>
               </div>
 
               {/* Working Export Buttons: [Excel] [CSV] [PDF] */}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#588157] font-semibold hidden md:inline">Export:</span>
+                <span className="text-[11px] text-slate-muted font-semibold hidden md:inline">Export:</span>
                 <button
                   id="export-excel-btn"
                   onClick={handleExportExcel}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-[#EAF0E6] text-[#1B3022] border border-[#DDE5D4] transition-colors cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-slate-50 text-slate-body border border-slate-border transition-colors cursor-pointer shadow-2xs"
                   title="Export to Microsoft Excel"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#395C40]" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-govt-navy" />
                   <span>Excel</span>
                 </button>
                 <button
                   id="export-csv-btn"
                   onClick={handleExportCsv}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-[#EAF0E6] text-[#1B3022] border border-[#DDE5D4] transition-colors cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-slate-50 text-slate-body border border-slate-border transition-colors cursor-pointer shadow-2xs"
                   title="Export to CSV"
                 >
-                  <FileText className="w-3.5 h-3.5 text-[#395C40]" />
+                  <FileText className="w-3.5 h-3.5 text-govt-navy" />
                   <span>CSV</span>
                 </button>
                 <button
                   id="export-pdf-btn"
                   onClick={handleExportPdf}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-[#EAF0E6] text-[#1B3022] border border-[#DDE5D4] transition-colors cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white hover:bg-slate-50 text-slate-body border border-slate-border transition-colors cursor-pointer shadow-2xs"
                   title="Print / Save as PDF"
                 >
-                  <Printer className="w-3.5 h-3.5 text-[#395C40]" />
+                  <Printer className="w-3.5 h-3.5 text-govt-navy" />
                   <span>PDF</span>
                 </button>
               </div>
@@ -1333,86 +1454,86 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-[#1B3022] text-white select-none">
+                  <tr className="bg-govt-navy text-white select-none">
                     <th
                       onClick={() => handleSort('srNo')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-govt-navy-light"
                     >
                       Sr. No.
                     </th>
                     <th
                       onClick={() => handleSort('state')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-govt-navy-light"
                     >
                       State
                     </th>
                     <th
                       onClick={() => handleSort('mpName')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-govt-navy-light"
                     >
                       Hon'ble Member of Parliament
                     </th>
                     <th
                       onClick={() => handleSort('constituency')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide cursor-pointer hover:bg-govt-navy-light"
                     >
                       Constituency
                     </th>
                     <th
                       onClick={() => handleSort('allocatedAmountCr')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Allocated Amount
                     </th>
                     <th
                       onClick={() => handleSort('recommendedAmountCr')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Recommended Amount
                     </th>
                     <th
                       onClick={() => handleSort('sanctionedAmountCr')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Sanctioned Amount
                     </th>
                     <th
                       onClick={() => handleSort('utilizedAmountCr')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Utilized Amount
                     </th>
                     <th
                       onClick={() => handleSort('worksRecommended')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Works Recommended
                     </th>
                     <th
                       onClick={() => handleSort('worksSanctioned')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Works Sanctioned
                     </th>
                     <th
                       onClick={() => handleSort('worksCompleted')}
-                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-[#26412f]"
+                      className="py-3 px-3.5 font-semibold text-[11px] tracking-wide text-right cursor-pointer hover:bg-govt-navy-light"
                     >
                       Works Completed
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAF0E6]">
+                <tbody className="divide-y divide-slate-100">
                   {paginatedMpRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={11} className="py-10 text-center text-xs text-[#588157]">
+                      <td colSpan={11} className="py-10 text-center text-xs text-slate-muted">
                         <div className="max-w-xs mx-auto space-y-2">
-                          <Info className="w-6 h-6 text-[#8FA391] mx-auto" />
-                          <div className="font-semibold text-[#1B3022]">No MP records found</div>
+                          <Info className="w-6 h-6 text-[#94A3B8] mx-auto" />
+                          <div className="font-semibold text-slate-body">No MP records found</div>
                           <div className="text-[11px]">Try adjusting your search query or reset applied filters.</div>
                           <button
                             onClick={handleResetFilters}
-                            className="px-3 py-1.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-xs font-semibold hover:bg-[#DCE7D6] cursor-pointer"
+                            className="px-3 py-1.5 rounded-md bg-slate-100 text-slate-body text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                           >
                             Reset Filters
                           </button>
@@ -1423,29 +1544,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     paginatedMpRecords.map((r, i) => (
                       <tr
                         key={r.mpName + i}
-                        className="hover:bg-[#F8F9F7] transition-colors"
+                        className="hover:bg-panel-bg transition-colors"
                       >
-                        <td className="py-2.5 px-3.5 text-[#588157] font-mono text-xs">{r.srNo}</td>
-                        <td className="py-2.5 px-3.5 font-medium text-[#1B3022] whitespace-nowrap">{r.state}</td>
-                        <td className="py-2.5 px-3.5 font-semibold text-[#1B3022] whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 text-slate-muted font-mono text-xs">{r.srNo}</td>
+                        <td className="py-2.5 px-3.5 font-medium text-slate-body whitespace-nowrap">{r.state}</td>
+                        <td className="py-2.5 px-3.5 font-semibold text-slate-body whitespace-nowrap">
                           {r.mpName}
                         </td>
-                        <td className="py-2.5 px-3.5 text-[#588157] whitespace-nowrap">{r.constituency}</td>
-                        <td className="py-2.5 px-3.5 text-right font-medium text-[#1B3022] whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 text-slate-muted whitespace-nowrap">{r.constituency}</td>
+                        <td className="py-2.5 px-3.5 text-right font-medium text-slate-body whitespace-nowrap">
                           ₹{r.allocatedAmountCr.toFixed(2)} Cr
                         </td>
-                        <td className="py-2.5 px-3.5 text-right text-[#395C40] font-medium whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 text-right text-govt-navy font-medium whitespace-nowrap">
                           ₹{r.recommendedAmountCr.toFixed(2)} Cr
                         </td>
-                        <td className="py-2.5 px-3.5 text-right text-[#1B3022] font-semibold whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 text-right text-slate-body font-semibold whitespace-nowrap">
                           ₹{r.sanctionedAmountCr.toFixed(2)} Cr
                         </td>
-                        <td className="py-2.5 px-3.5 text-right text-[#2D4A32] font-medium whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 text-right text-status-verified font-medium whitespace-nowrap">
                           ₹{r.utilizedAmountCr.toFixed(2)} Cr
                         </td>
-                        <td className="py-2.5 px-3.5 text-right text-[#1B3022] font-medium">{r.worksRecommended}</td>
-                        <td className="py-2.5 px-3.5 text-right text-[#395C40] font-semibold">{r.worksSanctioned}</td>
-                        <td className="py-2.5 px-3.5 text-right text-[#138808] font-bold">{r.worksCompleted}</td>
+                        <td className="py-2.5 px-3.5 text-right text-slate-body font-medium">{r.worksRecommended}</td>
+                        <td className="py-2.5 px-3.5 text-right text-govt-navy font-semibold">{r.worksSanctioned}</td>
+                        <td className="py-2.5 px-3.5 text-right text-status-verified font-bold">{r.worksCompleted}</td>
                       </tr>
                     ))
                   )}
@@ -1455,8 +1576,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Pagination Controls */}
             {sortedMpRecords.length > 0 && (
-              <div className="px-4 py-3 bg-[#F8F9F7] border-t border-[#DDE5D4] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <span className="text-[#588157]">
+              <div className="px-4 py-3 bg-[#F8FAFC] border-t border-slate-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <span className="text-slate-muted">
                   Showing {(mpPage - 1) * mpPageSize + 1} to{' '}
                   {Math.min(mpPage * mpPageSize, sortedMpRecords.length)} of {sortedMpRecords.length} MPs
                 </span>
@@ -1465,27 +1586,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button
                     onClick={() => setMpPage(p => Math.max(1, p - 1))}
                     disabled={mpPage === 1}
-                    className="px-2.5 py-1 rounded bg-white border border-[#DDE5D4] text-[#1B3022] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#EAF0E6] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-white border border-slate-border text-slate-body disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 cursor-pointer"
                   >
                     Previous
                   </button>
-                  {Array.from({ length: totalMpPages }).map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setMpPage(idx + 1)}
-                      className={`w-7 h-7 rounded text-xs font-semibold cursor-pointer ${
-                        mpPage === idx + 1
-                          ? 'bg-[#1B3022] text-white'
-                          : 'bg-white border border-[#DDE5D4] text-[#588157] hover:bg-[#EAF0E6]'
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
+                  {Array.from({ length: totalMpPages })
+                    .map((_, idx) => idx + 1)
+                    .filter(page => {
+                      if (totalMpPages <= 7) return true;
+                      if (page === 1 || page === totalMpPages) return true;
+                      return Math.abs(page - mpPage) <= 1;
+                    })
+                    .map((page, idx, arr) => {
+                      const prevPage = arr[idx - 1];
+                      const showEllipsis = prevPage && page - prevPage > 1;
+                      return (
+                        <React.Fragment key={page}>
+                          {showEllipsis && (
+                            <span className="px-1 text-xs text-slate-muted">...</span>
+                          )}
+                          <button
+                            onClick={() => setMpPage(page)}
+                            className={`w-7 h-7 rounded text-xs font-semibold cursor-pointer ${
+                              mpPage === page
+                                ? 'bg-govt-navy text-white'
+                                : 'bg-white border border-slate-border text-slate-muted hover:bg-slate-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
                   <button
                     onClick={() => setMpPage(p => Math.min(totalMpPages, p + 1))}
                     disabled={mpPage === totalMpPages}
-                    className="px-2.5 py-1 rounded bg-white border border-[#DDE5D4] text-[#1B3022] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#EAF0E6] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-white border border-slate-border text-slate-body disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 cursor-pointer"
                   >
                     Next
                   </button>
@@ -1495,30 +1631,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         ) : (
           /* Detailed Works View */
-          <div className="bg-white rounded-xl border border-[#DDE5D4] overflow-hidden shadow-2xs">
-            <div className="px-4 py-3 bg-[#F8F9F7] border-b border-[#DDE5D4] flex items-center justify-between">
+          <div className="bg-white rounded-xl border border-slate-border overflow-hidden shadow-2xs">
+            <div className="px-4 py-3 bg-[#F8FAFC] border-b border-slate-border flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-[#1B3022]">Matching Developmental Works</h3>
-                <p className="text-[11px] text-[#588157]">
+                <h3 className="text-sm font-bold text-slate-body">Matching Developmental Works</h3>
+                <p className="text-[11px] text-slate-muted">
                   Click on any developmental project to inspect sanction orders, photos, and live completion status
                 </p>
               </div>
               <button
                 onClick={() => setActiveViewTab('mps')}
-                className="text-xs font-semibold text-[#395C40] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-govt-navy hover:underline cursor-pointer"
               >
                 &larr; Switch to MP Summary
               </button>
             </div>
 
-            <div className="divide-y divide-[#EAF0E6]">
+            <div className="divide-y divide-slate-100">
               {paginatedWorks.length === 0 ? (
-                <div className="py-12 text-center text-xs text-[#588157]">
-                  <p className="font-semibold text-sm text-[#1B3022]">No works match your current criteria</p>
+                <div className="py-12 text-center text-xs text-slate-muted">
+                  <p className="font-semibold text-sm text-slate-body">No works match your current criteria</p>
                   <p className="text-xs mt-1">Try resetting or broadening your search parameters.</p>
                   <button
                     onClick={handleResetFilters}
-                    className="mt-3 px-3 py-1.5 rounded-md bg-[#EAF0E6] text-[#2D4A32] text-xs font-semibold hover:bg-[#DCE7D6] cursor-pointer"
+                    className="mt-3 px-3 py-1.5 rounded-md bg-slate-100 text-slate-body text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                   >
                     Reset Filters
                   </button>
@@ -1527,19 +1663,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 paginatedWorks.map(p => (
                   <div
                     key={p.id}
-                    className="p-4 hover:bg-[#F8F9F7] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="p-4 hover:bg-panel-bg transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-[#1B3022] bg-[#EAF0E6] px-2 py-0.5 rounded border border-[#C8D5B9]">
+                        <span className="font-mono text-xs font-bold text-slate-body bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                           {p.projectCode}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             p.status === 'Completed'
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-emerald-100 text-status-verified'
                               : p.status === 'Ongoing'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-emerald-100 text-govt-navy'
                               : p.status === 'Delayed'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-amber-100 text-amber-800'
@@ -1547,26 +1683,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         >
                           {p.status}
                         </span>
-                        <span className="text-[11px] text-[#588157] font-medium">
+                        <span className="text-[11px] text-slate-muted font-medium">
                           {p.category}
                         </span>
                       </div>
 
-                      <h4 className="text-sm font-bold text-[#1B3022] truncate">{p.title}</h4>
-                      <p className="text-xs text-[#588157] line-clamp-1">{p.locationAddress}</p>
+                      <h4 className="text-sm font-bold text-slate-body truncate">{p.title}</h4>
+                      <p className="text-xs text-slate-muted line-clamp-1">{p.locationAddress}</p>
 
-                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-[#588157] pt-1">
-                        <span>MP: <strong className="text-[#1B3022]">{p.mpName}</strong></span>
-                        <span>Agency: <strong className="text-[#1B3022]">{p.implementingAgencyName}</strong></span>
-                        <span>Sanction: <strong className="text-[#1B3022]">₹{(p.sanctionedAmount / 100000).toFixed(1)} Lakh</strong></span>
-                        <span>Progress: <strong className="text-[#138808]">{p.completionPercentage}%</strong></span>
+                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-muted pt-1">
+                        <span>MP: <strong className="text-slate-body">{p.mpName}</strong></span>
+                        <span>Agency: <strong className="text-slate-body">{p.implementingAgencyName}</strong></span>
+                        <span>Sanction: <strong className="text-slate-body">₹{(p.sanctionedAmount / 100000).toFixed(1)} Lakh</strong></span>
+                        <span>Progress: <strong className="text-status-verified">{p.completionPercentage}%</strong></span>
                       </div>
                     </div>
 
                     <div className="shrink-0">
                       <button
                         onClick={() => onSelectProject(p)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1B3022] hover:bg-[#284431] text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-govt-navy hover:bg-govt-navy-light text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>View Details</span>
@@ -1579,8 +1715,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Pagination for Works */}
             {filteredWorks.length > 0 && (
-              <div className="px-4 py-3 bg-[#F8F9F7] border-t border-[#DDE5D4] flex items-center justify-between text-xs">
-                <span className="text-[#588157]">
+              <div className="px-4 py-3 bg-[#F8FAFC] border-t border-slate-border flex items-center justify-between text-xs">
+                <span className="text-slate-muted">
                   Showing {(worksPage - 1) * worksPageSize + 1} to{' '}
                   {Math.min(worksPage * worksPageSize, filteredWorks.length)} of {filteredWorks.length} works
                 </span>
@@ -1589,17 +1725,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button
                     onClick={() => setWorksPage(p => Math.max(1, p - 1))}
                     disabled={worksPage === 1}
-                    className="px-2.5 py-1 rounded bg-white border border-[#DDE5D4] text-[#1B3022] disabled:opacity-40 hover:bg-[#EAF0E6] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-white border border-slate-border text-slate-body disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
                   >
                     Previous
                   </button>
-                  <span className="px-2 text-xs font-semibold text-[#1B3022]">
+                  <span className="px-2 text-xs font-semibold text-slate-body">
                     Page {worksPage} of {totalWorksPages}
                   </span>
                   <button
                     onClick={() => setWorksPage(p => Math.min(totalWorksPages, p + 1))}
                     disabled={worksPage === totalWorksPages}
-                    className="px-2.5 py-1 rounded bg-white border border-[#DDE5D4] text-[#1B3022] disabled:opacity-40 hover:bg-[#EAF0E6] cursor-pointer"
+                    className="px-2.5 py-1 rounded bg-white border border-slate-border text-slate-body disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
                   >
                     Next
                   </button>
@@ -1610,22 +1746,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         )}
 
         {/* 6. CITIZEN OPINION & PUBLIC FEEDBACK (Dedicated Section, No Official Login Needed) */}
-        <div id="feedback-section" className="bg-white rounded-xl border border-[#DDE5D4] p-5 shadow-2xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5D4]">
+        <div id="feedback-section" className="bg-white rounded-xl border border-slate-border p-5 shadow-2xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-border">
             <div>
               <div className="flex items-center gap-2">
-                <MessageSquareWarning className="w-5 h-5 text-[#395C40]" />
-                <h3 className="text-base font-bold text-[#1B3022]">
+                <MessageSquareWarning className="w-5 h-5 text-govt-navy" />
+                <h3 className="text-base font-bold text-slate-body">
                   Citizen Opinion & Public Feedback
                 </h3>
               </div>
-              <p className="text-xs text-[#588157] mt-0.5">
+              <p className="text-xs text-slate-muted mt-0.5">
                 Share citizen feedback, report delays or quality concerns, and express public satisfaction. Stored separately from official records.
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF0E6] text-[#2D4A32] text-xs font-semibold border border-[#C8D5B9]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#395C40]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-govt-navy text-xs font-semibold border border-emerald-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-govt-navy" />
               <span>Public Portal Feature • No Login Required</span>
             </div>
           </div>
@@ -1633,30 +1769,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Feedback Form & Recent Registry Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Feedback Submission Form */}
-            <div className="lg:col-span-6 bg-[#F8F9F7] p-4 sm:p-5 rounded-xl border border-[#DDE5D4] space-y-4">
+            <div className="lg:col-span-6 bg-panel-bg p-4 sm:p-5 rounded-xl border border-slate-border space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#1B3022] uppercase tracking-wide">
+                <span className="text-xs font-bold text-slate-body uppercase tracking-wide">
                   Submit Citizen Observation
                 </span>
-                <span className="text-[10px] text-[#588157]">Direct to District Authority</span>
+                <span className="text-[10px] text-slate-muted">Direct to District Authority</span>
               </div>
 
               {feedbackSuccessId ? (
-                <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-900 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-emerald-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <div className="p-4 bg-emerald-50 rounded-lg border border-status-verified/30 text-status-verified space-y-2 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-status-verified">
+                    <CheckCircle2 className="w-4 h-4 text-status-verified" />
                     <span>Feedback Registered Successfully!</span>
                   </div>
                   <p>
                     Your citizen feedback has been logged under Tracking Reference ID:{' '}
-                    <strong className="font-mono text-emerald-900">{feedbackSuccessId}</strong>.
+                    <strong className="font-mono text-status-verified">{feedbackSuccessId}</strong>.
                   </p>
-                  <p className="text-[11px] text-emerald-700">
+                  <p className="text-[11px] text-status-verified">
                     District Authority and Vigilance Officers review all public reports for ground verification.
                   </p>
                   <button
                     onClick={() => setFeedbackSuccessId(null)}
-                    className="mt-2 text-xs font-semibold underline text-emerald-800 cursor-pointer"
+                    className="mt-2 text-xs font-semibold underline text-status-verified cursor-pointer"
                   >
                     Submit Another Feedback
                   </button>
@@ -1670,13 +1806,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   )}
 
                   <div>
-                    <label className="block text-[#1B3022] font-semibold mb-1">
+                    <label className="block text-slate-body font-semibold mb-1">
                       Select MPLADS Work *
                     </label>
                     <select
                       value={fbProjectId}
                       onChange={e => setFbProjectId(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40]"
+                      className="w-full px-3 py-2 bg-white border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy focus:border-govt-navy"
                     >
                       {projects.map(p => (
                         <option key={p.id} value={p.id}>
@@ -1688,13 +1824,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[#1B3022] font-semibold mb-1">
+                      <label className="block text-slate-body font-semibold mb-1">
                         Category of Observation *
                       </label>
                       <select
                         value={fbIssueType}
                         onChange={e => setFbIssueType(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40]"
+                        className="w-full px-3 py-2 bg-white border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy focus:border-govt-navy"
                       >
                         <option value="Incomplete Work">Incomplete Work</option>
                         <option value="Poor Quality">Substandard Material Quality</option>
@@ -1707,7 +1843,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[#1B3022] font-semibold mb-1">
+                      <label className="block text-slate-body font-semibold mb-1">
                         Citizen Name (Optional)
                       </label>
                       <input
@@ -1715,13 +1851,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         value={fbCitizenName}
                         onChange={e => setFbCitizenName(e.target.value)}
                         placeholder="Anonymous or Name"
-                        className="w-full px-3 py-2 bg-white border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40]"
+                        className="w-full px-3 py-2 bg-white border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy focus:border-govt-navy"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[#1B3022] font-semibold mb-1">
+                    <label className="block text-slate-body font-semibold mb-1">
                       Phone or Email (Optional, masked for privacy)
                     </label>
                     <input
@@ -1729,12 +1865,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       value={fbCitizenContact}
                       onChange={e => setFbCitizenContact(e.target.value)}
                       placeholder="+91 98490 ***** or citizen@email.com"
-                      className="w-full px-3 py-2 bg-white border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40]"
+                      className="w-full px-3 py-2 bg-white border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy focus:border-govt-navy"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#1B3022] font-semibold mb-1">
+                    <label className="block text-slate-body font-semibold mb-1">
                       Observation Details & Ground Realities *
                     </label>
                     <textarea
@@ -1742,14 +1878,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       value={fbDescription}
                       onChange={e => setFbDescription(e.target.value)}
                       placeholder="Describe what you observed on site, current state of the facility, quality issues or public satisfaction..."
-                      className="w-full px-3 py-2 bg-white border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40] focus:border-[#395C40]"
+                      className="w-full px-3 py-2 bg-white border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy focus:border-govt-navy"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={feedbackSubmitting}
-                    className="w-full py-2.5 px-4 rounded-lg bg-[#1B3022] hover:bg-[#284431] text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 rounded-lg bg-govt-navy hover:bg-govt-navy-light text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{feedbackSubmitting ? 'Submitting Feedback...' : 'Submit Feedback to Public Registry'}</span>
@@ -1761,42 +1897,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Public Feedback Transparency Feed */}
             <div className="lg:col-span-6 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#1B3022] uppercase tracking-wide">
+                <span className="text-xs font-bold text-slate-body uppercase tracking-wide">
                   Public Feedback Registry ({feedbacks.length})
                 </span>
-                <span className="text-[11px] text-[#588157]">Verified Transparency Log</span>
+                <span className="text-[11px] text-slate-muted">Verified Transparency Log</span>
               </div>
 
               <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
                 {feedbackLoading ? (
-                  <div className="p-6 text-center text-xs text-[#588157]">
+                  <div className="p-6 text-center text-xs text-slate-muted">
                     Loading public citizen observations...
                   </div>
                 ) : feedbacks.length === 0 ? (
-                  <div className="p-6 bg-[#F8F9F7] rounded-lg border border-[#DDE5D4] text-center text-xs text-[#588157]">
+                  <div className="p-6 bg-panel-bg rounded-lg border border-slate-border text-center text-xs text-slate-muted">
                     No public grievances registered yet. Be the first to share ground observation!
                   </div>
                 ) : (
                   feedbacks.map(item => (
                     <div
                       key={item.id}
-                      className="p-3 bg-[#F8F9F7] hover:bg-white rounded-lg border border-[#DDE5D4] text-xs space-y-1.5 transition-colors"
+                      className="p-3 bg-panel-bg hover:bg-white rounded-lg border border-slate-border text-xs space-y-1.5 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold text-[#1B3022] bg-white px-1.5 py-0.5 rounded border border-[#DDE5D4]">
+                          <span className="font-mono text-[10px] font-bold text-slate-body bg-white px-1.5 py-0.5 rounded border border-slate-border">
                             {item.id}
                           </span>
-                          <span className="text-[11px] font-semibold text-[#1B3022] truncate max-w-[180px]">
+                          <span className="text-[11px] font-semibold text-slate-body truncate max-w-[180px]">
                             {item.issueType}
                           </span>
                         </div>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             item.status === 'Resolved'
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-emerald-100 text-status-verified'
                               : item.status === 'Verified'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-emerald-100 text-govt-navy'
                               : item.status === 'Under Review'
                               ? 'bg-amber-100 text-amber-800'
                               : 'bg-gray-100 text-gray-700'
@@ -1806,9 +1942,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         </span>
                       </div>
 
-                      <p className="text-xs text-[#4A6451] line-clamp-2">{item.description}</p>
+                      <p className="text-xs text-slate-muted line-clamp-2">{item.description}</p>
 
-                      <div className="flex items-center justify-between text-[10px] text-[#8FA391] pt-1 border-t border-[#EAF0E6]">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-border">
                         <span>Citizen: {item.citizenName || 'Public Observer'}</span>
                         <span>{new Date(item.submittedAt).toLocaleDateString('en-IN')}</span>
                       </div>
@@ -1823,19 +1959,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* FILTER MODAL / PANEL */}
       {isFilterModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-2xs">
-          <div className="bg-white rounded-2xl border border-[#DDE5D4] max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-2xs">
+          <div className="bg-white rounded-2xl border border-slate-border max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-[#1B3022] text-white flex items-center justify-between">
+            <div className="px-6 py-4 bg-govt-navy text-white flex items-center justify-between">
               <div>
-                <div className="text-[10px] text-[#A3B18A] uppercase font-bold tracking-wider">
+                <div className="text-[10px] text-panel-bg/80 uppercase font-bold tracking-wider">
                   Precise Search & Filter Engine
                 </div>
                 <h3 className="text-base font-bold">Filter MPLADS Records</h3>
               </div>
               <button
                 onClick={() => setIsFilterModalOpen(false)}
-                className="p-1 rounded-lg text-[#DDE5D4] hover:text-white hover:bg-[#395C40] cursor-pointer"
+                className="p-1 rounded-lg text-panel-bg/80 hover:text-white hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1846,11 +1982,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* A. Tenure */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">A. Tenure</label>
+                  <label className="block font-semibold text-slate-body mb-1">A. Tenure</label>
                   <select
                     value={selectedTenure}
                     onChange={e => setSelectedTenure(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="18th Lok Sabha">18th Lok Sabha (Current)</option>
                     <option value="17th Lok Sabha">17th Lok Sabha</option>
@@ -1860,7 +1996,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* B. State */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">B. State / UT</label>
+                  <label className="block font-semibold text-slate-body mb-1">B. State / UT</label>
                   <select
                     value={selectedState}
                     onChange={e => {
@@ -1868,7 +2004,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       setSelectedConstituency('All');
                       setSelectedMp('All');
                     }}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All States / UTs</option>
                     {availableStates.map(st => (
@@ -1881,13 +2017,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* C. Constituency (Dynamic) */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">
+                  <label className="block font-semibold text-slate-body mb-1">
                     C. Constituency (Dynamic)
                   </label>
                   <select
                     value={selectedConstituency}
                     onChange={e => setSelectedConstituency(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Constituencies</option>
                     {availableConstituencies.map(c => (
@@ -1900,13 +2036,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* D. MP Name (Dynamic) */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">
+                  <label className="block font-semibold text-slate-body mb-1">
                     D. Hon'ble MP Name (Dynamic)
                   </label>
                   <select
                     value={selectedMp}
                     onChange={e => setSelectedMp(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Hon'ble MPs</option>
                     {availableMps.map(m => (
@@ -1919,11 +2055,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* E. Work Status */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">E. Work Status</label>
+                  <label className="block font-semibold text-slate-body mb-1">E. Work Status</label>
                   <select
                     value={selectedStatus}
                     onChange={e => setSelectedStatus(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Statuses</option>
                     {workStatuses.map(s => (
@@ -1936,11 +2072,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* F. Sector */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">F. Sector / Category</label>
+                  <label className="block font-semibold text-slate-body mb-1">F. Sector / Category</label>
                   <select
                     value={selectedSector}
                     onChange={e => setSelectedSector(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Sectors</option>
                     {sectorsList.map(sec => (
@@ -1953,11 +2089,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* G. Financial Year */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">G. Financial Year</label>
+                  <label className="block font-semibold text-slate-body mb-1">G. Financial Year</label>
                   <select
                     value={selectedFinYear}
                     onChange={e => setSelectedFinYear(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Financial Years</option>
                     {financialYears.map(fy => (
@@ -1970,11 +2106,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* H. District */}
                 <div>
-                  <label className="block font-semibold text-[#1B3022] mb-1">H. District</label>
+                  <label className="block font-semibold text-slate-body mb-1">H. District</label>
                   <select
                     value={selectedDistrict}
                     onChange={e => setSelectedDistrict(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs focus:ring-1 focus:ring-[#395C40]"
+                    className="w-full px-3 py-2 bg-panel-bg border border-slate-border rounded-lg text-xs focus:ring-1 focus:ring-govt-navy"
                   >
                     <option value="All">All Districts</option>
                     {availableDistricts.map(d => (
@@ -1988,11 +2124,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-3 bg-[#F8F9F7] border-t border-[#DDE5D4] flex items-center justify-between">
+            <div className="px-6 py-3 bg-panel-bg border-t border-slate-border flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-[#B85338] hover:bg-red-50 border border-transparent transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 border border-transparent transition-colors cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -2001,7 +2137,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsFilterModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-[#1B3022] hover:bg-[#EAF0E6] border border-[#DDE5D4] transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-body hover:bg-slate-200 border border-slate-border transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2012,7 +2148,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     setWorksPage(1);
                     setIsFilterModalOpen(false);
                   }}
-                  className="px-5 py-2 rounded-lg text-xs font-semibold bg-[#1B3022] hover:bg-[#284431] text-white shadow-2xs transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-lg text-xs font-semibold bg-govt-navy hover:bg-govt-navy-light text-white shadow-2xs transition-colors cursor-pointer"
                 >
                   Apply Filters
                 </button>
@@ -2023,23 +2159,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       )}
 
       {/* FOOTER */}
-      <footer className="bg-white border-t border-[#DDE5D4] py-6 px-4 mt-12 text-xs text-[#588157]">
+      <footer className="bg-white border-t border-slate-border py-6 px-4 mt-12 text-xs text-slate-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-full bg-[#1B3022] text-white flex items-center justify-center font-bold text-[9px]">
+            <div className="w-7 h-7 rounded-full bg-govt-navy text-white flex items-center justify-center font-bold text-[9px]">
               GOI
             </div>
             <div>
-              <div className="font-bold text-[#1B3022]">e-SAKSHI Portal &bull; MPLADS Digital Governance</div>
+              <div className="font-bold text-slate-body">e-SAKSHI Portal &bull; MPLADS Digital Governance</div>
               <div className="text-[11px]">Ministry of Statistics & Programme Implementation, Government of India</div>
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
-            <a href="#dashboard-section" className="hover:text-[#1B3022]">Dashboard</a>
-            <a href="#feedback-section" className="hover:text-[#1B3022]">Citizen Feedback</a>
-            <button onClick={onEnterPublic} className="hover:text-[#1B3022] cursor-pointer">Public Portal</button>
-            <button onClick={() => onOpenLogin()} className="hover:text-[#1B3022] cursor-pointer font-semibold">Officer Login</button>
+            <a href="#dashboard-section" className="hover:text-govt-navy">Dashboard</a>
+            <a href="#feedback-section" className="hover:text-govt-navy">Citizen Feedback</a>
+            <button onClick={onEnterPublic} className="hover:text-govt-navy cursor-pointer">Public Portal</button>
+            <button onClick={() => onOpenLogin()} className="hover:text-govt-navy cursor-pointer font-semibold">Officer Login</button>
           </div>
         </div>
       </footer>

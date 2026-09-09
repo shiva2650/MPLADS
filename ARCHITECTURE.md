@@ -1,10 +1,10 @@
-# MPLADS AI Integrity & Monitoring System: Architecture & eSAKSHI Overlay Model
+# MPLADS AI Integrity & Monitoring System: Architecture & Data Overlay Model
 
 ## Executive Summary
 
-The **MPLADS AI Integrity & Monitoring System** is engineered not to replace existing governmental workflows, but to operate as a **non-invasive, high-precision verification overlay** sitting directly atop the Ministry of Statistics and Programme Implementation’s (MoSPI) **eSAKSHI** portal (mplads.mospi.gov.in) and open data platforms (data.gov.in).
+The **MPLADS AI Integrity & Monitoring System** is engineered not to replace existing governmental workflows, but to operate as a **non-invasive, high-precision verification overlay** sitting directly atop official Ministry of Statistics and Programme Implementation (MoSPI) portals (mplads.mospi.gov.in) and open data platforms (data.gov.in).
 
-While eSAKSHI serves as the administrative system of record for sanction orders, milestone approvals, and fund disbursements, our architecture introduces an automated **Intelligence & Forensic Assurance Layer** that independently audits claims before funds are disbursed.
+While central governmental registries serve as the administrative system of record for sanction orders, milestone approvals, and fund disbursements, our architecture introduces an automated **Intelligence & Forensic Assurance Layer** that independently audits claims before funds are disbursed.
 
 ---
 
@@ -13,24 +13,24 @@ While eSAKSHI serves as the administrative system of record for sanction orders,
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        DATA INGESTION ADAPTER                          │
-│   eSAKSHI API / CSV Exports  │  data.gov.in Datasets  │  Citizen Portals │
+│   Official API / CSV Exports │  data.gov.in Datasets  │  Citizen Portals │
 └──────────────────────────────────┬─────────────────────────────────────┘
                                    │ Defensive Parsing & Quality Audit
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                INTEGRITY ENGINE & MULTI-LAYER AUDIT                    │
-├───────────────────────┬────────────────────────┬───────────────────────┤
-│  Satellite Imagery    │  Graph Network Fraud   │  Multi-Layer Evidence │
-│  Cross-Verification   │  Collusion Detection   │  Forensics & ELA      │
-│  - Sentinel-2 multi-  │  - Concentration Z-    │  - Perceptual hashing │
-│    temporal diff      │    score analysis      │    for duplicate pics │
-│  - Canny structural   │  - Rapid-fire award    │  - EXIF GPS vs        │
-│    edge detection     │    burst tracking      │    sanctioned bounds  │
-│  - Multispectral NDVI │  - Shell company match │  - Multimodal Gemini  │
-│    canopy growth      │  - Louvain clustering  │    vision forensics   │
-└───────────────────────┴──────────┬─────────────┴───────────────────────┘
-                                   │
-                                   ▼
+├────────────────────────────────────────┬───────────────────────────────┤
+│          Graph Network Fraud           │     Multi-Layer Evidence      │
+│          Collusion Detection           │        Forensics & ELA        │
+│          - Concentration Z-score       │     - Perceptual hashing for  │
+│            analysis                    │       duplicate project pics  │
+│          - Rapid-fire award burst      │     - EXIF GPS vs sanctioned  │
+│            tracking                    │       geographical bounds     │
+│          - Shell company match         │     - Multimodal vision       │
+│          - Louvain clustering          │       forensics & metadata    │
+└────────────────────────────────────────┴──────────────┬────────────────┘
+                                                        │
+                                                        ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │             CRYPTOGRAPHIC HASH-CHAIN AUDIT LAYER                       │
 │  - SHA-256 Chained Blocks: entryHash = H(prevHash | entry | timestamp) │
@@ -57,6 +57,6 @@ While eSAKSHI serves as the administrative system of record for sanction orders,
 2. **Defensive Data Ingestion**:
    Tolerates missing fields, varied Indian Rupee formatting (Crores, Lakhs, commas), and uncalibrated GPS strings. Produces a real-time **Data Quality Report** (e.g. *94.2% GPS completeness*) as a built-in transparency metric.
 3. **Pluggable Verification Pipeline**:
-   The verification layers (Satellite change detection, Graph collusion analysis, Photo forensics) run asynchronously as workers, flagging anomalies for Vigilance review without halting legitimate work sanctions.
+   The verification layers (Graph collusion analysis, Photo forensics, Spatial validation) run asynchronously, flagging anomalies for Vigilance review without halting legitimate work sanctions.
 4. **Actionable Impact Deliverables**:
-   Computes verified potential savings (disparity between funds disbursed vs satellite/forensic verified completion) so authorities have concrete numbers for audits.
+   Computes verified potential savings (disparity between funds disbursed vs verified forensic completion) so authorities have concrete numbers for audits.

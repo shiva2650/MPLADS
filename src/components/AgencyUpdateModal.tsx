@@ -59,25 +59,25 @@ const AgencyUpdateModalContent: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1B3022]/60 backdrop-blur-xs overflow-y-auto">
-      <div className="w-full max-w-2xl bg-[#F8F9F7] rounded-2xl shadow-2xl border border-[#DDE5D4] overflow-hidden my-8">
-        <div className="px-6 py-4 bg-[#1B3022] text-white flex items-center justify-between border-b border-[#2C4A34]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-govt-navy-dark/60 backdrop-blur-xs overflow-y-auto">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-border overflow-hidden my-8">
+        <div className="px-6 py-4 bg-govt-navy text-white flex items-center justify-between border-b border-govt-navy-dark">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#395C40]/50 text-[#DDE5D4] border border-[#395C40]">
-              <HardHat className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-govt-navy-light text-white border border-white/20">
+              <HardHat className="w-5 h-5 text-govt-saffron" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
                 Update Physical Progress & Upload Geotag Photo
               </h2>
-              <div className="text-xs text-[#A3B18A] font-mono">
+              <div className="text-xs text-panel-bg/80 font-mono">
                 {project.projectCode} — {project.title}
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#A3B18A] hover:text-white hover:bg-[#395C40] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-panel-bg/80 hover:text-white hover:bg-govt-navy-light transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -85,14 +85,14 @@ const AgencyUpdateModalContent: React.FC<{
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
           {error && (
-            <div className="p-3 bg-[#FAF3E0] border border-[#E8DAB2] text-[#935D26] rounded-xl font-medium">
+            <div className="p-3 bg-panel-bg border border-status-flagged/30 text-status-flagged rounded-xl font-medium">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-bold text-[#1B3022] mb-1">
+              <label className="block font-bold text-slate-body mb-1">
                 Physical Completion Percentage ({progress}%) *
               </label>
               <input
@@ -101,9 +101,9 @@ const AgencyUpdateModalContent: React.FC<{
                 max="100"
                 value={progress}
                 onChange={e => setProgress(Number(e.target.value))}
-                className="w-full h-2 bg-[#DDE5D4] rounded-lg appearance-none cursor-pointer accent-[#395C40]"
+                className="w-full h-2 bg-slate-border rounded-lg appearance-none cursor-pointer accent-govt-navy"
               />
-              <div className="flex justify-between text-[10px] text-[#588157] mt-1">
+              <div className="flex justify-between text-[10px] text-slate-muted mt-1">
                 <span>0% (Commenced)</span>
                 <span>50% (Mid-term)</span>
                 <span>100% (Certified)</span>
@@ -111,7 +111,7 @@ const AgencyUpdateModalContent: React.FC<{
             </div>
 
             <div>
-              <label className="block font-bold text-[#1B3022] mb-1">
+              <label className="block font-bold text-slate-body mb-1">
                 Total Funds Utilized to Date (₹ Lakh) *
               </label>
               <input
@@ -120,16 +120,16 @@ const AgencyUpdateModalContent: React.FC<{
                 required
                 value={fundsUtilizedLakh}
                 onChange={e => setFundsUtilizedLakh(e.target.value)}
-                className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white font-mono font-bold focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white font-mono font-bold focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
               />
-              <div className="text-[10px] text-[#588157] mt-1">
+              <div className="text-[10px] text-slate-muted mt-1">
                 Sanctioned ceiling: ₹{(project.sanctionedAmount / 100000).toFixed(2)} Lakh
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-[#1B3022] mb-1">
+            <label className="block font-bold text-slate-body mb-1">
               Field Engineer Progress Remarks
             </label>
             <textarea
@@ -137,24 +137,24 @@ const AgencyUpdateModalContent: React.FC<{
               value={remarks}
               onChange={e => setRemarks(e.target.value)}
               placeholder="e.g., Plinth masonry foundation complete. Centering and reinforcement inspection passed by AE."
-              className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+              className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
             />
           </div>
 
           {/* Photo Geotag Upload Section */}
-          <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs space-y-3">
-            <div className="flex items-center gap-2 font-bold text-[#1B3022] text-xs">
-              <Camera className="w-4 h-4 text-[#395C40]" />
+          <div className="p-4 bg-panel-bg rounded-xl border border-slate-border shadow-xs space-y-3">
+            <div className="flex items-center gap-2 font-bold text-slate-body text-xs">
+              <Camera className="w-4 h-4 text-govt-navy" />
               <span>Mandatory Geotagged Progress Photo</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="block font-bold text-[#1B3022] mb-1">Milestone Stage</label>
+                <label className="block font-bold text-slate-body mb-1">Milestone Stage</label>
                 <select
                   value={photoStage}
                   onChange={e => setPhotoStage(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
                 >
                   <option value="before">Before Work Started</option>
                   <option value="during">During Work Execution</option>
@@ -163,72 +163,72 @@ const AgencyUpdateModalContent: React.FC<{
               </div>
 
               <div className="md:col-span-2">
-                <label className="block font-bold text-[#1B3022] mb-1">Photo Description / Stage</label>
+                <label className="block font-bold text-slate-body mb-1">Photo Description / Stage</label>
                 <input
                   type="text"
                   value={photoCaption}
                   onChange={e => setPhotoCaption(e.target.value)}
                   placeholder="e.g., Slab casting and shuttering inspection"
-                  className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-[#1B3022] mb-1">Photo Image URL</label>
+              <label className="block font-bold text-slate-body mb-1">Photo Image URL</label>
               <input
                 type="url"
                 value={photoUrl}
                 onChange={e => setPhotoUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg font-mono text-[11px] text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                className="w-full px-3 py-2 border border-slate-border rounded-lg font-mono text-[11px] text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
               <div>
-                <label className="block font-bold text-[#1B3022] mb-1 flex items-center gap-1">
-                  <Compass className="w-3 h-3 text-[#395C40]" />
+                <label className="block font-bold text-slate-body mb-1 flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-govt-navy" />
                   <span>Photo EXIF Latitude</span>
                 </label>
                 <input
                   type="text"
                   value={photoLat}
                   onChange={e => setPhotoLat(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg font-mono text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-border rounded-lg font-mono text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#1B3022] mb-1 flex items-center gap-1">
-                  <Compass className="w-3 h-3 text-[#395C40]" />
+                <label className="block font-bold text-slate-body mb-1 flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-govt-navy" />
                   <span>Photo EXIF Longitude</span>
                 </label>
                 <input
                   type="text"
                   value={photoLon}
                   onChange={e => setPhotoLon(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg font-mono text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-border rounded-lg font-mono text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
                 />
               </div>
             </div>
 
-            <div className="text-[11px] text-[#395C40] bg-[#EAF0E6] p-2.5 rounded-xl border border-[#C8D5B9]">
+            <div className="text-[11px] text-govt-navy bg-panel-bg p-2.5 rounded-xl border border-slate-border">
               💡 <strong>AI Verification Note:</strong> The system automatically verifies that the photo EXIF coordinates fall within 250 meters of the sanctioned site ({project.latitude ? project.latitude.toFixed(4) : '17.4120'}°, {project.longitude ? project.longitude.toFixed(4) : '78.4982'}°). If you enter distant coordinates, a location mismatch alert will be triggered automatically.
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#DDE5D4] flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-border flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-[#DDE5D4] text-[#1B3022] bg-white hover:bg-[#F8F9F7] font-bold cursor-pointer transition-colors"
+              className="px-4 py-2 rounded-lg border border-slate-border text-slate-body bg-white hover:bg-panel-bg font-bold cursor-pointer transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 rounded-lg bg-[#395C40] text-white font-bold hover:bg-[#2C4A34] disabled:opacity-50 flex items-center gap-2 shadow-xs cursor-pointer transition-colors"
+              className="px-5 py-2 rounded-lg bg-govt-navy text-white font-bold hover:bg-govt-navy-light disabled:opacity-50 flex items-center gap-2 shadow-xs cursor-pointer transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{submitting ? 'Submitting...' : 'Save & Verify Progress'}</span>

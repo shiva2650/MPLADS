@@ -17,12 +17,20 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  if (!isOpen || !alert) return null;
-
   const [decision, setDecision] = useState<'Under Review' | 'False Positive' | 'Escalated' | 'Resolved'>('Under Review');
-  const [reviewNotes, setReviewNotes] = useState(alert.reviewNotes || '');
+  const [reviewNotes, setReviewNotes] = useState(alert?.reviewNotes || '');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (alert) {
+      setReviewNotes(alert.reviewNotes || '');
+      setDecision('Under Review');
+      setError(null);
+    }
+  }, [alert?.id, isOpen]);
+
+  if (!isOpen || !alert) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,25 +49,25 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1B3022]/60 backdrop-blur-xs overflow-y-auto">
-      <div className="w-full max-w-xl bg-[#F8F9F7] rounded-2xl shadow-2xl border border-[#DDE5D4] overflow-hidden my-8">
-        <div className="px-6 py-4 bg-[#1B3022] text-white flex items-center justify-between border-b border-[#2C4A34]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-govt-navy-dark/60 backdrop-blur-xs overflow-y-auto">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-border overflow-hidden my-8">
+        <div className="px-6 py-4 bg-govt-navy text-white flex items-center justify-between border-b border-govt-navy-dark">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#E07A5F]/20 text-[#E07A5F] border border-[#E07A5F]/30">
-              <ShieldAlert className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-panel-bg text-status-flagged border border-status-flagged/40">
+              <ShieldAlert className="w-5 h-5 text-status-flagged" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
                 Investigate & Adjudicate AI Risk Alert
               </h2>
-              <div className="text-xs text-[#A3B18A] font-mono">
+              <div className="text-xs text-panel-bg/80 font-mono">
                 {alert.id} — {alert.alertType}
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#A3B18A] hover:text-white hover:bg-[#395C40] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-panel-bg/80 hover:text-white hover:bg-govt-navy-light transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -67,41 +75,41 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
           {error && (
-            <div className="p-3 bg-[#FAF3E0] border border-[#E8DAB2] text-[#935D26] rounded-xl font-medium">
+            <div className="p-3 bg-panel-bg border border-status-flagged/30 text-status-flagged rounded-xl font-medium">
               {error}
             </div>
           )}
 
           {/* Alert Context Summary */}
-          <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs space-y-2">
+          <div className="p-4 bg-panel-bg rounded-xl border border-slate-border shadow-xs space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-[#1B3022]">{alert.projectTitle}</span>
+              <span className="font-bold text-slate-body">{alert.projectTitle}</span>
               <RiskBadge level={alert.riskLevel} />
             </div>
-            <div className="text-[11px] text-[#588157] space-x-2 font-mono">
+            <div className="text-[11px] text-slate-muted space-x-2 font-mono">
               <span>Code: {alert.projectCode}</span>
               <span>•</span>
               <span>District: {alert.district}</span>
               <span>•</span>
               <span>Agency: {alert.agencyName}</span>
             </div>
-            <div className="pt-2 border-t border-[#F0F2ED] text-[#1B3022] font-medium">
-              <span className="text-[#588157] font-normal">Observed Indicator: </span>
+            <div className="pt-2 border-t border-slate-border text-slate-body font-medium">
+              <span className="text-slate-muted font-normal">Observed Indicator: </span>
               {alert.reason}
             </div>
           </div>
 
           {/* Decision Selector */}
           <div>
-            <label className="block font-bold text-[#1B3022] mb-2">
+            <label className="block font-bold text-slate-body mb-2">
               Human Review & Vigilance Determination *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <label
                 className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-colors ${
                   decision === 'Under Review'
-                    ? 'border-[#D4A373] bg-[#FAF3E0] text-[#935D26] font-bold'
-                    : 'border-[#DDE5D4] bg-white hover:bg-[#F8F9F7] text-[#1B3022]'
+                    ? 'border-status-review/40 bg-panel-bg text-status-review font-bold'
+                    : 'border-slate-border bg-white hover:bg-panel-bg text-slate-body'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -114,7 +122,7 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
                   />
                   <span>Mark Under Review</span>
                 </div>
-                <span className="text-[10px] text-[#588157] font-normal ml-5">
+                <span className="text-[10px] text-slate-muted font-normal ml-5">
                   Assigned for field verification & measurement book check
                 </span>
               </label>
@@ -122,8 +130,8 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
               <label
                 className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-colors ${
                   decision === 'Escalated'
-                    ? 'border-[#E07A5F] bg-[#FAF0EC] text-[#B84A30] font-bold'
-                    : 'border-[#DDE5D4] bg-white hover:bg-[#F8F9F7] text-[#1B3022]'
+                    ? 'border-status-flagged/40 bg-panel-bg text-status-flagged font-bold'
+                    : 'border-slate-border bg-white hover:bg-panel-bg text-slate-body'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -136,7 +144,7 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
                   />
                   <span>Escalate to Vigilance</span>
                 </div>
-                <span className="text-[10px] text-[#588157] font-normal ml-5">
+                <span className="text-[10px] text-slate-muted font-normal ml-5">
                   Issue show-cause notice & freeze further payment tranches
                 </span>
               </label>
@@ -144,8 +152,8 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
               <label
                 className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-colors ${
                   decision === 'False Positive'
-                    ? 'border-[#A3B18A] bg-[#F1F4EE] text-[#395C40] font-bold'
-                    : 'border-[#DDE5D4] bg-white hover:bg-[#F8F9F7] text-[#1B3022]'
+                    ? 'border-govt-navy/40 bg-panel-bg text-govt-navy font-bold'
+                    : 'border-slate-border bg-white hover:bg-panel-bg text-slate-body'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -158,7 +166,7 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
                   />
                   <span>Mark False Positive</span>
                 </div>
-                <span className="text-[10px] text-[#588157] font-normal ml-5">
+                <span className="text-[10px] text-slate-muted font-normal ml-5">
                   Verified as legitimate deviation; adjust AI baseline
                 </span>
               </label>
@@ -166,8 +174,8 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
               <label
                 className={`p-3 rounded-xl border flex flex-col gap-1 cursor-pointer transition-colors ${
                   decision === 'Resolved'
-                    ? 'border-[#395C40] bg-[#EAF0E6] text-[#1B3022] font-bold'
-                    : 'border-[#DDE5D4] bg-white hover:bg-[#F8F9F7] text-[#1B3022]'
+                    ? 'border-govt-navy bg-panel-bg text-govt-navy font-bold'
+                    : 'border-slate-border bg-white hover:bg-panel-bg text-slate-body'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -180,7 +188,7 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
                   />
                   <span>Mark Resolved</span>
                 </div>
-                <span className="text-[10px] text-[#588157] font-normal ml-5">
+                <span className="text-[10px] text-slate-muted font-normal ml-5">
                   Satisfactory justification submitted and vetted
                 </span>
               </label>
@@ -188,7 +196,7 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-bold text-[#1B3022] mb-1">
+            <label className="block font-bold text-slate-body mb-1">
               Administrative Findings & Action Taken Notes *
             </label>
             <textarea
@@ -197,22 +205,22 @@ export const AlertActionModal: React.FC<AlertActionModalProps> = ({
               value={reviewNotes}
               onChange={e => setReviewNotes(e.target.value)}
               placeholder="Detail reasons for decision, inspection officer appointed, or rectification received..."
-              className="w-full px-3 py-2 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:border-[#395C40] focus:outline-hidden"
+              className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
             />
           </div>
 
-          <div className="pt-4 border-t border-[#DDE5D4] flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-border flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-[#DDE5D4] text-[#1B3022] bg-white hover:bg-[#F8F9F7] font-bold cursor-pointer transition-colors"
+              className="px-4 py-2 rounded-lg border border-slate-border text-slate-body bg-white hover:bg-panel-bg font-bold cursor-pointer transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 rounded-lg bg-[#395C40] text-white font-bold hover:bg-[#2C4A34] disabled:opacity-50 flex items-center gap-2 shadow-xs cursor-pointer transition-colors"
+              className="px-5 py-2 rounded-lg bg-govt-navy text-white font-bold hover:bg-govt-navy-light disabled:opacity-50 flex items-center gap-2 shadow-xs cursor-pointer transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{submitting ? 'Saving Decision...' : 'Record Administrative Decision'}</span>

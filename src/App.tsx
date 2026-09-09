@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
-import { Project, RiskAlert, DashboardSummary, CitizenFeedback } from './types/index.js';
-import { api } from './services/api.js';
+import { Project, RiskAlert } from './types/index.js';
+import { useDataService } from './services/dataService.js';
 
 // Layout Components
 import { Navbar } from './components/Navbar.js';
-import { Sidebar } from './components/Sidebar.js';
+import { Sidebar, TAB_ALLOWED_ROLES } from './components/Sidebar.js';
+import { OfficerRestrictedGate } from './components/OfficerRestrictedGate.js';
 import { GISMap } from './components/GISMap.js';
 import { ProjectModal } from './components/ProjectModal.js';
 import { RecommendModal } from './components/RecommendModal.js';
@@ -24,33 +25,72 @@ import { AgencyWorkdeskPage } from './pages/AgencyWorkdeskPage.js';
 import { VendorAnalyticsPage } from './pages/VendorAnalyticsPage.js';
 import { CitizenFeedbackPage } from './pages/CitizenFeedbackPage.js';
 import { ReportsPage } from './pages/ReportsPage.js';
+import { VerificationStatusPage } from './pages/VerificationStatusPage.js';
 import { AuditLogPage } from './pages/AuditLogPage.js';
-import { SatelliteVerificationPage } from './pages/SatelliteVerificationPage.js';
 import { ContractorNetworkFraudPage } from './pages/ContractorNetworkFraudPage.js';
 import { DataIngestionImpactPage } from './pages/DataIngestionImpactPage.js';
 import { CitizenChatbotDrawer } from './components/CitizenChatbotDrawer.js';
 
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowLeft } from 'lucide-react';
+
+type AppViewMode = 'home' | 'workspace' | 'login';
 
 const MainAppContent: React.FC = () => {
   const { user, currentUser, isPublicMode, enterPublicMode, exitPublicMode, logout, loading: authLoading } = useAuth();
   const effectiveUser = user || currentUser;
 
-  // View state before login: 'landing' (Home page & dashboard) or 'login' (Official login)
-  const [unauthenticatedView, setUnauthenticatedView] = useState<'landing' | 'login'>('landing');
+  // Top-level View Routing:
+  // - 'home': Official MoSPI MPLADS Portal Home & Public Dashboard (LandingPage)
+  // - 'workspace': Interactive Operational Workspace (Dashboard, GIS map, AI anomalies, etc.)
+  // - 'login': Officer authentication screen
+  const [viewMode, setViewMode] = useState<AppViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mplads_current_view');
+      if (saved === 'workspace' || saved === 'login') {
+        return saved as AppViewMode;
+      }
+    }
+    return 'home';
+  });
   const [loginPresetRole, setLoginPresetRole] = useState<'MP' | 'ADMIN' | 'AGENCY' | undefined>(undefined);
+
+  const navigateToHome = () => {
+    setViewMode('home');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mplads_current_view', 'home');
+    }
+  };
+
+  const navigateToWorkspace = () => {
+    setViewMode('workspace');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mplads_current_view', 'workspace');
+    }
+  };
+
+  const navigateToLogin = (role?: 'MP' | 'ADMIN' | 'AGENCY') => {
+    setLoginPresetRole(role);
+    setViewMode('login');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mplads_current_view', 'login');
+    }
+  };
 
   // Navigation State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-  // Core Data State
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [alerts, setAlerts] = useState<RiskAlert[]>([]);
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [feedbackList, setFeedbackList] = useState<CitizenFeedback[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
+  // Dedicated Service Layer: replaces local in-memory arrays with asynchronous backend calls
+  // Guarantees persistence of projects, alerts, summary metrics, and feedback across restarts
+  const {
+    projects,
+    alerts,
+    summary,
+    feedbackList,
+    loading,
+    refreshing,
+    refreshData: fetchData
+  } = useDataService();
 
   // Active Modals State
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -65,125 +105,80 @@ const MainAppContent: React.FC = () => {
 
   const effectiveRole = isPublicMode ? 'PUBLIC' : effectiveUser?.role || 'PUBLIC';
 
-  // Load All Primary Data
-  const fetchData = useCallback(async () => {
-    try {
-      setRefreshing(true);
-      const [projectsRes, alertsRes, summaryRes, feedbackRes] = await Promise.all([
-        api.getProjects(),
-        api.getAlerts().catch(() => ({ alerts: [] })),
-        api.getDashboardSummary().catch(() => null),
-        api.getCitizenFeedback().catch(() => ({ feedback: [] }))
-      ]);
-
-      setProjects(projectsRes.projects || []);
-      setAlerts(alertsRes.alerts || []);
-      setSummary(summaryRes || null);
-      setFeedbackList(feedbackRes.feedback || []);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
   // While restoring session from localStorage, show gentle loader
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9F7] flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-3 p-6 bg-white rounded-2xl border border-[#DDE5D4] shadow-xs">
-          <RefreshCw className="w-6 h-6 text-[#395C40] animate-spin" />
-          <span className="text-xs font-semibold text-[#588157]">Verifying authorized session...</span>
+      <div className="min-h-screen bg-panel-bg flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3 p-6 bg-white rounded-2xl border border-slate-border shadow-xs">
+          <RefreshCw className="w-6 h-6 text-govt-navy animate-spin" />
+          <span className="text-xs font-semibold text-slate-muted">Verifying authorized session...</span>
         </div>
       </div>
     );
   }
 
-  // If user is not logged in and not in public transparency mode, show Home Page & Dashboard or Login Page
-  if (!effectiveUser && !isPublicMode) {
-    if (unauthenticatedView === 'login') {
-      return (
-        <LoginPage
-          onBackToHome={() => setUnauthenticatedView('landing')}
-          onEnterPublic={enterPublicMode}
-          initialRole={loginPresetRole}
-        />
-      );
-    }
+  // 1. Officer Login View
+  if (viewMode === 'login') {
+    return (
+      <LoginPage
+        onBackToHome={navigateToHome}
+        onEnterPublic={() => {
+          enterPublicMode();
+          navigateToWorkspace();
+        }}
+        onLoginSuccess={navigateToWorkspace}
+        initialRole={loginPresetRole}
+      />
+    );
+  }
 
+  // 2. Official Portal Home View (LandingPage)
+  if (viewMode === 'home') {
     return (
       <>
         <LandingPage
           summary={summary}
           projects={projects}
-          onOpenLogin={(role) => {
-            setLoginPresetRole(role);
-            setUnauthenticatedView('login');
+          currentUser={effectiveUser}
+          userRole={effectiveRole}
+          onOpenLogin={navigateToLogin}
+          onEnterPublic={() => {
+            enterPublicMode();
+            navigateToWorkspace();
           }}
-          onEnterPublic={enterPublicMode}
-          onSelectProject={(p) => setSelectedProject(p)}
+          onReturnToWorkspace={navigateToWorkspace}
+          onLogout={() => {
+            logout();
+            navigateToHome();
+          }}
+          onSelectProject={(p) => handleSelectProject(p)}
         />
 
         {/* Modal for Project details preview from Landing Page */}
         <ProjectModal
           project={selectedProject}
+          initialTab={selectedProjectInitialTab}
           onClose={() => setSelectedProject(null)}
-          userRole="PUBLIC"
+          userRole={effectiveRole}
+          onRefresh={fetchData}
         />
+
+        {/* Citizen AI Assistant accessible from Portal Home */}
+        <CitizenChatbotDrawer />
       </>
     );
   }
 
-  const criticalAlertsCount = alerts.filter(
-    a => (a.status === 'New' || a.status === 'Under Review') && (a.riskLevel === 'HIGH' || a.riskLevel === 'CRITICAL')
-  ).length;
-
   return (
-    <div className="min-h-screen bg-[#F8F9F7] flex flex-col font-sans antialiased text-[#1B3022]">
+    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans antialiased text-slate-body overflow-x-hidden w-full max-w-full">
       {/* Top Navigation Masthead */}
       <Navbar
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onOpenRecommend={() => setIsRecommendOpen(true)}
-        criticalAlertsCount={criticalAlertsCount}
-        onNavigateToHome={() => {
-          if (isPublicMode) {
-            exitPublicMode();
-          }
-          setUnauthenticatedView('landing');
-        }}
-        onOpenLogin={() => {
-          if (isPublicMode) {
-            exitPublicMode();
-          }
-          setUnauthenticatedView('login');
-        }}
+        onNavigateToAlerts={() => setCurrentTab('alerts')}
+        onNavigateToProjects={() => setCurrentTab('projects')}
+        onNavigateToHome={navigateToHome}
+        onOpenLogin={() => navigateToLogin()}
       />
-
-      {/* Ticker / Priority Alert Banner (when critical issues exist) */}
-      {criticalAlertsCount > 0 && effectiveRole !== 'PUBLIC' && (
-        <div className="bg-[#B85338] text-white px-4 py-2 text-xs flex items-center justify-between border-b border-[#A62B17] shadow-xs">
-          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-            <AlertTriangle className="w-4 h-4 text-[#F5C2B4] shrink-0" />
-            <span className="font-bold text-[#F5C2B4] uppercase tracking-wider text-[10px]">
-              Vigilance Alert:
-            </span>
-            <span className="truncate text-xs">
-              {criticalAlertsCount} High/Critical integrity risk anomalies require review under MoSPI rules.
-            </span>
-            <button
-              onClick={() => setCurrentTab('anomalies')}
-              className="ml-auto underline font-semibold text-white text-xs whitespace-nowrap hover:text-[#F5C2B4] cursor-pointer"
-            >
-              Review Flagged Items →
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Main Workspace Layout with Sidebar and Content View */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto p-3 sm:p-4 md:p-6 gap-6">
@@ -195,22 +190,18 @@ const MainAppContent: React.FC = () => {
             setSidebarOpen(false);
           }}
           pendingAlertsCount={alerts.filter(a => a.status === 'New').length}
+          unreadFeedbackCount={feedbackList.filter(f => f.status === 'New' || f.status === 'Under Review').length}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          onNavigateToHome={() => {
-            if (isPublicMode) {
-              exitPublicMode();
-            }
-            setUnauthenticatedView('landing');
-          }}
+          onNavigateToHome={navigateToHome}
         />
 
         {/* Dynamic Main Stage */}
         <main className="flex-1 min-w-0">
           {loading ? (
-            <div className="h-96 flex flex-col items-center justify-center gap-3 bg-white rounded-2xl border border-[#DDE5D4] shadow-xs">
-              <RefreshCw className="w-8 h-8 text-[#395C40] animate-spin" />
-              <div className="text-xs font-semibold text-[#588157]">
+            <div className="h-96 flex flex-col items-center justify-center gap-3 bg-white rounded-2xl border border-slate-border shadow-xs">
+              <RefreshCw className="w-8 h-8 text-govt-navy animate-spin" />
+              <div className="text-xs font-semibold text-slate-muted">
                 Loading official MPLADS dataset & executing AI integrity heuristics...
               </div>
             </div>
@@ -232,11 +223,23 @@ const MainAppContent: React.FC = () => {
 
               {currentTab === 'map' && (
                 <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentTab('dashboard')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>← Back to Overview</span>
+                    </button>
+                    <span className="text-xs text-slate-muted">
+                      Dashboard &gt; Map Surveillance
+                    </span>
+                  </div>
                   <div>
-                    <h1 className="text-xl font-bold text-[#1B3022] tracking-tight">
+                    <h1 className="text-xl font-bold text-slate-body tracking-tight">
                       Geographic Information System (GIS) Surveillance
                     </h1>
-                    <p className="text-xs text-[#588157]">
+                    <p className="text-xs text-slate-muted">
                       Georeferenced project footprints, territorial proximity analysis, and duplicate cluster detection
                     </p>
                   </div>
@@ -254,6 +257,7 @@ const MainAppContent: React.FC = () => {
                   userRole={effectiveRole}
                   onSelectProject={p => handleSelectProject(p)}
                   onNavigateToRecommend={() => setIsRecommendOpen(true)}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -263,6 +267,7 @@ const MainAppContent: React.FC = () => {
                   alerts={alerts}
                   onSelectProject={(p, tab) => handleSelectProject(p, tab)}
                   onOpenAlertAction={a => setActiveAlertForAction(a)}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -272,6 +277,7 @@ const MainAppContent: React.FC = () => {
                   projects={projects}
                   onOpenAlertAction={a => setActiveAlertForAction(a)}
                   onSelectProject={p => handleSelectProject(p)}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -282,6 +288,7 @@ const MainAppContent: React.FC = () => {
                   onOpenRecommend={() => setIsRecommendOpen(true)}
                   onSelectProject={p => setSelectedProject(p)}
                   onRefresh={fetchData}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -289,6 +296,7 @@ const MainAppContent: React.FC = () => {
                 <FundsLedgerPage
                   projects={projects}
                   userRole={effectiveRole}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -298,11 +306,14 @@ const MainAppContent: React.FC = () => {
                   userRole={effectiveRole}
                   onSelectProject={p => setSelectedProject(p)}
                   onRefresh={fetchData}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
               {currentTab === 'vendors' && (
-                <VendorAnalyticsPage />
+                <VendorAnalyticsPage
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
+                />
               )}
 
               {(currentTab === 'grievances' || currentTab === 'feedback') && (
@@ -312,6 +323,7 @@ const MainAppContent: React.FC = () => {
                   userRole={effectiveRole}
                   onRefresh={fetchData}
                   onSelectProject={p => setSelectedProject(p)}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
@@ -320,26 +332,52 @@ const MainAppContent: React.FC = () => {
                   projects={projects}
                   alerts={alerts}
                   userRole={effectiveRole}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
+                />
+              )}
+
+              {currentTab === 'verification' && (
+                <VerificationStatusPage
+                  projects={projects}
+                  onSelectProject={p => setSelectedProject(p)}
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
 
               {(currentTab === 'audit' || currentTab === 'audit-logs') && (
-                <AuditLogPage />
-              )}
-
-              {currentTab === 'satellite' && (
-                <SatelliteVerificationPage
-                  projects={projects}
-                  onSelectProject={p => setSelectedProject(p)}
-                />
+                !TAB_ALLOWED_ROLES['audit-logs'].includes(effectiveRole as any) ? (
+                  <OfficerRestrictedGate
+                    toolName="Immutable Ledger Audit Trail"
+                    toolDescription="Cryptographic hash-chained audit logs and tamper-verification certificates are restricted to certified District Authority auditors."
+                    onLogin={() => navigateToLogin('ADMIN')}
+                    onReturnToPublic={() => setCurrentTab('dashboard')}
+                  />
+                ) : (
+                  <AuditLogPage
+                    onBackToDashboard={() => setCurrentTab('dashboard')}
+                  />
+                )
               )}
 
               {currentTab === 'network-fraud' && (
-                <ContractorNetworkFraudPage />
+                !TAB_ALLOWED_ROLES['network-fraud'].includes(effectiveRole as any) ? (
+                  <OfficerRestrictedGate
+                    toolName="Contractor Link Graph & Network Fraud Detection"
+                    toolDescription="Forensic vendor relationship graphs, common director detection, and bid collusion algorithms are restricted to District Vigilance Administrators."
+                    onLogin={() => navigateToLogin('ADMIN')}
+                    onReturnToPublic={() => setCurrentTab('dashboard')}
+                  />
+                ) : (
+                  <ContractorNetworkFraudPage
+                    onBackToDashboard={() => setCurrentTab('dashboard')}
+                  />
+                )
               )}
 
               {currentTab === 'data-ingestion' && (
-                <DataIngestionImpactPage />
+                <DataIngestionImpactPage
+                  onBackToDashboard={() => setCurrentTab('dashboard')}
+                />
               )}
             </>
           )}
@@ -354,6 +392,7 @@ const MainAppContent: React.FC = () => {
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}
+        onRefresh={fetchData}
         userRole={effectiveRole}
         initialTab={selectedProjectInitialTab}
       />
@@ -379,18 +418,18 @@ const MainAppContent: React.FC = () => {
         }}
       />
 
-      {/* Official Government Footer in Natural Tones */}
-      <footer className="bg-white border-t border-[#DDE5D4] mt-auto py-4 px-6 text-xs text-[#588157]">
+      {/* Official Government Footer */}
+      <footer className="bg-white border-t border-slate-border mt-auto py-4 px-6 text-xs text-slate-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#1B3022]">MPLADS AI Integrity Portal</span>
+            <span className="font-bold text-slate-body">MPLADS AI Integrity Portal</span>
             <span>•</span>
             <span>National Informatics Centre (NIC)</span>
             <span>•</span>
             <span>MoSPI, New Delhi</span>
           </div>
-          <div className="text-[11px] text-[#588157]/80">
-            Natural Tones Theme • Compliant with MoSPI 2023 Guidelines & SIH Standards
+          <div className="text-[11px] text-slate-muted">
+            Official Government Institutional Design • Compliant with MoSPI 2023 Guidelines & SIH Standards
           </div>
         </div>
       </footer>

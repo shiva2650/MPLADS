@@ -13,17 +13,41 @@ interface AuthContextType {
   loading: boolean;
   login: (userId: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
-  switchDemoRole: (targetRole: 'MP' | 'ADMIN' | 'AGENCY' | 'PUBLIC') => Promise<void>;
+  validateSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(authStorage.getUser());
+  // Never grant role elevation purely based on unvalidated client storage
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isPublicMode, setIsPublicMode] = useState<boolean>(() => {
     return localStorage.getItem('mplads_public_mode') === 'true';
   });
+
+  const validateSession = async (): Promise<boolean> => {
+    const token = authStorage.getToken();
+    if (!token) {
+      setUser(null);
+      return false;
+    }
+    try {
+      const res = await AuthService.getMe();
+      if (res && res.user) {
+        setUser(res.user);
+        authStorage.setUser(res.user);
+        return true;
+      }
+      setUser(null);
+      authStorage.removeToken();
+      return false;
+    } catch {
+      setUser(null);
+      authStorage.removeToken();
+      return false;
+    }
+  };
 
   useEffect(() => {
     const initAuth = async () => {
@@ -31,19 +55,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const res = await AuthService.getMe();
-          setUser(res.user);
-          authStorage.setUser(res.user);
-          setIsPublicMode(false);
-          localStorage.removeItem('mplads_public_mode');
+          if (res && res.user && res.user.role) {
+            setUser(res.user);
+            authStorage.setUser(res.user);
+            setIsPublicMode(false);
+            localStorage.removeItem('mplads_public_mode');
+          } else {
+            authStorage.removeToken();
+            setUser(null);
+          }
         } catch {
           authStorage.removeToken();
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
 
     initAuth();
+
+    // Listen for server-side unauthorized/forbidden signals during any sensitive request
+    const handleUnauthorized = () => {
+      console.warn('[AuthContext] Unauthorized role elevation or expired session rejected by server. Revoking access.');
+      authStorage.removeToken();
+      setUser(null);
+      setIsPublicMode(true);
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
   }, []);
 
   const enterPublicMode = () => {
@@ -78,24 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const switchDemoRole = async (targetRole: 'MP' | 'ADMIN' | 'AGENCY' | 'PUBLIC') => {
-    if (targetRole === 'PUBLIC') {
-      enterPublicMode();
-      return;
-    }
-
-    const demoCreds: Record<'MP' | 'ADMIN' | 'AGENCY', { id: string; pass: string }> = {
-      MP: { id: 'MP001', pass: 'MP@123' },
-      ADMIN: { id: 'ADMIN001', pass: 'Admin@123' },
-      AGENCY: { id: 'AGENCY001', pass: 'Agency@123' }
-    };
-
-    const creds = demoCreds[targetRole];
-    if (creds) {
-      await login(creds.id, creds.pass);
-    }
-  };
-
   const role: UserRole | 'PUBLIC' = isPublicMode ? 'PUBLIC' : user ? user.role : 'PUBLIC';
   const isAuthenticated = !!user;
 
@@ -112,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         login,
         logout,
-        switchDemoRole
+        validateSession
       }}
     >
       {children}

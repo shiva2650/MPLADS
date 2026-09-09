@@ -6,12 +6,8 @@ import {
   User,
   Eye,
   EyeOff,
-  Building2,
-  Landmark,
-  UserCheck,
   ArrowRight,
   ArrowLeft,
-  Info,
   AlertTriangle,
   WifiOff
 } from 'lucide-react';
@@ -19,6 +15,7 @@ import {
 interface LoginPageProps {
   onEnterPublic: () => void;
   onBackToHome?: () => void;
+  onLoginSuccess?: () => void;
   initialRole?: 'MP' | 'ADMIN' | 'AGENCY';
 }
 
@@ -43,8 +40,8 @@ const parseAuthError = (err: any): AuthError => {
     return {
       type: 'invalid_credentials',
       title: 'Invalid credentials',
-      message: 'The User ID or password you entered does not match our authorized records.',
-      suggestion: 'Please verify your credentials or use the 1-Click Demo Login options below.'
+      message: 'The User ID or password you entered does not match authorized records.',
+      suggestion: 'Please verify your departmental User ID and password.'
     };
   }
 
@@ -70,22 +67,15 @@ const parseAuthError = (err: any): AuthError => {
     type: 'unknown',
     title: 'Authentication Failed',
     message: rawMsg || 'An unexpected error occurred during the authentication attempt.',
-    suggestion: 'Please try again or select a demonstration profile below.'
+    suggestion: 'Please verify your credentials and try again.'
   };
 };
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, initialRole }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, onLoginSuccess }) => {
   const { login } = useAuth();
 
-  const getInitialCreds = (r?: 'MP' | 'ADMIN' | 'AGENCY') => {
-    if (r === 'MP') return { id: 'MP001', pass: 'MP@123' };
-    if (r === 'AGENCY') return { id: 'AGENCY001', pass: 'Agency@123' };
-    return { id: 'ADMIN001', pass: 'Admin@123' };
-  };
-
-  const initial = getInitialCreds(initialRole);
-  const [userId, setUserId] = useState(initial.id);
-  const [password, setPassword] = useState(initial.pass);
+  const [userId, setUserId] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<AuthError | null>(null);
@@ -98,61 +88,41 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
     try {
       await login(userId, password);
+      onLoginSuccess?.();
     } catch (err: any) {
       setError(parseAuthError(err));
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickLogin = async (id: string, pass: string) => {
-    setUserId(id);
-    setPassword(pass);
-    setError(null);
-    setLoading(true);
-
-    try {
-      await login(id, pass);
-    } catch (err: any) {
-      setError(parseAuthError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setPreset = (id: string, pass: string) => {
-    setUserId(id);
-    setPassword(pass);
-    setError(null);
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9F7] flex flex-col justify-between font-sans">
+    <div className="min-h-screen bg-panel-bg flex flex-col justify-between font-sans">
       {/* Top National Strip */}
       <div className="h-1.5 w-full bg-linear-to-r from-[#FF9933] via-white to-[#138808]" />
 
       {/* Header bar */}
-      <header className="bg-white border-b border-[#DDE5D4] py-3 px-6">
+      <header className="bg-white border-b border-slate-border py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             {onBackToHome && (
               <button
                 onClick={onBackToHome}
-                className="p-1.5 rounded-lg bg-[#EAF0E6] hover:bg-[#DDE5D4] text-[#1B3022] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mr-1"
+                className="p-1.5 rounded-lg bg-panel-bg hover:bg-slate-border text-slate-body text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mr-1"
                 title="Return to Scheme Home & Public Dashboard"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Back to Home</span>
               </button>
             )}
-            <div className="w-10 h-10 rounded-full bg-[#1B3022] text-[#A3B18A] flex items-center justify-center font-serif text-sm font-bold border-2 border-[#395C40]">
+            <div className="w-10 h-10 rounded-full bg-govt-navy text-white flex items-center justify-center font-serif text-sm font-bold border-2 border-govt-saffron/50">
               GOI
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[#588157] font-semibold">
+              <div className="text-[10px] uppercase tracking-wider text-slate-muted font-semibold">
                 भारत सरकार | Government of India
               </div>
-              <div className="text-sm sm:text-base font-bold text-[#1B3022]">
+              <div className="text-sm sm:text-base font-bold text-slate-body">
                 Ministry of Statistics and Programme Implementation (MoSPI)
               </div>
             </div>
@@ -162,14 +132,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
             {onBackToHome && (
               <button
                 onClick={onBackToHome}
-                className="text-xs font-semibold text-[#588157] hover:text-[#1B3022] sm:hidden cursor-pointer"
+                className="text-xs font-semibold text-slate-muted hover:text-slate-body sm:hidden cursor-pointer"
               >
                 Home
               </button>
             )}
             <button
               onClick={onEnterPublic}
-              className="text-xs font-bold text-[#395C40] hover:text-[#1B3022] underline flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-xs font-bold text-govt-navy hover:text-govt-navy-light underline flex items-center gap-1 cursor-pointer transition-colors"
             >
               <span>Skip to Citizen Public Transparency Portal</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -180,25 +150,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
       {/* Main Login Card Container */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-6">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#DDE5D4] overflow-hidden">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-border overflow-hidden">
           {/* Card Header */}
-          <div className="p-6 bg-[#1B3022] text-white text-center">
+          <div className="p-6 bg-govt-navy text-white text-center">
             {onBackToHome && (
               <div className="flex justify-start mb-3">
                 <button
                   onClick={onBackToHome}
-                  className="text-[11px] font-medium text-[#A3B18A] hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                  className="text-[11px] font-medium text-panel-bg/80 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <ArrowLeft className="w-3 h-3" />
                   <span>Return to Scheme Home</span>
                 </button>
               </div>
             )}
-            <div className="inline-flex p-2.5 rounded-xl bg-[#395C40]/50 text-[#DDE5D4] mb-2 border border-[#395C40]">
+            <div className="inline-flex p-2.5 rounded-xl bg-white/10 text-white mb-2 border border-white/20">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">MPLADS AI Integrity & Monitoring</h1>
-            <p className="text-xs text-[#A3B18A] mt-1">
+            <p className="text-xs text-panel-bg/80 mt-1">
               Secure Role-Based Access Control & Anomaly Detection Portal
             </p>
           </div>
@@ -240,11 +210,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
             )}
 
             <div>
-              <label className="block font-bold text-[#1B3022] mb-1">
+              <label className="block font-bold text-slate-body mb-1">
                 Official User ID / Employee Code
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#A3B18A]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <User className="w-4 h-4" />
                 </div>
                 <input
@@ -256,24 +226,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                     if (error) setError(null);
                   }}
                   placeholder="e.g. MP001, ADMIN001, AGENCY001"
-                  className="w-full pl-9 pr-3 py-2.5 border border-[#DDE5D4] rounded-lg text-[#1B3022] uppercase font-mono font-bold bg-white focus:ring-2 focus:ring-[#395C40] focus:border-[#395C40] focus:outline-hidden"
+                  className="w-full pl-9 pr-3 py-2.5 border border-slate-border rounded-lg text-slate-body uppercase font-mono font-bold bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-[#1B3022]">Security Password</label>
+                <label className="font-bold text-slate-body">Security Password</label>
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(true)}
-                  className="text-[11px] text-[#395C40] hover:underline font-semibold cursor-pointer"
+                  className="text-[11px] text-govt-navy hover:underline font-semibold cursor-pointer"
                 >
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#A3B18A]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -285,12 +255,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                     if (error) setError(null);
                   }}
                   placeholder="Enter authorized password"
-                  className="w-full pl-9 pr-10 py-2.5 border border-[#DDE5D4] rounded-lg text-[#1B3022] bg-white focus:ring-2 focus:ring-[#395C40] focus:border-[#395C40] focus:outline-hidden"
+                  className="w-full pl-9 pr-10 py-2.5 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#A3B18A] hover:text-[#1B3022] cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-body cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -301,65 +271,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[#395C40] text-white font-bold rounded-lg hover:bg-[#2C4A34] disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
+              className="w-full py-2.5 bg-govt-navy text-white font-bold rounded-lg hover:bg-govt-navy-light disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
             >
               {loading ? 'Authenticating...' : 'Sign In to Secure Portal'}
             </button>
 
-            {/* Quick Demo Credentials Switcher for Evaluators */}
-            <div className="pt-4 border-t border-[#DDE5D4]">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#588157] text-center mb-1">
-                1-Click Demonstration Login
+            {/* Department Officer Credential Notice */}
+            <div className="pt-4 border-t border-slate-border text-slate-muted">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-body mb-1">
+                Authorized Department Portals
               </div>
-              <p className="text-[10px] text-[#588157] text-center mb-2.5">
-                Click any role below to instantly log in as that stakeholder
+              <p className="text-[11px] text-slate-muted leading-relaxed">
+                Registered officers from District Collectorates, Parliamentary Secretariats, and Implementing Authorities may log in using their assigned Government of India service IDs.
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleQuickLogin('MP001', 'MP@123')}
-                  className="p-2.5 border border-[#DDE5D4] rounded-xl hover:bg-[#FAF3E0] hover:border-[#E8DAB2] text-left transition-all bg-[#F8F9F7] cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
-                  title="Click to sign in instantly as Member of Parliament"
-                >
-                  <div className="flex items-center gap-1 font-bold text-[#935D26]">
-                    <Landmark className="w-3.5 h-3.5" />
-                    <span>MP</span>
-                  </div>
-                  <div className="text-[10px] text-[#588157] font-mono">MP001</div>
-                  <div className="text-[9px] text-[#935D26] font-semibold mt-1">1-Click Login →</div>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleQuickLogin('ADMIN001', 'Admin@123')}
-                  className="p-2.5 border border-[#C8D5B9] rounded-xl hover:bg-[#EAF0E6] hover:border-[#395C40] text-left transition-all bg-[#EAF0E6]/50 cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
-                  title="Click to sign in instantly as District Magistrate & Collector"
-                >
-                  <div className="flex items-center gap-1 font-bold text-[#1B3022]">
-                    <Building2 className="w-3.5 h-3.5 text-[#395C40]" />
-                    <span>Collector</span>
-                  </div>
-                  <div className="text-[10px] text-[#588157] font-mono">ADMIN001</div>
-                  <div className="text-[9px] text-[#395C40] font-bold mt-1">1-Click Login →</div>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleQuickLogin('AGENCY001', 'Agency@123')}
-                  className="p-2.5 border border-[#DDE5D4] rounded-xl hover:bg-[#EAF0E6] hover:border-[#395C40] text-left transition-all bg-[#F8F9F7] cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
-                  title="Click to sign in instantly as Implementing Agency"
-                >
-                  <div className="flex items-center gap-1 font-bold text-[#1B3022]">
-                    <UserCheck className="w-3.5 h-3.5 text-[#588157]" />
-                    <span>Agency</span>
-                  </div>
-                  <div className="text-[10px] text-[#588157] font-mono">AGENCY001</div>
-                  <div className="text-[9px] text-[#395C40] font-semibold mt-1">1-Click Login →</div>
-                </button>
-              </div>
             </div>
 
             {/* Citizen Open Access */}
@@ -367,7 +291,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
               <button
                 type="button"
                 onClick={onEnterPublic}
-                className="w-full py-2 bg-[#F8F9F7] hover:bg-[#EAF0E6] text-[#1B3022] font-bold rounded-lg border border-[#DDE5D4] transition-colors cursor-pointer"
+                className="w-full py-2 bg-panel-bg hover:bg-slate-border text-slate-body font-bold rounded-lg border border-slate-border transition-colors cursor-pointer"
               >
                 Access as Public Citizen (Transparency View)
               </button>
@@ -378,18 +302,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1B3022]/60 backdrop-blur-xs">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-[#DDE5D4] space-y-3 text-xs">
-            <h3 className="text-sm font-bold text-[#1B3022]">Official Password Reset Protocol</h3>
-            <p className="text-[#588157] leading-relaxed">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-border space-y-3 text-xs">
+            <h3 className="text-sm font-bold text-slate-body">Official Password Reset Protocol</h3>
+            <p className="text-slate-muted leading-relaxed">
               Under National Informatics Centre (NIC) security directives, MPLADS officer credentials can only be reset through your registered District Magistrate Administrative Office or Nodal Parliamentary Officer.
             </p>
-            <div className="p-2.5 bg-[#EAF0E6] text-[#395C40] rounded-xl font-mono text-[11px] border border-[#C8D5B9]">
-              Demo Mode: You can login using any of the quick-login buttons (MP001 / MP@123, ADMIN001 / Admin@123, AGENCY001 / Agency@123).
+            <div className="p-2.5 bg-slate-50 text-slate-body rounded-xl font-mono text-[11px] border border-slate-border">
+              Contact your Nodal System Administrator or NIC State Centre Helpdesk for credential recovery.
             </div>
             <button
               onClick={() => setShowForgotModal(false)}
-              className="w-full py-2 bg-[#395C40] text-white rounded-lg font-bold hover:bg-[#2C4A34] transition-colors cursor-pointer"
+              className="w-full py-2 bg-govt-navy text-white rounded-lg font-bold hover:bg-govt-navy-light transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -398,9 +322,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
       )}
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#DDE5D4] py-3 text-center text-xs text-[#588157]">
+      <footer className="bg-white border-t border-slate-border py-3 text-center text-xs text-slate-muted">
         <div>National Informatics Centre (NIC) &copy; {new Date().getFullYear()} Ministry of Statistics & Programme Implementation</div>
-        <div className="text-[10px] text-[#A3B18A] mt-0.5">Designed for Smart India Hackathon (SIH) Evaluation</div>
+        <div className="text-[10px] text-slate-400 mt-0.5">Government of India • e-SAKSHI MPLADS Verification Engine</div>
       </footer>
     </div>
   );

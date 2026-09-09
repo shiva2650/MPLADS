@@ -80,11 +80,11 @@ export const GISMap: React.FC<GISMapProps> = ({
       bounds.extend([lat, lon]);
 
       // Determine marker color based on status and risk
-      let markerColor = '#588157'; // Sage/Mid Green (Ongoing)
-      if (project.status === 'Completed') markerColor = '#395C40'; // Deep Green
-      else if (project.status === 'Delayed' || project.riskAnalysis.riskLevel === 'CRITICAL') markerColor = '#E07A5F'; // Terracotta
-      else if (project.riskAnalysis.overallScore > 60) markerColor = '#D4A373'; // Amber/Warm Sand
-      else if (project.status === 'Recommended') markerColor = '#A3B18A'; // Soft Green Accent
+      let markerColor = '#0F5C3C'; // Primary Green (Ongoing)
+      if (project.status === 'Completed') markerColor = '#1E7B34'; // Status-verified
+      else if (project.status === 'Delayed' || project.riskAnalysis.riskLevel === 'CRITICAL') markerColor = '#B91C1C'; // Red (Delayed/Critical)
+      else if (project.riskAnalysis.overallScore > 60) markerColor = '#B45309'; // Amber (High Risk)
+      else if (project.status === 'Recommended') markerColor = '#5A6472'; // Slate (Recommended)
 
       // Create Custom SVG Pin
       const customIcon = L.divIcon({
@@ -123,21 +123,21 @@ export const GISMap: React.FC<GISMapProps> = ({
       const popupContent = document.createElement('div');
       popupContent.className = 'p-1 font-sans text-xs';
       popupContent.innerHTML = `
-        <div style="font-family: monospace; font-size: 10px; color: #588157; font-weight: 600;">${project.projectCode}</div>
-        <div style="font-weight: 700; font-size: 13px; color: #1B3022; margin-top: 2px; line-height: 1.2;">${project.title}</div>
-        <div style="margin-top: 4px; color: #588157; font-size: 11px;">
+        <div style="font-family: monospace; font-size: 10px; color: #5A6472; font-weight: 600;">${project.projectCode}</div>
+        <div style="font-weight: 700; font-size: 13px; color: #1F2933; margin-top: 2px; line-height: 1.2;">${project.title}</div>
+        <div style="margin-top: 4px; color: #5A6472; font-size: 11px;">
           <strong>District:</strong> ${project.district} | <strong>Category:</strong> ${project.category}
         </div>
-        <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 11px; color: #1B3022;">
+        <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 11px; color: #1F2933;">
           <div>Cost: <strong>₹${(project.sanctionedAmount / 100000).toFixed(1)}L</strong></div>
           <div>Progress: <strong>${project.completionPercentage}%</strong></div>
-          <div>Risk: <span style="font-weight:bold; color:${project.riskAnalysis.overallScore > 60 ? '#E07A5F' : '#395C40'}">${project.riskAnalysis.riskLevel} (${project.riskAnalysis.overallScore})</span></div>
+          <div>Risk: <span style="font-weight:bold; color:${project.riskAnalysis.overallScore > 60 ? '#DC2626' : '#059669'}">${project.riskAnalysis.riskLevel} (${project.riskAnalysis.overallScore})</span></div>
         </div>
         <button id="view-prj-${project.id}" style="
           margin-top: 8px;
           width: 100%;
           padding: 6px 10px;
-          background-color: #395C40;
+          background-color: #0F5C3C;
           color: #FFFFFF;
           border: none;
           border-radius: 6px;
@@ -167,56 +167,56 @@ export const GISMap: React.FC<GISMapProps> = ({
   const statuses = ['All', 'Ongoing', 'Completed', 'Delayed', 'Sanctioned', 'Recommended'];
 
   return (
-    <div className="relative w-full h-[600px] bg-[#F8F9F7] rounded-2xl border border-[#DDE5D4] overflow-hidden shadow-inner flex flex-col">
+    <div className="relative w-full h-[600px] bg-panel-bg rounded-2xl border border-slate-border overflow-hidden shadow-inner flex flex-col">
       {/* Top Filter Floating Bar */}
-      <div className="absolute top-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-[#DDE5D4] p-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="absolute top-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-xs rounded-xl shadow-md border border-slate-border p-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-bold text-[#1B3022]">Category:</span>
+          <span className="font-bold text-slate-body">Category:</span>
           <select
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
-            className="px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022] font-medium focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+            className="px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body font-medium focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
           >
             {categories.map(c => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
 
-          <span className="font-bold text-[#1B3022] ml-2">Status:</span>
+          <span className="font-bold text-slate-body ml-2">Status:</span>
           <select
             value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value)}
-            className="px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022] font-medium focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+            className="px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body font-medium focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
           >
             {statuses.map(s => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
 
-          <label className="flex items-center gap-1.5 ml-2 cursor-pointer font-bold text-[#E07A5F]">
+          <label className="flex items-center gap-1.5 ml-2 cursor-pointer font-bold text-status-flagged">
             <input
               type="checkbox"
               checked={filterRiskOnly}
               onChange={e => setFilterRiskOnly(e.target.checked)}
-              className="rounded text-[#E07A5F] focus:ring-[#E07A5F]"
+              className="rounded text-status-flagged focus:ring-status-flagged"
             />
             <span>High Risk / Delayed Only</span>
           </label>
         </div>
 
         {/* Legend */}
-        <div className="hidden lg:flex items-center gap-3 text-[11px] text-[#588157]">
+        <div className="hidden lg:flex items-center gap-3 text-[11px] text-slate-muted">
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#395C40] inline-block" /> Completed
+            <span className="w-2.5 h-2.5 rounded-full bg-status-verified inline-block" /> Completed
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#588157] inline-block" /> Ongoing
+            <span className="w-2.5 h-2.5 rounded-full bg-govt-navy inline-block" /> Ongoing
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E07A5F] inline-block" /> Delayed / Anomaly
+            <span className="w-2.5 h-2.5 rounded-full bg-status-flagged inline-block" /> Delayed / Anomaly
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#A3B18A] inline-block" /> Recommended
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-muted inline-block" /> Recommended
           </span>
         </div>
       </div>

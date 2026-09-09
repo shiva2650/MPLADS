@@ -101,6 +101,9 @@ export interface AiRiskAnalysis {
   photoAnomalyScore: number; // 0-100
   locationMismatch: boolean;
   delayProbability: number; // 0-100
+  delayRiskScore?: number; // alias for delayProbability
+  duplicateRiskScore?: number; // alias for duplicateProbability
+  photoReuseScore?: number; // alias for photoAnomalyScore
   reasons: string[];
   recommendations: string[];
   disclaimer: string;
@@ -138,6 +141,7 @@ export interface AiRiskAnalysis {
 export interface Project {
   id: string;
   projectCode: string;
+  workId?: string; // alias for projectCode
   title: string;
   description: string;
   category: string;
@@ -323,3 +327,17 @@ export const CATEGORY_COST_BENCHMARKS: Record<string, { min: number; max: number
   'Public Safety & Security': { min: 3000000, max: 5000000, typical: 4000000, unitDescription: '100+ CCTV camera network and control room integration' },
   'Sports & Recreation': { min: 1200000, max: 2200000, typical: 1700000, unitDescription: 'Open outdoor gym with 12 equipment pedestals & walking track' }
 };
+
+export interface AppNotification {
+  id: string;
+  userId?: string;
+  targetRole?: UserRole | 'ALL';
+  title: string;
+  message: string;
+  type: 'ALERT' | 'FINANCE' | 'INSPECTION' | 'SYSTEM' | 'RECOMMENDATION';
+  read: boolean;
+  readBy?: string[];
+  createdAt: string;
+  link?: string;
+}
+

@@ -1,6 +1,6 @@
 /**
- * Data Ingestion & eSAKSHI Overlay Integration Module
- * Ingests real public MPLADS data from data.gov.in and eSAKSHI exports (mplads.mospi.gov.in)
+ * Data Ingestion & Public Registry Integration Module
+ * Ingests real public MPLADS data from data.gov.in and official ministry exports (mplads.mospi.gov.in)
  * 1. Defensive CSV/JSON Parser: Normalizes inconsistent government datasets
  * 2. Data Quality Audit: Reports GPS coordinate completeness, missing fields, and skip logs
  * 3. Impact Metrics Calculator: Computes total flagged amount (₹ Cr), potential savings, and risk concentration
@@ -57,11 +57,11 @@ export function parseIndianCurrency(val: any): number {
 }
 
 /**
- * Parses raw CSV string from eSAKSHI / data.gov.in into structured Project records
+ * Parses raw CSV string from official portals / data.gov.in into structured Project records
  */
 export function parseExternalMpladsData(
   csvContent: string,
-  sourceLabel: string = 'eSAKSHI Public Export'
+  sourceLabel: string = 'Official Central Portal Export'
 ): { projects: Project[]; qualityReport: DataQualityReport } {
   const lines = csvContent.split(/\r?\n/).filter(line => line.trim().length > 0);
   if (lines.length < 2) {
@@ -158,9 +158,9 @@ export function parseExternalMpladsData(
           photoAnomalyScore: 10,
           locationMismatch: false,
           delayProbability: 20,
-          reasons: ['Baseline verified via eSAKSHI data ingestion overlay.'],
+          reasons: ['Baseline verified via central data ingestion overlay.'],
           recommendations: ['Routine progress milestone tracking.'],
-          disclaimer: 'AI-generated heuristic risk assessment from eSAKSHI data overlay.',
+          disclaimer: 'AI-generated heuristic risk assessment from central data overlay.',
           lastEvaluatedAt: new Date().toISOString()
         },
         timeline: [

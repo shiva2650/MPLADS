@@ -5,6 +5,7 @@
 
 import { runRbacTests } from './rbac.test.js';
 import { runAnomalyTests } from './anomalies.test.js';
+import { runResilienceAndNotificationTests } from './resilience_and_notifications.test.js';
 
 async function main() {
   console.log('================================================================');
@@ -16,6 +17,7 @@ async function main() {
   try {
     await runRbacTests();
     await runAnomalyTests();
+    await runResilienceAndNotificationTests();
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log('================================================================');

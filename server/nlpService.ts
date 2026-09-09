@@ -331,11 +331,11 @@ ${contextSnippet}
     if (lang.code === 'hi') {
       generatedAnswer = `आधिकारिक MPLADS पोर्टल के अनुसार, आपकी खोज से संबंधित ${candidateProjects.length} परियोजनाएं मिली हैं:\n\n` +
         candidateProjects.map(p => `• **${p.title}** (${p.projectCode})\n  सांसद: ${p.mpName} (${p.district})\n  स्वीकृत राशि: ₹${(p.sanctionedAmount / 100000).toFixed(1)} लाख | कार्य प्रगति: ${p.completionPercentage}% (${p.status})\n  जोखिम स्थिति: ${p.riskAnalysis.riskLevel}`).join('\n\n') +
-        `\n\nअधिक जानकारी के लिए कृपया आधिकारिक eSAKSHI पोर्टल देखें।`;
+        `\n\nअधिक जानकारी के लिए कृपया आधिकारिक MoSPI MPLADS पोर्टल देखें।`;
     } else if (lang.code === 'te') {
       generatedAnswer = `అధికారిక MPLADS పోర్టల్ రికార్డుల ప్రకారం మీ విచారణకు సంబంధించిన ${candidateProjects.length} ప్రాజెక్టులు ఇక్కడ ఉన్నాయి:\n\n` +
         candidateProjects.map(p => `• **${p.title}** (${p.projectCode})\n  ఎంపీ: ${p.mpName} (${p.district})\n  మంజూరైన నిధులు: ₹${(p.sanctionedAmount / 100000).toFixed(1)} లక్షలు | పురోగతి: ${p.completionPercentage}% (${p.status})\n  రిస్క్ స్థాయి: ${p.riskAnalysis.riskLevel}`).join('\n\n') +
-        `\n\nమరిన్ని వివరాల కోసం అధికారిక eSAKSHI పోర్టల్‌ను సంప్రదించండి.`;
+        `\n\nమరిన్ని వివరాల కోసం అధికారిక MoSPI పోర్టల్‌ను సంప్రదించండి.`;
     } else {
       generatedAnswer = `Based on official MPLADS records retrieved for your query, here is the verified project status:\n\n` +
         candidateProjects.map(p => `• **${p.title}** (${p.projectCode})\n  MP: ${p.mpName} (${p.constituency}, ${p.district})\n  Sanctioned: ₹${(p.sanctionedAmount / 100000).toFixed(1)} Lakh | Progress: ${p.completionPercentage}% (${p.status})\n  Risk Level: ${p.riskAnalysis.riskLevel} | Agency: ${p.implementingAgencyName}`).join('\n\n') +
@@ -358,7 +358,7 @@ ${contextSnippet}
       riskLevel: p.riskAnalysis.riskLevel
     })),
     isGrounded: true,
-    disclaimer: 'Notice: This summary is generated from official MPLADS open data records. For legal or statutory certification, refer to the authenticated eSAKSHI sanction order.',
+    disclaimer: 'Notice: This summary is generated from official MPLADS open data records. For legal or statutory certification, refer to the authenticated administrative sanction order.',
     responseTimeMs: Date.now() - startTime
   };
 }

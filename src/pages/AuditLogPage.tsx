@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
-import { ShieldCheck, Lock, CheckCircle2, AlertTriangle, RefreshCw, Hash, Cpu } from 'lucide-react';
+import { ShieldCheck, Lock, CheckCircle2, AlertTriangle, RefreshCw, Hash, Cpu, ArrowLeft } from 'lucide-react';
 import { AuditLogEntry } from '../types/index.js';
 
-export const AuditLogPage: React.FC = () => {
+interface AuditLogPageProps {
+  onBackToDashboard?: () => void;
+}
+
+export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard }) => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
@@ -45,8 +49,8 @@ export const AuditLogPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-xs text-[#588157] flex flex-col items-center justify-center space-y-2">
-        <RefreshCw className="w-5 h-5 animate-spin text-[#395C40]" />
+      <div className="p-12 text-center text-xs text-slate-muted flex flex-col items-center justify-center space-y-2">
+        <RefreshCw className="w-5 h-5 animate-spin text-govt-navy" />
         <span>Verifying & loading immutable audit sequence...</span>
       </div>
     );
@@ -54,15 +58,31 @@ export const AuditLogPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Top Persistent Back Button */}
+      {onBackToDashboard && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onBackToDashboard}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>← Back to Overview</span>
+          </button>
+          <span className="text-xs text-slate-muted">
+            Dashboard &gt; Audit Log
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-5 h-5 text-[#395C40]" />
-            <h1 className="text-xl font-bold text-[#1B3022] tracking-tight">
+            <ShieldCheck className="w-5 h-5 text-govt-navy" />
+            <h1 className="text-xl font-bold text-slate-body tracking-tight">
               Tamper-Evident System Audit Trail & Security Logs
             </h1>
           </div>
-          <p className="text-xs text-[#588157] mt-0.5">
+          <p className="text-xs text-slate-muted mt-0.5">
             Cryptographically chained SHA-256 ledger recording all administrative, financial, and AI verification events
           </p>
         </div>
@@ -70,12 +90,12 @@ export const AuditLogPage: React.FC = () => {
         <button
           onClick={handleVerifyIntegrity}
           disabled={verifying}
-          className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#1B3022] text-white hover:bg-[#2C4A34] transition-colors shadow-xs disabled:opacity-50"
+          className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-govt-navy text-white hover:bg-govt-navy-light transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
         >
           {verifying ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
           ) : (
-            <Lock className="w-4 h-4 text-[#A3B899]" />
+            <Lock className="w-4 h-4 text-panel-bg/80" />
           )}
           <span>{verifying ? 'Validating Hashes...' : 'Verify Cryptographic Integrity'}</span>
         </button>
@@ -85,13 +105,13 @@ export const AuditLogPage: React.FC = () => {
         <div
           className={`p-3.5 rounded-xl border flex items-center justify-between text-xs ${
             verificationResult.isValid
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              ? 'bg-emerald-50 border-status-verified/30 text-status-verified'
               : 'bg-red-50 border-red-200 text-red-900'
           }`}
         >
           <div className="flex items-center space-x-2.5">
             {verificationResult.isValid ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-status-verified flex-shrink-0" />
             ) : (
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
             )}
@@ -112,10 +132,10 @@ export const AuditLogPage: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-[#DDE5D4] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F9F7] text-[#1B3022] font-bold uppercase text-[10px] tracking-wider border-b border-[#DDE5D4]">
+            <thead className="bg-panel-bg text-slate-body font-bold uppercase text-[10px] tracking-wider border-b border-slate-border">
               <tr>
                 <th className="p-3">Log ID</th>
                 <th className="p-3">Timestamp</th>
@@ -125,41 +145,41 @@ export const AuditLogPage: React.FC = () => {
                 <th className="p-3">Cryptographic SHA-256 Hash</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DDE5D4]">
+            <tbody className="divide-y divide-slate-border">
               {logs.map(log => (
-                <tr key={log.id} className="hover:bg-[#F8F9F7] transition-colors">
-                  <td className="p-3 font-mono font-bold text-[#588157] whitespace-nowrap">
+                <tr key={log.id} className="hover:bg-panel-bg transition-colors">
+                  <td className="p-3 font-mono font-bold text-slate-muted whitespace-nowrap">
                     {log.id}
                   </td>
-                  <td className="p-3 whitespace-nowrap font-mono text-[#588157] text-[11px]">
+                  <td className="p-3 whitespace-nowrap font-mono text-slate-muted text-[11px]">
                     {new Date(log.timestamp).toLocaleString('en-IN')}
                   </td>
                   <td className="p-3 whitespace-nowrap">
-                    <div className="font-bold text-[#1B3022]">{log.userName}</div>
-                    <div className="text-[10px] text-[#588157] font-mono">
+                    <div className="font-bold text-slate-body">{log.userName}</div>
+                    <div className="text-[10px] text-slate-muted font-mono">
                       {log.userId} ({log.userRole})
                     </div>
                   </td>
                   <td className="p-3 whitespace-nowrap">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#EAF0E6] text-[#395C40] border border-[#C8D5B9]">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-govt-navy border border-emerald-200">
                       {log.action}
                     </span>
                   </td>
-                  <td className="p-3 text-[#1B3022]">
-                    <div className="font-mono text-[11px] text-[#395C40]">
+                  <td className="p-3 text-slate-body">
+                    <div className="font-mono text-[11px] text-govt-navy">
                       {log.targetEntity}: {log.targetId}
                     </div>
                     {log.newValue && (
-                      <div className="text-xs text-gray-700 mt-0.5">{log.newValue}</div>
+                      <div className="text-xs text-slate-700 mt-0.5">{log.newValue}</div>
                     )}
                     {log.previousValue && (
-                      <div className="text-[10px] text-gray-400 mt-0.5">Prev: {log.previousValue}</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Prev: {log.previousValue}</div>
                     )}
                   </td>
                   <td className="p-3 font-mono text-[10px] text-gray-500 max-w-[200px]">
                     {log.entryHash ? (
                       <div>
-                        <span className="font-semibold text-emerald-700">Hash: </span>
+                        <span className="font-semibold text-status-verified">Hash: </span>
                         <span title={log.entryHash} className="cursor-help">
                           {log.entryHash.slice(0, 16)}...
                         </span>

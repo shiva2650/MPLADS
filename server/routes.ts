@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import sharp from 'sharp';
 import { db, users } from './db.js';
-import { generateToken, revokeToken, requireAuth, requireRole, sanitizeUser } from './auth.js';
+import { generateToken, revokeToken, requireAuth, requireRole, sanitizeUser, verifyPassword, requireProjectAccess, requireGrievanceAccess, requireNotificationAccess, requireAuditAccess } from './auth.js';
+import { toPublicProjectDTO, toAuthorizedProjectDTO, toPublicGrievanceDTO, toInternalGrievanceDTO } from './dto.js';
 import {
   evaluateProjectRiskScore,
   evaluateCostAnomaly,
@@ -12,7 +13,6 @@ import {
   generateGeminiAuditReport
 } from './aiService.js';
 import { verifySubmittedEvidence } from './evidenceVerification.js';
-import { verifyProjectSatelliteImagery } from './satelliteVerification.js';
 import { analyzeContractorNetwork } from './networkFraudDetection.js';
 import { analyzeCitizenGrievance, executeRagChatbotQuery } from './nlpService.js';
 import { parseExternalMpladsData, calculateImpactMetrics } from './dataIngestion.js';
@@ -91,11 +91,14 @@ apiRouter.post('/auth/login', (req: Request, res: Response) => {
     normalizedId = 'AGENCY001';
   }
 
-  const user = users.find(u => u.userId.toUpperCase() === normalizedId);
+  const user = db.users.find(u => u.userId.toUpperCase() === normalizedId) || users.find(u => u.userId.toUpperCase() === normalizedId);
 
   const rawPassword = String(password).trim();
-  // Strictly enforce password matching against stored credential
-  const passwordValid = user && user.passwordHash === rawPassword;
+  // Strictly enforce password matching against stored credential (salted PBKDF2 or plaintext fallback)
+  const passwordValid = user && (
+    (user.salt && verifyPassword(rawPassword, user.passwordHash, user.salt)) ||
+    user.passwordHash === rawPassword
+  );
 
   if (!user || !passwordValid) {
     return res.status(401).json({
@@ -255,12 +258,35 @@ apiRouter.get('/projects/:id', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid project ID format.' });
   }
 
-  const project = db.getProjectByIdForUser(rawId, req.user || null);
-  if (!project) {
-    return res.status(404).json({ error: 'Project not found or access restricted for your role.' });
+  const rawProject = db.getProjectById(rawId);
+  if (!rawProject) {
+    return res.status(404).json({ error: 'Project not found.' });
   }
 
-  // Also include duplicate candidates if user is authorized (Admin or MP)
+  // If public or unauthenticated, return sanitized public DTO
+  if (!req.user || req.user.role === 'PUBLIC') {
+    const publicProject = toPublicProjectDTO(rawProject);
+    return res.json({ project: publicProject, duplicateCandidates: [] });
+  }
+
+  // Role jurisdiction check (ABAC)
+  if (req.user.role === 'MP') {
+    const isOwner = rawProject.mpId === req.user.userId;
+    const isSameConstituency = req.user.constituency && rawProject.constituency.toLowerCase() === req.user.constituency.toLowerCase();
+    if (!isOwner && !isSameConstituency) {
+      return res.status(403).json({ error: 'Access denied: Project does not belong to your parliamentary constituency.' });
+    }
+  } else if (req.user.role === 'AGENCY') {
+    if (rawProject.implementingAgencyId !== req.user.agencyId) {
+      return res.status(403).json({ error: 'Access denied: Project is not assigned to your implementing agency.' });
+    }
+  } else if (req.user.role === 'ADMIN') {
+    if (req.user.district && rawProject.district.toLowerCase() !== req.user.district.toLowerCase()) {
+      return res.status(403).json({ error: 'Access denied: Project is outside your district administrative jurisdiction.' });
+    }
+  }
+
+  const project = toAuthorizedProjectDTO(rawProject, req.user);
   let duplicateCandidates = [];
   if (req.user && (req.user.role === 'ADMIN' || req.user.role === 'MP')) {
     duplicateCandidates = findDuplicateCandidates(project, db.projects);
@@ -679,6 +705,11 @@ apiRouter.post('/projects/:id/payments', requireRole(['AGENCY', 'ADMIN']), (req:
   const project = db.projects.find(p => p.id === req.params.id);
   if (!project) return res.status(404).json({ error: 'Project not found.' });
 
+  // Verify agency authorization: Agencies cannot request payments for projects not assigned to them
+  if (req.user!.role === 'AGENCY' && project.implementingAgencyId !== req.user!.agencyId) {
+    return res.status(403).json({ error: 'Access denied: You can only request payment vouchers for projects assigned to your agency.' });
+  }
+
   const { amount, sanctionOrderNo, remarks, action, status } = req.body;
   const numAmount = Number(amount);
 
@@ -694,6 +725,13 @@ apiRouter.post('/projects/:id/payments', requireRole(['AGENCY', 'ADMIN']), (req:
   }
 
   const isDisbursal = req.user!.role === 'ADMIN' && action !== 'REQUEST';
+
+  // Statutory Financial Rule: Disbursal cannot exceed total sanctioned budget
+  if (isDisbursal && (project.fundsUtilized || 0) + numAmount > project.sanctionedAmount) {
+    return res.status(400).json({
+      error: `Statutory financial restriction: Cumulative disbursements (₹${(((project.fundsUtilized || 0) + numAmount) / 100000).toFixed(2)}L) cannot exceed sanctioned budget (₹${(project.sanctionedAmount / 100000).toFixed(2)}L).`
+    });
+  }
 
   const newPayment = {
     id: `pay_${Date.now()}`,
@@ -736,6 +774,13 @@ apiRouter.post('/projects/:id/payments/disburse', requireRole(['ADMIN']), (req: 
 
   if (!numAmount || numAmount <= 0) {
     return res.status(400).json({ error: 'Valid payment amount is required.' });
+  }
+
+  // Statutory Financial Rule: Disbursal cannot exceed total sanctioned budget
+  if ((project.fundsUtilized || 0) + numAmount > project.sanctionedAmount) {
+    return res.status(400).json({
+      error: `Statutory financial restriction: Cumulative disbursements (₹${(((project.fundsUtilized || 0) + numAmount) / 100000).toFixed(2)}L) cannot exceed sanctioned budget (₹${(project.sanctionedAmount / 100000).toFixed(2)}L).`
+    });
   }
 
   const newPayment = {
@@ -829,8 +874,43 @@ apiRouter.post('/alerts/:id/action', requireRole(['ADMIN']), (req: Request, res:
 
 // --- CITIZEN FEEDBACK & GRIEVANCE REPORTING ---
 
-apiRouter.get('/citizen-feedback', requireRole(['ADMIN']), (req: Request, res: Response) => {
-  return res.json({ feedback: db.citizenFeedback, count: db.citizenFeedback.length });
+apiRouter.get('/citizen-feedback', (req: Request, res: Response) => {
+  const trackingId = (req.query.id || req.query.trackingNumber) as string;
+
+  if (!req.user || req.user.role === 'PUBLIC') {
+    if (trackingId) {
+      const item = db.citizenFeedback.find(f => f.id.toUpperCase() === trackingId.toUpperCase());
+      if (!item) {
+        return res.status(404).json({ error: 'Grievance record not found with the specified tracking reference.' });
+      }
+      return res.json({ feedback: [toPublicGrievanceDTO(item)], count: 1 });
+    }
+    return res.status(401).json({
+      error: 'Authentication required to list internal grievances. Public citizens can query specific status using ?id=FB-XXX'
+    });
+  }
+
+  let list = db.citizenFeedback;
+  if (req.user.role === 'MP') {
+    const allowedProjectIds = new Set(
+      db.projects
+        .filter(p => p.mpId === req.user!.userId || p.constituency === req.user!.constituency)
+        .map(p => p.id)
+    );
+    list = list.filter(f => allowedProjectIds.has(f.projectId));
+  } else if (req.user.role === 'AGENCY') {
+    const allowedProjectIds = new Set(
+      db.projects
+        .filter(p => p.implementingAgencyId === req.user!.agencyId)
+        .map(p => p.id)
+    );
+    list = list.filter(f => allowedProjectIds.has(f.projectId));
+  }
+
+  return res.json({
+    feedback: list.map(f => toInternalGrievanceDTO(f, req.user!)),
+    count: list.length
+  });
 });
 
 apiRouter.post('/citizen-feedback', (req: Request, res: Response) => {
@@ -1064,44 +1144,6 @@ apiRouter.get('/public/projects', (req: Request, res: Response) => {
   return res.json({ projects: sanitized, count: sanitized.length });
 });
 
-// --- SATELLITE IMAGERY CROSS-VERIFICATION (SENTINEL-2 / EARTH ENGINE) ---
-
-apiRouter.get('/satellite/:projectId', (req: Request, res: Response) => {
-  const project = db.projects.find(p => p.id === req.params.projectId || p.projectCode === req.params.projectId);
-  if (!project) return res.status(404).json({ error: 'Project not found.' });
-
-  const observation = verifyProjectSatelliteImagery(project);
-  return res.json({ observation });
-});
-
-apiRouter.post('/satellite/verify/:projectId', requireRole(['ADMIN', 'MP', 'AGENCY']), (req: Request, res: Response) => {
-  const project = db.projects.find(p => p.id === req.params.projectId || p.projectCode === req.params.projectId);
-  if (!project) return res.status(404).json({ error: 'Project not found.' });
-
-  const { targetDate, overrideFootprintM2 } = req.body;
-  const observation = verifyProjectSatelliteImagery(project, { targetDate, overrideFootprintM2 });
-
-  // If satellite anomaly detected on a completed claim, log a critical alert
-  if (observation.verdict === 'ANOMALY_DETECTED') {
-    db.alerts.unshift({
-      id: `ALT-SAT-${Date.now().toString().slice(-4)}`,
-      projectId: project.id,
-      projectCode: project.projectCode,
-      projectTitle: project.title,
-      district: project.district,
-      mpName: project.mpName,
-      agencyName: project.implementingAgencyName,
-      alertType: 'Photo Anomaly',
-      riskLevel: 'HIGH',
-      reason: observation.verdictReason,
-      createdAt: new Date().toISOString(),
-      status: 'New'
-    });
-  }
-
-  return res.json({ success: true, observation });
-});
-
 // --- CONTRACTOR / VENDOR NETWORK FRAUD DETECTION (GRAPH ANALYSIS) ---
 
 apiRouter.get('/network/contractors', (req: Request, res: Response) => {
@@ -1207,3 +1249,113 @@ apiRouter.post('/data/ingest', requireRole(['ADMIN']), (req: Request, res: Respo
     newTotalProjects: db.projects.length
   });
 });
+
+// --- NOTIFICATIONS (ROLE & USER SCOPED) ---
+
+apiRouter.get('/notifications', requireAuth, (req: Request, res: Response) => {
+  const notifications = db.getNotificationsForUser(req.user!);
+  const unreadCount = notifications.filter(n => !n.read).length;
+  return res.json({ notifications, count: notifications.length, unreadCount });
+});
+
+const handleMarkAsRead = (req: Request, res: Response) => {
+  const notifId = req.params.id || req.body?.id || req.body?.notificationId;
+  if (!notifId) {
+    return res.status(400).json({ error: 'Notification ID is required.' });
+  }
+  const success = db.markNotificationRead(notifId, req.user!);
+  if (!success) {
+    return res.status(404).json({ error: 'Notification not found or access restricted.' });
+  }
+  const notif = db.getNotificationById(notifId);
+  return res.json({
+    success: true,
+    message: 'Notification marked as read with backend persistence.',
+    notification: notif
+  });
+};
+
+apiRouter.post('/notifications/:id/read', requireAuth, requireNotificationAccess, handleMarkAsRead);
+apiRouter.post('/notifications/:id/mark-as-read', requireAuth, requireNotificationAccess, handleMarkAsRead);
+apiRouter.patch('/notifications/:id/read', requireAuth, requireNotificationAccess, handleMarkAsRead);
+apiRouter.put('/notifications/:id/read', requireAuth, requireNotificationAccess, handleMarkAsRead);
+apiRouter.post('/notifications/mark-as-read', requireAuth, requireNotificationAccess, handleMarkAsRead);
+
+apiRouter.post('/notifications/read-all', requireAuth, (req: Request, res: Response) => {
+  const count = db.markAllNotificationsRead(req.user!);
+  return res.json({ success: true, count, message: 'All notifications marked as read.' });
+});
+
+apiRouter.post('/notifications/reset', requireAuth, (req: Request, res: Response) => {
+  const notifications = db.resetNotifications(req.user!);
+  const unreadCount = notifications.filter(n => !n.read).length;
+  return res.json({
+    success: true,
+    notifications,
+    count: notifications.length,
+    unreadCount,
+    message: 'Notifications successfully reset to initial baseline state.'
+  });
+});
+
+// --- SITE INSPECTIONS (STATUTORY OVERSIGHT) ---
+
+apiRouter.get('/inspections', (req: Request, res: Response) => {
+  const inspections = db.getInspections(req.user);
+  return res.json({ inspections, count: inspections.length });
+});
+
+apiRouter.post('/inspections', requireRole(['ADMIN', 'AGENCY']), (req: Request, res: Response) => {
+  const { projectId, scheduledDate, completedDate, inspectorName, inspectorDesignation, findings, riskObservations, photos } = req.body;
+
+  if (!projectId || !scheduledDate || !findings) {
+    return res.status(400).json({ error: 'Project ID, scheduled date, and findings are required.' });
+  }
+
+  const project = db.getProjectById(projectId);
+  if (!project) {
+    return res.status(404).json({ error: 'Referenced project not found.' });
+  }
+
+  // Agency can only inspect projects assigned to it
+  if (req.user!.role === 'AGENCY' && project.implementingAgencyId !== req.user!.agencyId) {
+    return res.status(403).json({ error: 'Access denied: You can only file inspection reports for projects assigned to your agency.' });
+  }
+
+  const newInspection = {
+    id: `INSP-${Date.now().toString().slice(-4)}`,
+    projectId: project.id,
+    projectTitle: project.title,
+    scheduledDate,
+    completedDate: completedDate || scheduledDate,
+    inspectorName: sanitizeString(inspectorName || req.user!.name, 100),
+    inspectorDesignation: sanitizeString(inspectorDesignation || req.user!.designation || 'Field Engineer', 100),
+    status: completedDate ? 'Completed' : 'Scheduled',
+    findings: sanitizeString(findings, 2000),
+    riskObservations: sanitizeString(riskObservations || '', 1000),
+    photos: Array.isArray(photos) ? photos : []
+  };
+
+  db.addInspection(newInspection);
+
+  db.addAuditLog({
+    userId: req.user!.userId,
+    userName: req.user!.name,
+    userRole: req.user!.role,
+    action: 'SITE_INSPECTION_RECORDED',
+    targetEntity: 'Inspection',
+    targetId: newInspection.id,
+    newValue: `Inspection recorded for ${project.projectCode} by ${newInspection.inspectorName}`,
+    ipAddressMasked: '10.14.02.***'
+  });
+
+  return res.status(201).json({ success: true, inspection: newInspection });
+});
+
+// --- VENDOR REGISTRY & COMPLIANCE ---
+
+apiRouter.get('/vendors', (req: Request, res: Response) => {
+  const vendors = db.getVendors(req.user);
+  return res.json({ vendors, count: vendors.length });
+});
+

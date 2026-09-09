@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { useLanguage } from '../context/LanguageContext.js';
 import {
   ShieldAlert,
   LogOut,
@@ -11,16 +12,19 @@ import {
   Menu,
   X,
   ChevronDown,
-  Home
+  Home,
+  AlertTriangle,
+  UserCog,
+  Shield,
+  Languages
 } from 'lucide-react';
+import { NotificationCenter } from './NotificationCenter.js';
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   onNavigateToAlerts?: () => void;
-  pendingAlertsCount?: number;
-  criticalAlertsCount?: number;
-  onOpenRecommend?: () => void;
+  onNavigateToProjects?: () => void;
   onNavigateToHome?: () => void;
   onOpenLogin?: () => void;
 }
@@ -29,13 +33,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
   isSidebarOpen,
   onNavigateToAlerts,
-  pendingAlertsCount = 4,
-  criticalAlertsCount,
-  onOpenRecommend,
+  onNavigateToProjects,
   onNavigateToHome,
   onOpenLogin
 }) => {
-  const { user, role, logout, switchDemoRole } = useAuth();
+  const { user, role, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const getRoleDisplay = () => {
@@ -47,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           name: user?.name || 'Shri Rajesh Kumar, MP',
           detail: 'Hyderabad North Constituency',
           icon: Landmark,
-          theme: 'bg-[#395C40] text-white border border-[#C8D5B9]'
+          theme: 'bg-govt-navy-light text-white border border-white/20'
         };
       case 'ADMIN':
         return {
@@ -56,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           name: user?.name || 'Dr. Ananya Sharma, IAS',
           detail: 'Hyderabad District Administration',
           icon: Building2,
-          theme: 'bg-[#263D2E] text-white border border-[#C8D5B9]'
+          theme: 'bg-govt-navy-dark text-white border border-white/20'
         };
       case 'AGENCY':
         return {
@@ -65,16 +68,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           name: user?.name || 'TSUDA - Hyderabad Zone',
           detail: 'Municipal & Urban Dev Authority',
           icon: UserCheck,
-          theme: 'bg-[#3A5A40] text-white border border-[#C8D5B9]'
+          theme: 'bg-govt-navy-light text-white border border-white/20'
         };
       default:
         return {
           title: 'Citizen Transparency Portal',
           label: 'Public Access',
           name: 'Public Citizen',
-          detail: 'Open Public View (Restricted/Safe)',
+          detail: 'Citizen Transparency View',
           icon: Eye,
-          theme: 'bg-[#2D3A3A] text-white border border-[#C8D5B9]'
+          theme: 'bg-govt-navy-dark text-white border border-white/20'
         };
     }
   };
@@ -83,193 +86,164 @@ export const Navbar: React.FC<NavbarProps> = ({
   const RoleIcon = roleInfo.icon;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#1B3022] text-white border-b-4 border-[#C8D5B9] shadow-md">
-      {/* National Tricolor Top Stripe */}
-      <div className="h-1 w-full bg-linear-to-r from-[#FF9933] via-white to-[#138808]" />
+    <header className="sticky top-0 z-40 bg-govt-navy text-white border-b border-govt-navy-dark shadow-sm w-full">
+      {/* National Tricolor Top Accent Stripe */}
+      <div className="h-1 w-full bg-linear-to-r from-govt-saffron via-white to-emerald-600" />
 
       {/* Main Government Masthead */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center justify-between h-16 sm:h-18 gap-2 sm:gap-4 w-full">
           {/* Left: Emblem & System Title */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               id="sidebar-toggle-btn"
               onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-md text-[#DDE5D4] hover:text-white hover:bg-[#263D2E]"
-              aria-label="Toggle Navigation"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg text-white hover:bg-govt-navy-light focus:outline-hidden focus:ring-2 focus:ring-govt-saffron transition-colors cursor-pointer shrink-0"
+              aria-label="Toggle Navigation Menu"
             >
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Emblem representation in Natural Tones */}
+            {/* Institutional Shield & Ministry Name */}
             <div
-              className={`flex items-center gap-3 ${onNavigateToHome ? 'cursor-pointer hover:opacity-90' : ''}`}
+              className={`flex items-center gap-2 sm:gap-3 min-w-0 ${onNavigateToHome ? 'cursor-pointer hover:opacity-95' : ''}`}
               onClick={onNavigateToHome}
               title={onNavigateToHome ? 'Return to Scheme Portal Home' : undefined}
             >
-              <div className="bg-white p-1 rounded shadow-xs">
-                <div className="w-8 h-8 bg-[#1B3022] rounded-xs flex items-center justify-center font-bold text-white text-xs border border-[#C8D5B9]">
-                  AI
-                </div>
+              {/* Generic Institutional Shield Icon */}
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0 shadow-xs">
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-govt-saffron" />
               </div>
-              <div className="hidden sm:block">
-                <div className="text-[10px] uppercase tracking-wider text-[#C8D5B9] font-medium leading-tight">
-                  भारत सरकार • Ministry of Statistics & Programme Implementation
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] uppercase tracking-wider text-panel-bg/80 font-semibold leading-tight flex items-center gap-1.5 truncate">
+                  <span>{t.govIndia}</span>
+                  <span className="text-white/60">•</span>
+                  <span className="truncate">{t.mospiTitle}</span>
                 </div>
-                <div className="text-base sm:text-lg font-bold text-white tracking-wider uppercase leading-tight flex items-center gap-2">
-                  <span>MPLADS</span>
-                  <span className="text-xs px-2 py-0.5 rounded bg-[#395C40] text-white font-mono font-medium border border-[#A3B18A]/50">
-                    AI Integrity
+                <div className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight flex items-center gap-1.5 sm:gap-2">
+                  <span className="truncate">{t.portalName}</span>
+                  <span className="text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md bg-govt-saffron text-govt-navy-dark font-bold tracking-normal uppercase shrink-0">
+                    Official
                   </span>
-                  <span className="text-xs text-[#C8D5B9] font-normal lowercase tracking-normal hidden md:inline">portal</span>
+                </div>
+                <div className="text-[11px] text-panel-bg/80 font-normal leading-tight hidden xl:block truncate max-w-md">
+                  {t.mpladsFullName}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Center/Right: Role Badge & Quick Switcher for Testing */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Quick Demo Role Switcher */}
-            <div className="relative">
+          {/* Right: Language Toggle, Role Selector, and Officer Login */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Bilingual Language Switcher (EN | हिन्दी) */}
+            <div className="flex items-center bg-govt-navy-dark rounded-lg p-0.5 border border-white/20 text-xs shrink-0">
               <button
-                id="role-switch-dropdown-btn"
-                onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors ${roleInfo.theme}`}
-                title="Click to quickly switch role for evaluation"
+                onClick={() => setLanguage('en')}
+                aria-label="Switch to English"
+                className={`px-1.5 sm:px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-white text-govt-navy shadow-xs'
+                    : 'text-panel-bg/80 hover:text-white'
+                }`}
               >
-                <RoleIcon className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden md:inline">{roleInfo.label}:</span>
-                <span className="truncate max-w-[120px] sm:max-w-[160px] font-normal">{roleInfo.name.split(',')[0]}</span>
-                <ChevronDown className="w-3 h-3 ml-0.5 opacity-80" />
+                English
               </button>
-
-              {showRoleMenu && (
-                <div
-                  className="absolute right-0 mt-2 w-72 bg-white text-[#1B3022] rounded-xl shadow-xl border border-[#DDE5D4] py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
-                  onMouseLeave={() => setShowRoleMenu(false)}
-                >
-                  <div className="px-3 py-1.5 text-[11px] font-bold text-[#588157] uppercase tracking-wider border-b border-[#DDE5D4]">
-                    Switch Active Stakeholder View
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      switchDemoRole('MP');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-[#F8F9F7] ${
-                      role === 'MP' ? 'bg-[#EAF0E6] font-bold text-[#1B3022]' : 'text-gray-700'
-                    }`}
-                  >
-                    <Landmark className="w-4 h-4 text-[#395C40] shrink-0" />
-                    <div>
-                      <div className="font-semibold">MP Login (Shri Rajesh Kumar)</div>
-                      <div className="text-[10px] text-gray-500">Recommend works, track ₹5 Cr funds & risks</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      switchDemoRole('ADMIN');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-[#F8F9F7] ${
-                      role === 'ADMIN' ? 'bg-[#EAF0E6] font-bold text-[#1B3022]' : 'text-gray-700'
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4 text-[#263D2E] shrink-0" />
-                    <div>
-                      <div className="font-semibold">Admin (Dr. Ananya Sharma, IAS)</div>
-                      <div className="text-[10px] text-gray-500">Sanction works, assign agency, investigate alerts</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      switchDemoRole('AGENCY');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-[#F8F9F7] ${
-                      role === 'AGENCY' ? 'bg-[#EAF0E6] font-bold text-[#1B3022]' : 'text-gray-700'
-                    }`}
-                  >
-                    <UserCheck className="w-4 h-4 text-[#588157] shrink-0" />
-                    <div>
-                      <div className="font-semibold">Agency Desk (TSUDA)</div>
-                      <div className="text-[10px] text-gray-500">Update progress, upload geotagged photos, bills</div>
-                    </div>
-                  </button>
-
-                  <div className="border-t border-[#DDE5D4] my-1" />
-
-                  <button
-                    onClick={() => {
-                      switchDemoRole('PUBLIC');
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-[#F8F9F7] ${
-                      role === 'PUBLIC' ? 'bg-[#EAF0E6] font-bold text-[#1B3022]' : 'text-gray-700'
-                    }`}
-                  >
-                    <Eye className="w-4 h-4 text-[#2D3A3A] shrink-0" />
-                    <div>
-                      <div className="font-semibold">Citizen Transparency Portal</div>
-                      <div className="text-[10px] text-gray-500">Public dashboard without confidential details</div>
-                    </div>
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={() => setLanguage('hi')}
+                aria-label="हिन्दी भाषा चुनें"
+                className={`px-1.5 sm:px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                  language === 'hi'
+                    ? 'bg-white text-govt-navy shadow-xs'
+                    : 'text-panel-bg/80 hover:text-white'
+                }`}
+              >
+                हिन्दी
+              </button>
             </div>
 
-            {/* AI Alerts Button with Natural Tones terracotta badge */}
-            {role !== 'PUBLIC' && (
-              <button
-                id="navbar-alerts-btn"
-                onClick={onNavigateToAlerts}
-                className="relative p-2 rounded-lg text-[#DDE5D4] hover:text-white hover:bg-[#263D2E] transition-colors"
-                title={`${pendingAlertsCount} pending AI alerts`}
-              >
-                <Bell className="w-5 h-5" />
-                {pendingAlertsCount > 0 && (
-                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#E07A5F] text-[10px] font-bold text-white shadow-xs">
-                    {pendingAlertsCount}
-                  </span>
-                )}
-              </button>
-            )}
+            {/* Notification Bell */}
+            <NotificationCenter
+              onNavigateToAlerts={onNavigateToAlerts}
+              onNavigateToProjects={onNavigateToProjects}
+            />
 
-            {/* Logout / Switch to Public */}
-            {role !== 'PUBLIC' ? (
-              <button
-                id="navbar-logout-btn"
-                onClick={logout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#395C40] hover:bg-[#4a7251] text-white border border-[#C8D5B9]/40 transition-colors"
-                title="Log out of secure session"
-              >
-                <LogOut className="w-3.5 h-3.5 text-[#C8D5B9]" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                {onNavigateToHome && (
-                  <button
-                    id="navbar-home-btn"
-                    onClick={onNavigateToHome}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#DDE5D4] hover:text-white hover:bg-[#263D2E] border border-[#C8D5B9]/30 transition-colors cursor-pointer"
-                    title="Return to Scheme Home & Overview"
-                  >
-                    <Home className="w-3.5 h-3.5 text-[#A3B18A]" />
-                    <span className="hidden sm:inline">Portal Home</span>
-                  </button>
-                )}
+            {/* Officer Session Profile & Sign Out (Authenticated) */}
+            {role !== 'PUBLIC' && user ? (
+              <div className="relative shrink-0">
                 <button
-                  id="navbar-login-btn"
-                  onClick={() => onOpenLogin ? onOpenLogin() : switchDemoRole('ADMIN')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#395C40] hover:bg-[#4a7251] border border-[#C8D5B9] shadow-xs transition-colors cursor-pointer"
+                  id="officer-session-menu-btn"
+                  onClick={() => setShowRoleMenu(!showRoleMenu)}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer ${roleInfo.theme}`}
+                  title="Active Officer Session"
+                  aria-label="Active Officer Session"
                 >
-                  <span>Officer Login</span>
+                  <RoleIcon className="w-3.5 h-3.5 shrink-0 text-govt-saffron" />
+                  <span className="hidden lg:inline">{roleInfo.label}:</span>
+                  <span className="truncate max-w-[80px] sm:max-w-[120px] md:max-w-[140px] font-normal">
+                    {user.name.split(',')[0]}
+                  </span>
+                  <ChevronDown className="w-3 h-3 ml-0.5 opacity-80 shrink-0" />
                 </button>
+
+                {showRoleMenu && (
+                  <div
+                    className="absolute right-0 mt-2 w-72 bg-white text-slate-body rounded-xl shadow-lg border border-slate-border py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                    onMouseLeave={() => setShowRoleMenu(false)}
+                  >
+                    <div className="px-3 py-2 border-b border-slate-border">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-muted">
+                        Authenticated Official
+                      </div>
+                      <div className="text-xs font-bold text-slate-body mt-0.5">
+                        {user.name}
+                      </div>
+                      <div className="text-[11px] text-slate-muted">
+                        {user.designation || roleInfo.title}
+                      </div>
+                      <div className="text-[10px] font-mono text-govt-navy mt-1">
+                        ID: {user.userId} • {user.district || user.constituency || 'Headquarters'}
+                      </div>
+                    </div>
+
+                    <div className="px-3 py-2 text-[11px] text-slate-muted space-y-1 bg-panel-bg/50">
+                      <div className="flex justify-between">
+                        <span>Role Authority:</span>
+                        <span className="font-semibold text-slate-body">{user.role}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Security Protocol:</span>
+                        <span className="font-semibold text-emerald-700">Govt Token Verified</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-1 mt-1 border-t border-slate-border px-2">
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowRoleMenu(false);
+                        }}
+                        className="w-full px-2.5 py-1.5 text-left text-xs text-status-flagged hover:bg-red-50 rounded-lg flex items-center gap-2 font-medium cursor-pointer transition-colors"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Sign Out of Officer Session</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
+            ) : (
+              /* Public Citizen Mode - Dedicated Officer Login Button */
+              onOpenLogin && (
+                <button
+                  onClick={onOpenLogin}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-govt-saffron hover:bg-govt-saffron-hover text-govt-navy-dark shadow-xs transition-colors cursor-pointer"
+                  title="Officer / District Authority Login"
+                  aria-label="Officer / Admin Login"
+                >
+                  <UserCog className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t.officerLogin}</span>
+                </button>
+              )
             )}
           </div>
         </div>

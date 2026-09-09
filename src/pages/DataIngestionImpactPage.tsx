@@ -16,11 +16,16 @@ import {
   Building,
   Info,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  ArrowLeft
 } from 'lucide-react';
 
-export const DataIngestionImpactPage: React.FC = () => {
-  const { user, role, switchDemoRole } = useAuth();
+interface DataIngestionImpactPageProps {
+  onBackToDashboard?: () => void;
+}
+
+export const DataIngestionImpactPage: React.FC<DataIngestionImpactPageProps> = ({ onBackToDashboard }) => {
+  const { user, role } = useAuth();
   const [impactData, setImpactData] = useState<any | null>(null);
   const [loadingImpact, setLoadingImpact] = useState<boolean>(true);
 
@@ -63,9 +68,9 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
     setIngesting(true);
     setImportSuccessMessage(null);
     try {
-      const res = await api.ingestData(sampleCsvData, 'MoSPI eSAKSHI Batch Export 2024');
+      const res = await api.ingestData(sampleCsvData, 'MoSPI Official Batch Export 2024');
       setQualityReport(res.qualityReport);
-      setImportSuccessMessage(`Successfully ingested ${res.importedCount} records via eSAKSHI overlay!`);
+      setImportSuccessMessage(`Successfully ingested ${res.importedCount} records via data overlay!`);
       fetchImpactSummary();
     } catch (err: any) {
       console.error('Ingestion failed:', err);
@@ -111,24 +116,40 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
 
   return (
     <div className="space-y-6">
+      {/* Top Persistent Back Button */}
+      {onBackToDashboard && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onBackToDashboard}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>← Back to Overview</span>
+          </button>
+          <span className="text-xs text-slate-muted">
+            Dashboard &gt; Data Ingestion
+          </span>
+        </div>
+      )}
+
       {/* Top Banner */}
-      <div className="bg-white rounded-xl border border-[#DDE5D4] p-5 shadow-xs">
+      <div className="bg-white rounded-xl border border-slate-border p-5 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-[#1B3022] text-white shrink-0">
-              <Calculator className="w-6 h-6 text-[#A3B18A]" />
+            <div className="p-2.5 rounded-lg bg-govt-navy text-white shrink-0">
+              <Calculator className="w-6 h-6 text-panel-bg/80" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-bold text-[#1B3022]">
-                  eSAKSHI Overlay & Executive Impact Metrics
+                <h1 className="text-lg sm:text-xl font-bold text-slate-body">
+                  Data Ingestion & Executive Impact Metrics
                 </h1>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#EAF0E6] text-[#2D4A32] font-semibold border border-[#C8D5B9]">
-                  data.gov.in & eSAKSHI Adapter
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-govt-navy font-semibold border border-emerald-200">
+                  data.gov.in & Official Data Adapter
                 </span>
               </div>
-              <p className="text-xs text-[#588157] mt-0.5 max-w-3xl">
-                Operates as an intelligence and forensic verification overlay sitting atop government systems of record (eSAKSHI). Ingests public batch data, audits missing GPS tags, and computes verified potential savings.
+              <p className="text-xs text-slate-muted mt-0.5 max-w-3xl">
+                Operates as an intelligence and forensic verification overlay sitting atop government systems of record. Ingests public batch data, audits missing GPS tags, and computes verified potential savings.
               </p>
             </div>
           </div>
@@ -137,10 +158,10 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
             <button
               onClick={handleIngestSampleData}
               disabled={ingesting}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[#395C40] hover:bg-[#2e4d34] disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-govt-navy hover:bg-govt-navy-light disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
             >
               <Upload className={`w-3.5 h-3.5 ${ingesting ? 'animate-spin' : ''}`} />
-              <span>{ingesting ? 'Ingesting...' : 'Ingest eSAKSHI Sample Batch'}</span>
+              <span>{ingesting ? 'Ingesting...' : 'Ingest Sample Data Batch'}</span>
             </button>
           </div>
         </div>
@@ -149,21 +170,21 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
       {/* 1. Executive Impact Metrics Calculator Cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#1B3022]">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-body">
             Executive Pitch & Impact Metrics (Pitch Deliverables)
           </h2>
-          <span className="text-[11px] text-[#588157]">Live Real-Time Calculations</span>
+          <span className="text-[11px] text-slate-muted">Live Real-Time Calculations</span>
         </div>
 
         {impactData ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Metric 1: Total Flagged Value */}
-            <div className="bg-white p-4 rounded-xl border border-[#DDE5D4] shadow-xs">
+            <div className="bg-white p-4 rounded-xl border border-slate-border shadow-xs">
               <div className="flex items-center justify-between text-gray-500">
                 <span className="text-xs font-medium">Total High-Risk Flagged</span>
-                <AlertTriangle className="w-4 h-4 text-[#E07A5F]" />
+                <AlertTriangle className="w-4 h-4 text-red-500" />
               </div>
-              <div className="text-2xl font-bold text-[#9C3820] mt-1.5">
+              <div className="text-2xl font-bold text-red-600 mt-1.5">
                 ₹{impactData.totalFlaggedAmountCr} Cr
               </div>
               <div className="text-[11px] text-gray-500 mt-1">
@@ -172,26 +193,26 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
             </div>
 
             {/* Metric 2: Estimated Potential Savings */}
-            <div className="bg-white p-4 rounded-xl border border-[#DDE5D4] shadow-xs ring-1 ring-[#395C40]/30">
+            <div className="bg-white p-4 rounded-xl border border-status-verified/30 bg-emerald-50/20 shadow-xs ring-1 ring-emerald-500/20">
               <div className="flex items-center justify-between text-gray-500">
-                <span className="text-xs font-medium text-[#2D4A32] font-semibold">Estimated Potential Savings</span>
-                <CheckCircle2 className="w-4 h-4 text-[#588157]" />
+                <span className="text-xs font-semibold text-status-verified">Estimated Potential Savings</span>
+                <CheckCircle2 className="w-4 h-4 text-status-verified" />
               </div>
-              <div className="text-2xl font-bold text-[#1B3022] mt-1.5">
+              <div className="text-2xl font-bold text-slate-body mt-1.5">
                 ₹{impactData.estimatedPotentialSavingsCr} Cr
               </div>
-              <div className="text-[11px] text-[#588157] mt-1">
+              <div className="text-[11px] text-slate-muted mt-1">
                 Disbursement-vs-physical disparity
               </div>
             </div>
 
             {/* Metric 3: Highest Risk District */}
-            <div className="bg-white p-4 rounded-xl border border-[#DDE5D4] shadow-xs">
+            <div className="bg-white p-4 rounded-xl border border-slate-border shadow-xs">
               <div className="flex items-center justify-between text-gray-500">
                 <span className="text-xs font-medium">Highest Risk District</span>
                 <Building className="w-4 h-4 text-gray-500" />
               </div>
-              <div className="text-lg font-bold text-[#1B3022] mt-1.5">
+              <div className="text-lg font-bold text-slate-body mt-1.5">
                 {impactData.highestRiskDistrict.district}
               </div>
               <div className="text-[11px] text-gray-500 mt-1">
@@ -200,12 +221,12 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
             </div>
 
             {/* Metric 4: Total Monitored Portfolio */}
-            <div className="bg-white p-4 rounded-xl border border-[#DDE5D4] shadow-xs">
+            <div className="bg-white p-4 rounded-xl border border-slate-border shadow-xs">
               <div className="flex items-center justify-between text-gray-500">
                 <span className="text-xs font-medium">Active Ingested Works</span>
                 <Database className="w-4 h-4 text-gray-500" />
               </div>
-              <div className="text-2xl font-bold text-[#1B3022] mt-1.5">
+              <div className="text-2xl font-bold text-slate-body mt-1.5">
                 {impactData.totalLoadedProjects}
               </div>
               <div className="text-[11px] text-gray-500 mt-1">
@@ -218,8 +239,8 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
         )}
 
         {impactData?.methodologyNote && (
-          <div className="bg-[#F8F9F7] p-3 rounded-lg border border-[#DDE5D4] text-xs text-gray-600 flex items-start gap-2">
-            <Info className="w-4 h-4 text-[#588157] shrink-0 mt-0.5" />
+          <div className="bg-panel-bg p-3 rounded-lg border border-slate-border text-xs text-slate-muted flex items-start gap-2">
+            <Info className="w-4 h-4 text-govt-navy shrink-0 mt-0.5" />
             <span>{impactData.methodologyNote}</span>
           </div>
         )}
@@ -227,148 +248,119 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
 
       {/* 2. Data Ingestion Quality Audit Report */}
       {qualityReport && (
-        <div className="bg-white rounded-xl border border-[#DDE5D4] p-5 shadow-xs space-y-3">
+        <div className="bg-white rounded-xl border border-slate-border p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#1B3022]">
-              eSAKSHI Ingestion Data Quality Audit
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-body">
+              Ingestion Data Quality Audit
             </h3>
-            <span className="text-xs font-bold text-[#2D4A32] bg-[#EAF0E6] px-2.5 py-0.5 rounded-full border border-[#C8D5B9]">
+            <span className="text-xs font-bold text-status-verified bg-emerald-50 px-2.5 py-0.5 rounded-full border border-status-verified/30">
               Overall Quality Score: {qualityReport.overallDataQualityScore}/100
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div className="p-3 bg-[#F8F9F7] rounded-lg border border-[#DDE5D4]">
+            <div className="p-3 bg-panel-bg rounded-lg border border-slate-border">
               <span className="text-[11px] text-gray-500">GPS Coordinate Completeness</span>
-              <div className="text-base font-bold text-[#1B3022] mt-0.5">
+              <div className="text-base font-bold text-slate-body mt-0.5">
                 {qualityReport.gpsCompletenessPct}%
               </div>
               <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div className="bg-[#395C40] h-full" style={{ width: `${qualityReport.gpsCompletenessPct}%` }} />
+                <div className="bg-govt-navy h-full" style={{ width: `${qualityReport.gpsCompletenessPct}%` }} />
               </div>
             </div>
 
-            <div className="p-3 bg-[#F8F9F7] rounded-lg border border-[#DDE5D4]">
+            <div className="p-3 bg-panel-bg rounded-lg border border-slate-border">
               <span className="text-[11px] text-gray-500">Sanction Order Date Completeness</span>
-              <div className="text-base font-bold text-[#1B3022] mt-0.5">
+              <div className="text-base font-bold text-slate-body mt-0.5">
                 {qualityReport.sanctionDateCompletenessPct}%
               </div>
               <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div className="bg-[#395C40] h-full" style={{ width: `${qualityReport.sanctionDateCompletenessPct}%` }} />
+                <div className="bg-govt-navy h-full" style={{ width: `${qualityReport.sanctionDateCompletenessPct}%` }} />
               </div>
             </div>
 
-            <div className="p-3 bg-[#F8F9F7] rounded-lg border border-[#DDE5D4]">
+            <div className="p-3 bg-panel-bg rounded-lg border border-slate-border">
               <span className="text-[11px] text-gray-500">Vendor PAN Tagging</span>
-              <div className="text-base font-bold text-[#1B3022] mt-0.5">
+              <div className="text-base font-bold text-slate-body mt-0.5">
                 {qualityReport.vendorPanCompletenessPct}%
               </div>
               <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div className="bg-[#395C40] h-full" style={{ width: `${qualityReport.vendorPanCompletenessPct}%` }} />
+                <div className="bg-govt-navy h-full" style={{ width: `${qualityReport.vendorPanCompletenessPct}%` }} />
               </div>
             </div>
           </div>
 
           {importSuccessMessage && (
-            <div className="text-xs text-[#2D4A32] font-semibold flex items-center gap-1.5 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-[#588157]" />
+            <div className="text-xs text-status-verified font-semibold flex items-center gap-1.5 mt-2">
+              <CheckCircle2 className="w-4 h-4 text-status-verified" />
               <span>{importSuccessMessage}</span>
             </div>
           )}
         </div>
       )}
 
-      {/* 3. Live Security Proof & Hackathon Demo Mode */}
-      <div className="bg-white rounded-xl border border-[#DDE5D4] p-5 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DDE5D4] pb-3">
+      {/* 3. Live Security Proof & Cryptographic Audit Verification */}
+      <div className="bg-white rounded-xl border border-slate-border p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-border pb-3">
           <div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#395C40]" />
-              <h3 className="text-sm font-bold text-[#1B3022] uppercase tracking-wider">
+              <ShieldCheck className="w-5 h-5 text-govt-navy" />
+              <h3 className="text-sm font-bold text-slate-body uppercase tracking-wider">
                 Live Security Proof: Cryptographic Hash-Chain Tamper Detection
               </h3>
             </div>
-            <p className="text-xs text-[#588157] mt-0.5">
-              Live proof for hackathon evaluators demonstrating SHA-256 block hash chaining and zero-trust audit integrity.
+            <p className="text-xs text-slate-muted mt-0.5">
+              Continuous cryptographic audit trail demonstrating SHA-256 block hash chaining and zero-trust audit integrity.
             </p>
           </div>
 
-          {/* Quick Role Switcher for RBAC Security Demo */}
-          <div className="flex items-center gap-1 bg-[#F8F9F7] p-1 rounded-lg border border-[#DDE5D4]">
-            <span className="text-[11px] font-bold text-gray-500 px-2">Role Switch:</span>
-            <button
-              onClick={() => switchDemoRole('ADMIN')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                role === 'ADMIN' ? 'bg-[#1B3022] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              ADMIN
-            </button>
-            <button
-              onClick={() => switchDemoRole('MP')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                role === 'MP' ? 'bg-[#395C40] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              MP
-            </button>
-            <button
-              onClick={() => switchDemoRole('AGENCY')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                role === 'AGENCY' ? 'bg-[#588157] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              AGENCY
-            </button>
-            <button
-              onClick={() => switchDemoRole('PUBLIC')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                role === 'PUBLIC' ? 'bg-gray-800 text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              VIEWER (Public)
-            </button>
+          {/* Active Session Role Clearance Badge */}
+          <div className="flex items-center gap-2 bg-panel-bg px-3 py-1.5 rounded-lg border border-slate-border">
+            <span className="text-[11px] font-bold text-slate-muted">Security Clearance:</span>
+            <span className="px-2 py-0.5 text-xs font-bold rounded-md bg-govt-navy text-white font-mono">
+              {role}
+            </span>
           </div>
         </div>
 
         {/* Tamper Simulation Action Steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="p-3.5 rounded-lg border border-[#DDE5D4] bg-[#F8F9F7] space-y-2">
-            <span className="text-xs font-bold text-[#1B3022]">Step 1: Simulate Attack</span>
+          <div className="p-3.5 rounded-lg border border-slate-border bg-panel-bg space-y-2">
+            <span className="text-xs font-bold text-slate-body">Step 1: Simulate Attack</span>
             <p className="text-[11px] text-gray-600">
               Alters an existing approved transaction in memory directly without recomputing its SHA-256 hash or prevHash.
             </p>
             <button
               onClick={handleSimulateTamper}
               disabled={tampering}
-              className="w-full py-2 px-3 rounded-md text-xs font-bold text-white bg-[#E07A5F] hover:bg-[#c53f27] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+              className="w-full py-2 px-3 rounded-md text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
               {tampering ? 'Mutating Memory...' : 'Simulate Unauthorized Mutation'}
             </button>
           </div>
 
-          <div className="p-3.5 rounded-lg border border-[#DDE5D4] bg-[#F8F9F7] space-y-2">
-            <span className="text-xs font-bold text-[#1B3022]">Step 2: Run Cryptographic Audit</span>
+          <div className="p-3.5 rounded-lg border border-slate-border bg-panel-bg space-y-2">
+            <span className="text-xs font-bold text-slate-body">Step 2: Run Cryptographic Audit</span>
             <p className="text-[11px] text-gray-600">
               Iterates chronological blocks verifying <code>H(prevHash | payload) == entryHash</code>.
             </p>
             <button
               onClick={handleVerifyChain}
               disabled={verifying}
-              className="w-full py-2 px-3 rounded-md text-xs font-bold text-white bg-[#1B3022] hover:bg-[#284431] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+              className="w-full py-2 px-3 rounded-md text-xs font-bold text-white bg-govt-navy hover:bg-govt-navy-light transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
               {verifying ? 'Verifying Hashes...' : 'Verify Cryptographic Integrity'}
             </button>
           </div>
 
-          <div className="p-3.5 rounded-lg border border-[#DDE5D4] bg-[#F8F9F7] space-y-2">
-            <span className="text-xs font-bold text-[#1B3022]">Step 3: Restore Ledger</span>
+          <div className="p-3.5 rounded-lg border border-slate-border bg-panel-bg space-y-2">
+            <span className="text-xs font-bold text-slate-body">Step 3: Restore Ledger</span>
             <p className="text-[11px] text-gray-600">
               Restores the pristine tamper-evident audit ledger from verified cryptographic state.
             </p>
             <button
               onClick={handleRestoreChain}
-              className="w-full py-2 px-3 rounded-md text-xs font-bold text-[#1B3022] bg-white border border-[#C8D5B9] hover:bg-gray-50 transition-colors cursor-pointer shadow-xs"
+              className="w-full py-2 px-3 rounded-md text-xs font-bold text-slate-body bg-white border border-slate-border hover:bg-gray-50 transition-colors cursor-pointer shadow-xs"
             >
               Restore Pristine Chain
             </button>
@@ -380,14 +372,14 @@ MPLADS-TS-2024-0095,Community Hall & Skill Development Center,Community Infrastr
           <div
             className={`p-4 rounded-xl border flex items-start gap-3.5 ${
               verificationResult.isValid
-                ? 'bg-[#F1F6EF] border-[#A3B18A] text-[#244829]'
-                : 'bg-[#FFF0ED] border-[#E07A5F] text-[#9C3820]'
+                ? 'bg-emerald-50 border-status-verified/30 text-status-verified'
+                : 'bg-red-50 border-red-200 text-red-900'
             }`}
           >
             {verificationResult.isValid ? (
-              <CheckCircle2 className="w-5 h-5 text-[#588157] shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-status-verified shrink-0 mt-0.5" />
             ) : (
-              <AlertOctagon className="w-5 h-5 text-[#E07A5F] shrink-0 mt-0.5" />
+              <AlertOctagon className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             )}
             <div>
               <div className="font-bold text-sm">

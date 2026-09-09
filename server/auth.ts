@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { users } from './db.js';
+import { db } from './db.js';
 import { User, UserRole } from '../src/types/index.js';
+import { config } from './config.js';
 
 // Extend Express Request
 declare global {
@@ -15,25 +16,11 @@ declare global {
 
 /**
  * =========================================================================================
- * STATUTORY MPLADS ROLE-BASED ACCESS CONTROL (RBAC) MATRIX
+ * STATUTORY MPLADS ROLE-BASED ACCESS CONTROL (RBAC & ABAC) MATRIX
  * Mandated under MoSPI (Ministry of Statistics and Programme Implementation) Framework
- * =========================================================================================
- * Action / Capability               | MP        | District Authority (ADMIN) | Implementing Agency | Citizen (PUBLIC)
- * ----------------------------------+-----------+----------------------------+---------------------+-----------------
- * Recommend Project                 | ALLOWED   | ALLOWED (Co-sign)          | BLOCKED (403)       | BLOCKED (401/403)
- * Approve / Reject Project          | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
- * Sanction Funds & Set Ceiling      | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
- * Assign Contractor / Agency        | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
- * Disburse Payment Installment      | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
- * Request Payment Voucher           | BLOCKED   | ALLOWED                    | ALLOWED             | BLOCKED (401/403)
- * Submit Site Photos / Progress %   | BLOCKED   | ALLOWED (Override)         | ALLOWED             | BLOCKED (401/403)
- * Dismiss / Review Risk Flag Alerts | BLOCKED   | ALLOWED                    | BLOCKED (403)       | BLOCKED (401/403)
- * Submit Grievance / Feedback       | ALLOWED   | ALLOWED                    | ALLOWED             | ALLOWED
- * View Public Project Register      | ALLOWED   | ALLOWED                    | ALLOWED             | ALLOWED
  * =========================================================================================
  */
 
-// Enterprise role alias mapping (SUPER_ADMIN -> ADMIN, PROJECT_MANAGER -> AGENCY, VIEWER -> PUBLIC)
 export const ROLE_ALIASES: Record<string, UserRole> = {
   SUPER_ADMIN: 'ADMIN',
   ADMIN: 'ADMIN',
@@ -54,9 +41,26 @@ export function normalizeRole(roleStr?: string): UserRole {
   return ROLE_ALIASES[upper] || 'PUBLIC';
 }
 
-// Secure JWT configuration: Strong secret from environment, or cryptographically generated 256-bit entropy
-const JWT_SECRET: string = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
-const TOKEN_EXPIRY = '8h';
+// Cryptographic Password Hashing using PBKDF2 (SHA-256 with 100,000 iterations & salt)
+export function hashPassword(password: string, existingSalt?: string): { hash: string; salt: string } {
+  const salt = existingSalt || crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex');
+  return { hash, salt };
+}
+
+export function verifyPassword(password: string, storedHash: string, salt: string): boolean {
+  try {
+    const computedHash = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex');
+    const computedBuf = Buffer.from(computedHash, 'hex');
+    const storedBuf = Buffer.from(storedHash, 'hex');
+    if (computedBuf.length !== storedBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(computedBuf, storedBuf);
+  } catch {
+    return false;
+  }
+}
 
 // In-memory token revocation blocklist for logout & invalidation
 const revokedTokens = new Set<string>();
@@ -73,7 +77,7 @@ export function generateToken(user: User): string {
     jti: crypto.randomUUID()
   };
 
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+  return jwt.sign(payload, config.jwtSecret, { expiresIn: `${config.tokenExpiryHours}h` });
 }
 
 export function verifyToken(token: string): User | null {
@@ -82,12 +86,12 @@ export function verifyToken(token: string): User | null {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, config.jwtSecret) as any;
     if (!decoded || !decoded.userId) {
       return null;
     }
 
-    const foundUser = users.find(u => u.userId.toUpperCase() === decoded.userId.toUpperCase());
+    const foundUser = db.getUserByUserId(decoded.userId);
     if (foundUser) {
       return sanitizeUser(foundUser);
     }
@@ -103,8 +107,7 @@ export function verifyToken(token: string): User | null {
       constituency: decoded.constituency,
       agencyId: decoded.agencyId
     };
-  } catch (err) {
-    // Token signature invalid, expired, or malformed
+  } catch {
     return null;
   }
 }
@@ -112,7 +115,7 @@ export function verifyToken(token: string): User | null {
 export function revokeToken(token: string) {
   if (token) {
     revokedTokens.add(token);
-    // Auto-clean blocklist after 24h to prevent memory accumulation
+    // Auto-clean blocklist after 24h
     setTimeout(() => revokedTokens.delete(token), 24 * 60 * 60 * 1000);
   }
 }
@@ -123,7 +126,6 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
   if (!token) {
-    // Treat as public access
     req.user = undefined;
     return next();
   }
@@ -146,7 +148,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// Role-based authorization middleware with alias support (SUPER_ADMIN, ADMIN, PROJECT_MANAGER, VIEWER)
+// Role-based authorization middleware
 export function requireRole(allowedRoles: (UserRole | string)[]) {
   const normalizedAllowed = allowedRoles.map(r => normalizeRole(r));
 
@@ -166,8 +168,153 @@ export function requireRole(allowedRoles: (UserRole | string)[]) {
   };
 }
 
-// Strip sensitive fields (passwords, tokens, PAN)
-export function sanitizeUser(u: typeof users[0]): User {
-  const { passwordHash, ...safeUser } = u;
-  return safeUser;
+// Object-level authorization for projects (ABAC / IDOR defense)
+export function requireProjectAccess(mode: 'read' | 'update' | 'sanction' | 'disburse' = 'read') {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const projectId = req.params.id || req.body.projectId;
+    if (!projectId) {
+      return res.status(400).json({ error: 'Project ID required.' });
+    }
+
+    const project = db.getProjectById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found.' });
+    }
+
+    // Public read: allow (routes will sanitize with PublicProjectDTO)
+    if (mode === 'read') {
+      if (!req.user || req.user.role === 'PUBLIC') {
+        return next();
+      }
+    } else {
+      // Any mutation requires authenticated user
+      if (!req.user || req.user.role === 'PUBLIC') {
+        return res.status(401).json({ error: 'Authentication required.' });
+      }
+    }
+
+    const user = req.user!;
+    const userRole = normalizeRole(user.role);
+
+    // ADMIN has jurisdiction within district or overarching authority
+    if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+      if (user.district && project.district.toLowerCase() !== user.district.toLowerCase()) {
+        return res.status(403).json({ error: 'Access denied: Project is outside your district jurisdiction.' });
+      }
+      return next();
+    }
+
+    // MP permissions
+    if (userRole === 'MP') {
+      if (mode === 'sanction' || mode === 'disburse') {
+        return res.status(403).json({ error: 'Statutory Violation: Members of Parliament cannot sanction projects or disburse funds.' });
+      }
+      // Must match MP or Constituency
+      const isOwner = project.mpId === user.userId;
+      const isSameConstituency = user.constituency && project.constituency.toLowerCase() === user.constituency.toLowerCase();
+      if (!isOwner && !isSameConstituency) {
+        return res.status(403).json({ error: 'Access denied: Project does not belong to your constituency.' });
+      }
+      return next();
+    }
+
+    // AGENCY permissions
+    if (userRole === 'AGENCY') {
+      if (mode === 'sanction' || mode === 'disburse') {
+        return res.status(403).json({ error: 'Statutory Violation: Implementing Agencies cannot self-sanction or self-disburse.' });
+      }
+      if (project.implementingAgencyId !== user.agencyId) {
+        return res.status(403).json({ error: 'Access denied: Project is not assigned to your agency.' });
+      }
+      return next();
+    }
+
+    return res.status(403).json({ error: 'Access denied for your role.' });
+  };
+}
+
+// Object-level authorization for Citizen Grievance
+export function requireGrievanceAccess(req: Request, res: Response, next: NextFunction) {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(400).json({ error: 'Grievance ID required.' });
+  }
+
+  const grievance = db.getFeedbackById(id);
+  if (!grievance) {
+    return res.status(404).json({ error: 'Grievance record not found.' });
+  }
+
+  // Public users can only query if trackingNumber or id matches their explicit query,
+  // but if accessing /api/citizen-feedback/:id full internal record, must be authenticated
+  if (!req.user || req.user.role === 'PUBLIC') {
+    return res.status(401).json({ error: 'Authentication required to view internal grievance record.' });
+  }
+
+  const user = req.user;
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    return next();
+  }
+
+  const project = db.getProjectById(grievance.projectId);
+  if (user.role === 'MP') {
+    if (project && user.constituency && project.constituency.toLowerCase() !== user.constituency.toLowerCase()) {
+      return res.status(403).json({ error: 'Access denied: Grievance is outside your constituency.' });
+    }
+    return next();
+  }
+
+  if (user.role === 'AGENCY') {
+    if (project && user.agencyId && project.implementingAgencyId !== user.agencyId) {
+      return res.status(403).json({ error: 'Access denied: Grievance does not pertain to your assigned projects.' });
+    }
+    return next();
+  }
+
+  return res.status(403).json({ error: 'Access denied.' });
+}
+
+// User-specific notification security
+export function requireNotificationAccess(req: Request, res: Response, next: NextFunction) {
+  if (!req.user || req.user.role === 'PUBLIC') {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  const notifId = req.params.id || req.body?.id || req.body?.notificationId;
+  if (notifId) {
+    const notif = db.getNotificationById(notifId);
+    if (!notif) {
+      return res.status(404).json({ error: 'Notification not found.' });
+    }
+    // Allow if assigned directly to user, targeted to user's role, broadcast to ALL, or admin
+    const isOwner =
+      notif.userId === req.user.userId ||
+      notif.targetRole === req.user.role ||
+      notif.targetRole === 'ALL';
+    if (!isOwner && req.user.role !== 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ error: 'Access denied: Notification belongs to another user.' });
+    }
+  }
+
+  next();
+}
+
+// Strict ADMIN-only audit log access
+export function requireAuditAccess(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  const role = normalizeRole(req.user.role);
+  if (role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Access denied: Audit trail logs are strictly restricted to District Vigilance Administrators.' });
+  }
+
+  next();
+}
+
+// Strip sensitive fields (passwords, salts, tokens)
+export function sanitizeUser(u: any): User {
+  const { passwordHash, salt, ...safeUser } = u;
+  return safeUser as User;
 }

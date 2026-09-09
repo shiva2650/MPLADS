@@ -1,36 +1,103 @@
 import React from 'react';
 import { RiskLevel, ProjectStatus, AlertStatus } from '../types/index.js';
-import { ShieldCheck, ShieldAlert, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 
-export const RiskBadge: React.FC<{ level: RiskLevel; score?: number; showIcon?: boolean }> = ({
-  level,
-  score,
-  showIcon = true
-}) => {
-  const configs: Record<RiskLevel, { bg: string; text: string; border: string; icon: any }> = {
+export type VerificationState = 'Verified' | 'Under Review' | 'Flagged';
+
+/**
+ * Public-friendly simple Verification Badge (Verified / Under Review / Flagged)
+ * Clean, official styling without raw AI confidence scores.
+ */
+export const VerificationBadge: React.FC<{
+  status?: VerificationState | string;
+  className?: string;
+}> = ({ status = 'Verified', className = '' }) => {
+  let normalizedStatus: VerificationState = 'Verified';
+  if (status === 'Under Review' || status === 'Pending' || status === 'In Review') {
+    normalizedStatus = 'Under Review';
+  } else if (status === 'Flagged' || status === 'High Risk' || status === 'Critical' || status === 'Rejected') {
+    normalizedStatus = 'Flagged';
+  }
+
+  const configs: Record<VerificationState, { bg: string; text: string; border: string; icon: any }> = {
+    'Verified': {
+      bg: 'bg-panel-bg text-status-verified border-status-verified/30',
+      text: 'text-status-verified',
+      border: 'border-status-verified/30',
+      icon: CheckCircle2
+    },
+    'Under Review': {
+      bg: 'bg-panel-bg text-status-review border-status-review/30',
+      text: 'text-status-review',
+      border: 'border-status-review/30',
+      icon: Clock
+    },
+    'Flagged': {
+      bg: 'bg-panel-bg text-status-flagged border-status-flagged/30',
+      text: 'text-status-flagged',
+      border: 'border-status-flagged/30',
+      icon: AlertTriangle
+    }
+  };
+
+  const config = configs[normalizedStatus];
+  const IconComponent = config.icon;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.bg} ${className}`}
+    >
+      <IconComponent className="w-3.5 h-3.5 shrink-0" />
+      <span>{normalizedStatus}</span>
+    </span>
+  );
+};
+
+export const RiskBadge: React.FC<{
+  level: RiskLevel;
+  score?: number;
+  showIcon?: boolean;
+  publicView?: boolean;
+}> = ({ level, score, showIcon = true, publicView = false }) => {
+  // In public view, convert to plain language without raw algorithmic scores
+  if (publicView) {
+    if (level === 'LOW') {
+      return <VerificationBadge status="Verified" />;
+    } else if (level === 'MEDIUM') {
+      return <VerificationBadge status="Under Review" />;
+    } else {
+      return <VerificationBadge status="Flagged" />;
+    }
+  }
+
+  const configs: Record<RiskLevel, { bg: string; text: string; border: string; label: string; icon: any }> = {
     LOW: {
-      bg: 'bg-[#EAF0E6] text-[#263D2E] border-[#C8D5B9]',
-      text: 'text-[#263D2E]',
-      border: 'border-[#C8D5B9]',
+      bg: 'bg-panel-bg text-status-verified border-status-verified/30',
+      text: 'text-status-verified',
+      border: 'border-status-verified/30',
+      label: 'Routine / On Track',
       icon: ShieldCheck
     },
     MEDIUM: {
-      bg: 'bg-[#FAF3E0] text-[#935D26] border-[#E8DAB2]',
-      text: 'text-[#935D26]',
-      border: 'border-[#E8DAB2]',
+      bg: 'bg-panel-bg text-status-review border-status-review/30',
+      text: 'text-status-review',
+      border: 'border-status-review/30',
+      label: 'May Need Review',
       icon: AlertTriangle
     },
     HIGH: {
-      bg: 'bg-[#FDF0EC] text-[#B85338] border-[#F5C2B4]',
-      text: 'text-[#B85338]',
-      border: 'border-[#F5C2B4]',
+      bg: 'bg-panel-bg text-status-flagged border-status-flagged/30',
+      text: 'text-status-flagged',
+      border: 'border-status-flagged/30',
+      label: 'Flagged for Inspection',
       icon: ShieldAlert
     },
     CRITICAL: {
-      bg: 'bg-[#FBE8E4] text-[#A62B17] border-[#E07A5F] animate-pulse',
-      text: 'text-[#A62B17]',
-      border: 'border-[#E07A5F]',
-      icon: AlertOctagon
+      bg: 'bg-panel-bg text-status-flagged border-status-flagged/50',
+      text: 'text-status-flagged',
+      border: 'border-status-flagged/50',
+      label: 'Action Required',
+      icon: ShieldAlert
     }
   };
 
@@ -40,11 +107,14 @@ export const RiskBadge: React.FC<{ level: RiskLevel; score?: number; showIcon?: 
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.bg}`}
-      title={`AI Computed Risk: ${level} ${score !== undefined ? `(${score}/100)` : ''}`}
+      title={`Review Status: ${config.label} ${score !== undefined ? `(Index: ${score})` : ''}`}
     >
       {showIcon && <IconComponent className="w-3.5 h-3.5 shrink-0" />}
       <span>
-        {level} {score !== undefined && <span className="opacity-85 font-mono text-[11px] ml-0.5 font-bold">({score})</span>}
+        {config.label}
+        {score !== undefined && (
+          <span className="opacity-80 text-[11px] ml-1 font-semibold">({score})</span>
+        )}
       </span>
     </span>
   );
@@ -52,20 +122,20 @@ export const RiskBadge: React.FC<{ level: RiskLevel; score?: number; showIcon?: 
 
 export const StatusBadge: React.FC<{ status: ProjectStatus }> = ({ status }) => {
   const statusStyles: Record<ProjectStatus, string> = {
-    'Recommended': 'bg-[#EDEFEA] text-[#395C40] border-[#C8D5B9]',
-    'Under Review': 'bg-[#F7F2E7] text-[#8F6827] border-[#E8DAB2]',
-    'Sanctioned': 'bg-[#EAF0E6] text-[#263D2E] border-[#A3B18A]',
-    'Assigned': 'bg-[#E4ECE7] text-[#2D4F37] border-[#B8CEBF]',
-    'Ongoing': 'bg-[#E9EBE5] text-[#1B3022] border-[#C8D5B9]',
-    'Delayed': 'bg-[#FDF0EC] text-[#B85338] border-[#F5C2B4] font-medium',
-    'Completed': 'bg-[#EAF0E6] text-[#2D5A27] border-[#A3B18A] font-medium',
-    'Rejected': 'bg-[#F3F4F1] text-[#617467] border-[#DDE5D4]'
+    'Recommended': 'bg-panel-bg text-slate-body border-slate-border',
+    'Under Review': 'bg-panel-bg text-status-review border-status-review/30',
+    'Sanctioned': 'bg-panel-bg text-govt-navy border-slate-border font-semibold',
+    'Assigned': 'bg-panel-bg text-govt-navy-light border-slate-border',
+    'Ongoing': 'bg-panel-bg text-govt-navy border-slate-border',
+    'Delayed': 'bg-panel-bg text-status-flagged border-status-flagged/30 font-medium',
+    'Completed': 'bg-panel-bg text-govt-navy border-slate-border font-semibold',
+    'Rejected': 'bg-panel-bg text-slate-muted border-slate-border'
   };
 
   return (
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${
-        statusStyles[status] || 'bg-[#F3F4F1] text-[#617467] border-[#DDE5D4]'
+        statusStyles[status] || 'bg-panel-bg text-slate-body border-slate-border'
       }`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 shrink-0" />
@@ -76,15 +146,15 @@ export const StatusBadge: React.FC<{ status: ProjectStatus }> = ({ status }) => 
 
 export const AlertBadge: React.FC<{ status: AlertStatus }> = ({ status }) => {
   const styles: Record<AlertStatus, string> = {
-    'New': 'bg-[#FDF0EC] text-[#B85338] border-[#E07A5F] font-semibold',
-    'Under Review': 'bg-[#FAF3E0] text-[#935D26] border-[#E8DAB2]',
-    'Escalated': 'bg-[#F3EBF7] text-[#6A3D7E] border-[#D8C2E5] font-semibold',
-    'Resolved': 'bg-[#EAF0E6] text-[#263D2E] border-[#C8D5B9]',
-    'False Positive': 'bg-[#F3F4F1] text-[#617467] border-[#DDE5D4]'
+    'New': 'bg-panel-bg text-status-flagged border-status-flagged/30 font-semibold',
+    'Under Review': 'bg-panel-bg text-status-review border-status-review/30',
+    'Escalated': 'bg-panel-bg text-status-flagged border-status-flagged/40 font-semibold',
+    'Resolved': 'bg-panel-bg text-govt-navy border-slate-border font-semibold',
+    'False Positive': 'bg-panel-bg text-slate-muted border-slate-border'
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs border ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs border ${styles[status] || 'bg-panel-bg text-slate-body border-slate-border'}`}>
       {status}
     </span>
   );

@@ -8,7 +8,8 @@ import {
   FilePlus2,
   ChevronRight,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  ArrowLeft
 } from 'lucide-react';
 
 interface ProjectsPageProps {
@@ -16,13 +17,15 @@ interface ProjectsPageProps {
   userRole: UserRole | 'PUBLIC';
   onSelectProject: (project: Project) => void;
   onNavigateToRecommend?: () => void;
+  onBackToDashboard?: () => void;
 }
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   projects,
   userRole,
   onSelectProject,
-  onNavigateToRecommend
+  onNavigateToRecommend,
+  onBackToDashboard
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
@@ -105,11 +108,27 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Top Persistent Back Button */}
+      {onBackToDashboard && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onBackToDashboard}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>← Back to Overview</span>
+          </button>
+          <span className="text-xs text-slate-muted">
+            Dashboard &gt; Projects
+          </span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-[#1B3022] tracking-tight">MPLADS Works Directory</h1>
-          <p className="text-xs text-[#588157]">
+          <h1 className="text-xl font-bold text-slate-body tracking-tight">MPLADS Works Directory</h1>
+          <p className="text-xs text-slate-muted">
             Official repository of sanctioned, ongoing, and completed developmental works
           </p>
         </div>
@@ -117,16 +136,16 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#DDE5D4] rounded-lg text-xs font-semibold text-[#1B3022] hover:bg-[#F8F9F7] shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-border rounded-lg text-xs font-semibold text-slate-body hover:bg-panel-bg shadow-xs transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-[#588157]" />
+            <Download className="w-3.5 h-3.5 text-slate-muted" />
             <span>Export CSV</span>
           </button>
 
           {(userRole === 'MP' || userRole === 'ADMIN') && onNavigateToRecommend && (
             <button
               onClick={onNavigateToRecommend}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#395C40] hover:bg-[#4a7251] text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-govt-navy hover:bg-govt-navy-light text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               <FilePlus2 className="w-3.5 h-3.5" />
               <span>Recommend Work</span>
@@ -136,10 +155,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-[#DDE5D4] shadow-xs space-y-3">
+      <div className="bg-white rounded-2xl p-4 border border-slate-border shadow-xs space-y-3">
         {/* Search row */}
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#A3B18A]">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-muted">
             <Search className="w-4 h-4" />
           </div>
           <input
@@ -147,18 +166,18 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by project code, title, contractor, village, or address..."
-            className="w-full pl-9 pr-3 py-2 border border-[#DDE5D4] rounded-xl text-xs text-[#1B3022] bg-[#F8F9F7] focus:bg-white focus:ring-2 focus:ring-[#395C40] focus:outline-hidden"
+            className="w-full pl-9 pr-3 py-2 border border-slate-border rounded-xl text-xs text-slate-body bg-panel-bg focus:bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
           />
         </div>
 
         {/* Filter chips row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div>
-            <label className="block text-[11px] font-bold text-[#588157] mb-1 uppercase tracking-wider">Category</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">Category</label>
             <select
               value={categoryFilter}
               onChange={e => setCategoryFilter(e.target.value)}
-              className="w-full px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022]"
+              className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
               {categories.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -167,11 +186,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#588157] mb-1 uppercase tracking-wider">Execution Status</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">Execution Status</label>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="w-full px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022]"
+              className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
               {statuses.map(s => (
                 <option key={s} value={s}>{s}</option>
@@ -180,11 +199,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#588157] mb-1 uppercase tracking-wider">District</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">District</label>
             <select
               value={districtFilter}
               onChange={e => setDistrictFilter(e.target.value)}
-              className="w-full px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022]"
+              className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
               {districts.map(d => (
                 <option key={d} value={d}>{d}</option>
@@ -193,11 +212,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#588157] mb-1 uppercase tracking-wider">AI Risk Level</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">AI Risk Level</label>
             <select
               value={riskFilter}
               onChange={e => setRiskFilter(e.target.value)}
-              className="w-full px-2.5 py-1.5 bg-[#F8F9F7] border border-[#DDE5D4] rounded-lg text-xs text-[#1B3022]"
+              className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
               {risks.map(r => (
                 <option key={r} value={r}>{r}</option>
@@ -208,18 +227,18 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       </div>
 
       {/* Filter Stats Summary */}
-      <div className="flex items-center justify-between text-xs text-[#588157] px-1">
+      <div className="flex items-center justify-between text-xs text-slate-muted px-1">
         <div>
           Showing <strong>{filteredProjects.length}</strong> of {projects.length} developmental works
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[#588157]">Sort by:</span>
+          <span className="text-slate-muted">Sort by:</span>
           <button
             onClick={() => {
               setSortField('risk');
               setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
             }}
-            className={`font-semibold underline cursor-pointer ${sortField === 'risk' ? 'text-[#1B3022]' : 'text-[#588157]'}`}
+            className={`font-semibold underline cursor-pointer ${sortField === 'risk' ? 'text-slate-body' : 'text-slate-muted'}`}
           >
             Risk Score ({sortOrder})
           </button>
@@ -227,10 +246,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       </div>
 
       {/* Projects Table */}
-      <div className="bg-white rounded-2xl border border-[#DDE5D4] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F9F7] text-[#588157] font-bold uppercase text-[10px] border-b border-[#DDE5D4] tracking-wider">
+            <thead className="bg-panel-bg text-slate-muted font-bold uppercase text-[10px] border-b border-slate-border tracking-wider">
               <tr>
                 <th className="p-3">Project Ref</th>
                 <th className="p-3">Work Title & Category</th>
@@ -242,10 +261,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                 <th className="p-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F2ED]">
+            <tbody className="divide-y divide-slate-border">
               {filteredProjects.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-[#588157] text-xs">
+                  <td colSpan={8} className="p-8 text-center text-slate-muted text-xs">
                     No matching projects found for selected filters. Try broadening search criteria.
                   </td>
                 </tr>
@@ -254,41 +273,39 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   <tr
                     key={project.id}
                     onClick={() => onSelectProject(project)}
-                    className="hover:bg-[#F8F9F7] cursor-pointer transition-colors"
+                    className="hover:bg-panel-bg cursor-pointer transition-colors"
                   >
-                    <td className="p-3 font-mono font-semibold text-[#588157] whitespace-nowrap">
+                    <td className="p-3 font-mono font-semibold text-slate-muted whitespace-nowrap">
                       {project.projectCode}
                     </td>
 
                     <td className="p-3 max-w-xs">
-                      <div className="font-bold text-[#1B3022] line-clamp-1">{project.title}</div>
-                      <div className="text-[11px] text-[#588157] mt-0.5">{project.category}</div>
+                      <div className="font-bold text-slate-body line-clamp-1">{project.title}</div>
+                      <div className="text-[11px] text-slate-muted mt-0.5">{project.category}</div>
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
-                      <div className="text-[#1B3022] font-medium">{project.district}</div>
-                      <div className="text-[10px] text-[#588157]">{project.constituency}</div>
+                      <div className="text-slate-body font-medium">{project.district}</div>
+                      <div className="text-[10px] text-slate-muted">{project.constituency}</div>
                     </td>
 
-                    <td className="p-3 text-right whitespace-nowrap font-mono font-semibold text-[#1B3022]">
+                    <td className="p-3 text-right whitespace-nowrap font-mono font-semibold text-slate-body">
                       ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(2)}L
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <div className="w-16 bg-[#DDE5D4] h-2 rounded-full overflow-hidden">
+                        <div className="w-16 bg-slate-border h-2 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
-                              project.status === 'Completed'
-                                ? 'bg-[#395C40]'
-                                : project.status === 'Delayed'
-                                ? 'bg-[#B85338]'
-                                : 'bg-[#588157]'
+                              project.status === 'Delayed'
+                                ? 'bg-status-flagged'
+                                : 'bg-govt-navy'
                             }`}
                             style={{ width: `${project.completionPercentage}%` }}
                           />
                         </div>
-                        <span className="font-mono text-[11px] text-[#1B3022] font-medium">
+                        <span className="font-mono text-[11px] text-slate-body font-medium">
                           {project.completionPercentage}%
                         </span>
                       </div>
@@ -308,7 +325,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                           e.stopPropagation();
                           onSelectProject(project);
                         }}
-                        className="px-2.5 py-1 text-xs font-bold text-[#395C40] bg-[#EAF0E6] border border-[#C8D5B9] rounded-lg hover:bg-[#DDE5D4] transition-colors cursor-pointer"
+                        className="px-2.5 py-1 text-xs font-bold text-govt-navy bg-panel-bg border border-slate-border rounded-lg hover:bg-white transition-colors cursor-pointer"
                       >
                         Audit Details
                       </button>

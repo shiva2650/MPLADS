@@ -253,7 +253,7 @@ export async function runRbacTests() {
 
   res = await makeRequest('POST', '/projects/PRJ-2024-001/status', adminToken, {
     status: 'Sanctioned',
-    sanctionedAmount: 2200000,
+    sanctionedAmount: 50000000,
     remarks: 'Approved after technical scrutiny'
   });
   assertTest('District Authority CAN sanction and update project status (200 OK)', res.status, 200, res.body);

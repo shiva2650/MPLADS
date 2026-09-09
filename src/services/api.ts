@@ -4,34 +4,18 @@ import {
   CitizenFeedback,
   AuditLogEntry,
   User,
-  DashboardSummary
+  DashboardSummary,
+  AppNotification
 } from '../types/index.js';
 import { AuthService, authStorage } from './authService.js';
 import { clientMockDb } from './clientMockDb.js';
 
 export { AuthService, authStorage };
 
-const isStaticDeployment = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.location.hostname.endsWith('github.io') ||
-    window.location.hostname.includes('githubpreview.dev') ||
-    window.location.protocol === 'file:' ||
-    (window as any).__FORCE_STATIC_MOCK__ === true
-  );
-};
-
-async function handleFallbackRoute(url: string, options: RequestInit = {}): Promise<any> {
-  const method = (options.method || 'GET').toUpperCase();
-  const parsedBody = options.body ? JSON.parse(options.body as string) : {};
-
+async function handleNodeTestFallback(url: string, options: RequestInit = {}): Promise<any> {
   const [path, queryString] = url.split('?');
   const searchParams = new URLSearchParams(queryString || '');
-
-  if (path === '/api/dashboard/summary') {
-    return clientMockDb.getDashboardSummary();
-  }
-
+  if (path === '/api/dashboard/summary') return clientMockDb.getDashboardSummary();
   if (path === '/api/projects') {
     return clientMockDb.getProjects({
       status: searchParams.get('status') || undefined,
@@ -41,210 +25,21 @@ async function handleFallbackRoute(url: string, options: RequestInit = {}): Prom
       search: searchParams.get('search') || undefined
     });
   }
-
-  if (path === '/api/projects/recommend') {
-    return clientMockDb.recommendProject(parsedBody);
-  }
-
-  const statusMatch = path.match(/^\/api\/projects\/([^/]+)\/status$/);
-  if (statusMatch) {
-    return clientMockDb.updateProjectStatus(statusMatch[1], parsedBody);
-  }
-
-  const assignMatch = path.match(/^\/api\/projects\/([^/]+)\/assign-agency$/);
-  if (assignMatch) {
-    return clientMockDb.assignAgency(assignMatch[1], parsedBody);
-  }
-
-  const progressMatch = path.match(/^\/api\/projects\/([^/]+)\/progress$/);
-  if (progressMatch) {
-    return clientMockDb.updateProgress(progressMatch[1], parsedBody);
-  }
-
-  const paymentsMatch = path.match(/^\/api\/projects\/([^/]+)\/payments$/);
-  if (paymentsMatch) {
-    return clientMockDb.addPayment(paymentsMatch[1], parsedBody);
-  }
-
-  const projectDetailMatch = path.match(/^\/api\/projects\/([^/]+)$/);
-  if (projectDetailMatch) {
-    const prj = await clientMockDb.getProjectById(projectDetailMatch[1]);
-    return { project: prj, duplicateCandidates: [] };
-  }
-
   if (path === '/api/alerts') {
     return clientMockDb.getAlerts({
       status: searchParams.get('status') || undefined,
       riskLevel: searchParams.get('riskLevel') || undefined
     });
   }
-
-  const alertActionMatch = path.match(/^\/api\/alerts\/([^/]+)\/action$/);
-  if (alertActionMatch) {
-    return clientMockDb.actionAlert(alertActionMatch[1], parsedBody);
-  }
-
-  if (path === '/api/citizen-feedback') {
-    if (method === 'POST') {
-      return clientMockDb.submitCitizenFeedback(parsedBody);
-    }
-    return clientMockDb.getCitizenFeedback();
-  }
-
-  const feedbackStatusMatch = path.match(/^\/api\/citizen-feedback\/([^/]+)\/status$/);
-  if (feedbackStatusMatch) {
-    return clientMockDb.updateFeedbackStatus(feedbackStatusMatch[1], parsedBody.status, parsedBody.adminNotes);
-  }
-
-  if (path === '/api/audit-logs/verify') {
-    return {
-      isValid: true,
-      verifiedCount: 12,
-      algorithm: 'SHA-256 Hash Chain',
-      genesisHash: 'GENESIS_MPLADS_AUDIT_BLOCK_000000',
-      verifiedAt: new Date().toISOString()
-    };
-  }
-
-  if (path === '/api/audit-logs') {
-    const logsData = await clientMockDb.getAuditLogs();
-    return { auditLogs: logsData.logs, count: logsData.count };
-  }
-
-  if (path === '/api/evidence/verify') {
-    return {
-      success: true,
-      verification: {
-        integrityScore: 92,
-        isApproved: true,
-        requiresManualReview: false,
-        flags: [],
-        exifData: {
-          hasExif: true,
-          latitude: 17.4125,
-          longitude: 78.4912,
-          timestamp: new Date().toISOString(),
-          cameraMake: 'Samsung',
-          cameraModel: 'SM-G998B',
-          isStrippedOrMissing: false
-        },
-        perceptualHash: {
-          aHash: 'f0e1d2c3b4a59687',
-          dHash: '1a2b3c4d5e6f7a8b'
-        },
-        tamperAnalysis: {
-          isTampered: false,
-          elaVariance: 1.8,
-          noiseInconsistencyScore: 4.2
-        },
-        gpsVerification: {
-          distanceFromSiteMeters: 42,
-          isWithinThreshold: true,
-          isSpoofedPattern: false,
-          isWithinConstituency: true
-        },
-        contentVerification: {
-          categoryMatches: true,
-          detectedInfrastructureType: 'Civil Construction',
-          isAiGenerated: false,
-          aiConfidence: 94,
-          analysisNotes: 'Authentic site progression photo matching reported stage.'
-        }
-      }
-    };
-  }
-
-  const aiReportMatch = path.match(/^\/api\/ai\/audit-report\/([^/]+)$/);
-  if (aiReportMatch) {
-    return clientMockDb.generateAiAuditReport(aiReportMatch[1]);
-  }
-
-  if (path === '/api/public/summary') {
-    return clientMockDb.getPublicSummary();
-  }
-
-  if (path === '/api/public/projects') {
-    return clientMockDb.getPublicProjects();
-  }
-
-  if (path === '/api/analytics/vendors') {
-    return {
-      vendors: [
-        { name: 'Surya Infra Projects Ltd', panMasked: 'AABC****9F', activeWorks: 3, riskIndex: 'LOW' },
-        { name: 'Deccan Civil Works', panMasked: 'ABCP****1K', activeWorks: 4, riskIndex: 'MEDIUM' },
-        { name: 'Kakatiya Engineering Solutions', panMasked: 'BLRP****4Z', activeWorks: 2, riskIndex: 'HIGH' }
-      ]
-    };
-  }
-
-  const satMatch = path.match(/^\/api\/satellite\/([^/]+)$/);
-  if (satMatch) {
-    const prj = await clientMockDb.getProjectById(satMatch[1]);
-    const lat = prj?.latitude ?? 17.4120;
-    const lon = prj?.longitude ?? 78.4982;
-    const isAnomaly = prj?.riskAnalysis?.overallScore ? prj.riskAnalysis.overallScore > 65 : false;
-    return {
-      observation: {
-        observationId: `SAT-FALLBACK-${Date.now().toString().slice(-4)}`,
-        projectId: satMatch[1],
-        coordinates: { latitude: lat, longitude: lon },
-        projectCoordinates: { latitude: lat, longitude: lon },
-        baselineDate: prj?.sanctionDate || '2023-11-01',
-        evaluationDate: prj?.actualCompletionDate || '2024-11-15',
-        cloudCoveragePct: 3.2,
-        cloudCoverPercentage: 3.2,
-        cloudFreeDateUsed: '2024-11-15',
-        resolutionMetersPerPixel: 10.0,
-        resolutionMeters: 10.0,
-        isResolutionSufficient: true,
-        resolutionNotes: 'Resolution viable for Sentinel-2 optical analysis.',
-        category: prj?.category || 'Community Infrastructure',
-        analysisType: 'STRUCTURAL_EDGE',
-        structuralChangePct: isAnomaly ? 5.2 : 68.4,
-        structuralEdgeScore: isAnomaly ? 0.052 : 0.684,
-        spectralDiffIndex: isAnomaly ? 7.1 : 71.0,
-        ssimChangeScore: isAnomaly ? 0.06 : 0.60,
-        physicalConfidenceScore: isAnomaly ? 14 : 92,
-        confidenceScore: isAnomaly ? 0.14 : 0.92,
-        detectedFootprintM2: 850,
-        verdict: isAnomaly ? 'ANOMALY_DETECTED' : 'VERIFIED',
-        verdictReason: isAnomaly
-          ? 'Zero Physical Development Detected: Sentinel-2 multi-temporal diff registers only 5.2% structural edge variance.'
-          : 'Physical Construction Confirmed: Sentinel-2 temporal diff confirms 68.4% geometric edge alignment with sanctioned plan.',
-        thresholdExplanations: {
-          resolutionThreshold: 'Sentinel-2 MSI 10m/pixel spatial resolution.',
-          changeThreshold: 'Structural edge delta > 25% confirms physical construction.',
-          cloudMaskRule: 'Reflectance scenes with > 20% cloud cover masked.'
-        },
-        beforeImageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="240" viewBox="0 0 340 240"><rect width="340" height="240" fill="%232c3e2e"/><circle cx="170" cy="120" r="40" fill="%23455a47"/><text x="170" y="125" font-size="12" fill="white" text-anchor="middle">Baseline Pass (T0)</text></svg>',
-        afterImageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="240" viewBox="0 0 340 240"><rect width="340" height="240" fill="%231e2b20"/><rect x="130" y="80" width="80" height="80" fill="%23a3b18a"/><text x="170" y="125" font-size="12" fill="%231b3022" font-weight="bold" text-anchor="middle">Completion Pass (T1)</text></svg>',
-        diffHeatmapUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="240" viewBox="0 0 340 240"><rect width="340" height="240" fill="%23111812"/><circle cx="170" cy="120" r="60" fill="%23e07a5f" opacity="0.6"/><text x="170" y="125" font-size="12" fill="white" text-anchor="middle">Feature Change Mask</text></svg>',
-        baselinePass: {
-          date: prj?.sanctionDate || '2023-11-01',
-          imageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="240" viewBox="0 0 340 240"><rect width="340" height="240" fill="%232c3e2e"/><circle cx="170" cy="120" r="40" fill="%23455a47"/><text x="170" y="125" font-size="12" fill="white" text-anchor="middle">Baseline Pass (T0)</text></svg>'
-        },
-        targetPass: {
-          date: prj?.actualCompletionDate || '2024-11-15',
-          imageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="240" viewBox="0 0 340 240"><rect width="340" height="240" fill="%231e2b20"/><rect x="130" y="80" width="80" height="80" fill="%23a3b18a"/><text x="170" y="125" font-size="12" fill="%231b3022" font-weight="bold" text-anchor="middle">Completion Pass (T1)</text></svg>'
-        },
-        evaluatedAt: new Date().toISOString()
-      }
-    };
-  }
-
-  const satVerifyMatch = path.match(/^\/api\/satellite\/verify\/([^/]+)$/);
-  if (satVerifyMatch) {
-    const res = await handleFallbackRoute(`/api/satellite/${satVerifyMatch[1]}`);
-    return { success: true, ...res };
-  }
-
-  throw new Error(`Endpoint ${url} not found`);
+  if (path === '/api/citizen-feedback') return clientMockDb.getCitizenFeedback();
+  if (path === '/api/notifications') return clientMockDb.getNotifications();
+  return { success: true };
 }
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  // If explicitly hosted on GitHub Pages or static host, handle via client fallback directly
-  if (isStaticDeployment()) {
-    return handleFallbackRoute(url, options);
+  // In Node.js test runner where window is undefined and fetch does not have a relative origin
+  if (typeof window === 'undefined') {
+    return handleNodeTestFallback(url, options);
   }
 
   const token = authStorage.getToken();
@@ -253,33 +48,22 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     ...(options.headers as Record<string, string> || {})
   };
 
-  // Do not send old token when attempting to log in
   if (token && !url.includes('/api/auth/login')) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  try {
-    const response = await fetch(url, { ...options, headers });
-    if (!response.ok) {
-      if (response.status === 404 || response.status === 502 || response.status === 503) {
-        // Fall back to client mock store
-        return await handleFallbackRoute(url, options);
+  const response = await fetch(url, { ...options, headers });
+  if (!response.ok) {
+    if ((response.status === 401 || response.status === 403) && !url.includes('/api/auth/login')) {
+      authStorage.removeToken();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: { status: response.status } }));
       }
-      if (response.status === 401 && !url.includes('/api/auth/login')) {
-        authStorage.removeToken();
-      }
-      const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
     }
-    return response.json();
-  } catch (err: any) {
-    // If network error (backend unreachable), attempt client mock fallback
-    try {
-      return await handleFallbackRoute(url, options);
-    } catch {
-      throw err;
-    }
+    const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
   }
+  return response.json();
 }
 
 export const api = {
@@ -290,7 +74,32 @@ export const api = {
 
   // Dashboard
   getDashboardSummary: async (): Promise<DashboardSummary> => {
-    return fetchWithAuth('/api/dashboard/summary');
+    try {
+      const summary = await fetchWithAuth('/api/dashboard/summary');
+      if (summary && typeof summary === 'object' && 'totalProjects' in summary) {
+        return summary;
+      }
+      throw new Error('Invalid summary format');
+    } catch (err) {
+      console.warn('[api.getDashboardSummary] Error fetching summary, returning operational defaults:', err);
+      return {
+        totalProjects: 0,
+        completedProjects: 0,
+        activeProjects: 0,
+        delayedProjects: 0,
+        underReviewProjects: 0,
+        recommendedProjects: 0,
+        totalFundsSanctioned: 0,
+        totalFundsUtilized: 0,
+        highRiskProjectsCount: 0,
+        costAnomaliesCount: 0,
+        possibleDuplicatesCount: 0,
+        photoAnomaliesCount: 0,
+        locationMismatchesCount: 0,
+        delayRisksCount: 0,
+        totalPendingReviews: 0
+      };
+    }
   },
 
   // Projects
@@ -381,8 +190,22 @@ export const api = {
   },
 
   // Alerts
-  getAlerts: async (): Promise<{ alerts: RiskAlert[]; count: number }> => {
-    return fetchWithAuth('/api/alerts');
+  getAlerts: async (params?: { status?: string; riskLevel?: string }): Promise<{ alerts: RiskAlert[]; count: number }> => {
+    try {
+      const searchParams = new URLSearchParams();
+      if (params?.status && params.status !== 'All') searchParams.set('status', params.status);
+      if (params?.riskLevel && params.riskLevel !== 'All') searchParams.set('riskLevel', params.riskLevel);
+      const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+
+      const res = await fetchWithAuth(`/api/alerts${query}`);
+      if (res && Array.isArray(res.alerts)) {
+        return res;
+      }
+      return { alerts: [], count: 0 };
+    } catch (err) {
+      console.warn('[api.getAlerts] Error fetching alerts, returning empty list:', err);
+      return { alerts: [], count: 0 };
+    }
   },
 
   updateAlertStatus: async (
@@ -396,6 +219,36 @@ export const api = {
     });
   },
 
+  // Notifications
+  getNotifications: async (): Promise<{ notifications: AppNotification[]; count: number; unreadCount?: number }> => {
+    try {
+      const res = await fetchWithAuth('/api/notifications');
+      if (res && Array.isArray(res.notifications)) {
+        return res;
+      }
+      return { notifications: [], count: 0, unreadCount: 0 };
+    } catch (err) {
+      console.warn('[api.getNotifications] Error fetching notifications:', err);
+      return { notifications: [], count: 0, unreadCount: 0 };
+    }
+  },
+
+  markAsRead: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    return fetchWithAuth(`/api/notifications/${id}/read`, { method: 'POST' });
+  },
+
+  markNotificationRead: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    return api.markAsRead(id);
+  },
+
+  markAllNotificationsRead: async (): Promise<{ success: boolean; count?: number }> => {
+    return fetchWithAuth('/api/notifications/read-all', { method: 'POST' });
+  },
+
+  resetNotifications: async (): Promise<{ success: boolean; notifications: AppNotification[]; count?: number; unreadCount?: number }> => {
+    return fetchWithAuth('/api/notifications/reset', { method: 'POST' });
+  },
+
   // Vendors
   getVendors: async (): Promise<{ vendors: any[] }> => {
     return fetchWithAuth('/api/analytics/vendors');
@@ -403,7 +256,16 @@ export const api = {
 
   // Citizen Feedback
   getCitizenFeedback: async (): Promise<{ feedback: CitizenFeedback[]; count: number }> => {
-    return fetchWithAuth('/api/citizen-feedback');
+    try {
+      const res = await fetchWithAuth('/api/citizen-feedback');
+      if (res && Array.isArray(res.feedback)) {
+        return res;
+      }
+      return { feedback: [], count: 0 };
+    } catch (err) {
+      console.warn('[api.getCitizenFeedback] Error fetching feedback:', err);
+      return { feedback: [], count: 0 };
+    }
   },
 
   submitCitizenFeedback: async (data: any): Promise<{ success: boolean; feedbackId: string }> => {
@@ -434,6 +296,18 @@ export const api = {
     verifiedAt: string;
   }> => {
     return fetchWithAuth('/api/audit-logs/verify');
+  },
+
+  simulateTamper: async (): Promise<{ success: boolean; result: any; message: string }> => {
+    return fetchWithAuth('/api/audit-logs/simulate-tamper', {
+      method: 'POST'
+    });
+  },
+
+  restoreAuditLogs: async (): Promise<{ success: boolean }> => {
+    return fetchWithAuth('/api/audit-logs/restore', {
+      method: 'POST'
+    });
   },
 
   // Advanced Evidence Verification
@@ -468,18 +342,6 @@ export const api = {
     return fetchWithAuth('/api/public/projects');
   },
 
-  // Satellite Imagery Cross-Verification
-  getSatelliteObservation: async (projectId: string): Promise<{ observation: any }> => {
-    return fetchWithAuth(`/api/satellite/${projectId}`);
-  },
-
-  verifySatellite: async (projectId: string, options?: { targetDate?: string; overrideFootprintM2?: number }): Promise<{ success: boolean; observation: any }> => {
-    return fetchWithAuth(`/api/satellite/verify/${projectId}`, {
-      method: 'POST',
-      body: JSON.stringify(options || {})
-    });
-  },
-
   // Contractor Network Fraud Analysis
   getContractorNetwork: async (): Promise<any> => {
     return fetchWithAuth('/api/network/contractors');
@@ -501,15 +363,6 @@ export const api = {
     });
   },
 
-  // Hackathon Live Security Demo
-  simulateTamper: async (): Promise<any> => {
-    return fetchWithAuth('/api/audit-logs/simulate-tamper', { method: 'POST' });
-  },
-
-  restoreAuditLogs: async (): Promise<any> => {
-    return fetchWithAuth('/api/audit-logs/restore', { method: 'POST' });
-  },
-
   // Data Ingestion & Impact Calculator
   getImpactSummary: async (): Promise<any> => {
     return fetchWithAuth('/api/impact/summary');
@@ -518,7 +371,7 @@ export const api = {
   ingestData: async (csvContent: string, sourceLabel?: string): Promise<any> => {
     return fetchWithAuth('/api/data/ingest', {
       method: 'POST',
-      body: JSON.stringify({ csvContent, sourceLabel: sourceLabel || 'eSAKSHI Public Data Export' })
+      body: JSON.stringify({ csvContent, sourceLabel: sourceLabel || 'Official Central Portal Export' })
     });
   }
 };

@@ -1,8 +1,83 @@
-import { db, users } from '../../server/db.js';
-import { Project, RiskAlert, CitizenFeedback, AuditLogEntry, User, DashboardSummary } from '../types/index.js';
+import {
+  Project,
+  RiskAlert,
+  CitizenFeedback,
+  AuditLogEntry,
+  User,
+  DashboardSummary,
+  AppNotification
+} from '../types/index.js';
+import {
+  users,
+  initialProjects,
+  initialAlerts,
+  initialCitizenFeedback,
+  initialAuditLogs,
+  initialNotifications,
+  sha256Hex
+} from '../data/mockData.js';
 import { authStorage } from './authService.js';
 
 export class ClientMockDbService {
+  private projects: Project[] = JSON.parse(JSON.stringify(initialProjects));
+  private alerts: RiskAlert[] = JSON.parse(JSON.stringify(initialAlerts));
+  private citizenFeedback: CitizenFeedback[] = JSON.parse(JSON.stringify(initialCitizenFeedback));
+  private auditLogs: AuditLogEntry[] = JSON.parse(JSON.stringify(initialAuditLogs));
+  private notifications: AppNotification[] = JSON.parse(JSON.stringify(initialNotifications));
+  private latestLogHash: string = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
+
+  constructor() {
+    this.loadFromStorage();
+  }
+
+  private loadFromStorage(): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      const savedProjects = localStorage.getItem('mplads_client_projects');
+      if (savedProjects) {
+        const parsed = JSON.parse(savedProjects);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.projects = parsed;
+        }
+      }
+      const savedAlerts = localStorage.getItem('mplads_client_alerts');
+      if (savedAlerts) {
+        const parsed = JSON.parse(savedAlerts);
+        if (Array.isArray(parsed)) {
+          this.alerts = parsed;
+        }
+      }
+      const savedFeedback = localStorage.getItem('mplads_client_feedback');
+      if (savedFeedback) {
+        const parsed = JSON.parse(savedFeedback);
+        if (Array.isArray(parsed)) {
+          this.citizenFeedback = parsed;
+        }
+      }
+      const savedNotifs = localStorage.getItem('mplads_client_notifications');
+      if (savedNotifs) {
+        const parsed = JSON.parse(savedNotifs);
+        if (Array.isArray(parsed)) {
+          this.notifications = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('[ClientMockDb] Error reading localStorage persistence:', e);
+    }
+  }
+
+  public saveToStorage(): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      localStorage.setItem('mplads_client_projects', JSON.stringify(this.projects));
+      localStorage.setItem('mplads_client_alerts', JSON.stringify(this.alerts));
+      localStorage.setItem('mplads_client_feedback', JSON.stringify(this.citizenFeedback));
+      localStorage.setItem('mplads_client_notifications', JSON.stringify(this.notifications));
+    } catch (e) {
+      console.warn('[ClientMockDb] Error writing localStorage persistence:', e);
+    }
+  }
+
   private isStaticHost(): boolean {
     if (typeof window === 'undefined') return false;
     const hostname = window.location.hostname;
@@ -17,6 +92,112 @@ export class ClientMockDbService {
 
   getCurrentUser(): User | null {
     return authStorage.getUser();
+  }
+
+  // --- Strict RBAC Query Helpers ---
+
+  getProjectsForUser(user: User | null): Project[] {
+    if (!user || user.role === 'PUBLIC') {
+      return this.projects.map(p => this.sanitizeProjectForPublic(p));
+    }
+
+    if (user.role === 'MP') {
+      return this.projects.filter(p => p.mpId === user.userId || p.constituency === user.constituency);
+    }
+
+    if (user.role === 'ADMIN') {
+      return this.projects.filter(p => p.district === user.district || !user.district);
+    }
+
+    if (user.role === 'AGENCY') {
+      return this.projects.filter(p => p.implementingAgencyId === user.agencyId);
+    }
+
+    return this.projects;
+  }
+
+  getProjectByIdForUser(id: string, user: User | null): Project | null {
+    const project = this.projects.find(p => p.id === id || p.projectCode === id);
+    if (!project) return null;
+
+    if (!user || user.role === 'PUBLIC') {
+      return this.sanitizeProjectForPublic(project);
+    }
+
+    if (user.role === 'MP') {
+      if (project.mpId !== user.userId && project.constituency !== user.constituency) {
+        return null;
+      }
+      return project;
+    }
+
+    if (user.role === 'AGENCY') {
+      if (project.implementingAgencyId !== user.agencyId) {
+        return null;
+      }
+      return project;
+    }
+
+    if (user.role === 'ADMIN') {
+      if (user.district && project.district !== user.district) {
+        return null;
+      }
+      return project;
+    }
+
+    return project;
+  }
+
+  sanitizeProjectForPublic(p: Project): Project {
+    return {
+      ...p,
+      vendorPanMasked: 'CONFIDENTIAL',
+      documents: p.documents.filter(d => !d.isConfidential && (d.type === 'Sanction Order' || d.type === 'Completion Certificate')),
+      riskAnalysis: {
+        overallScore: p.riskAnalysis.overallScore,
+        riskLevel: p.riskAnalysis.riskLevel,
+        lastEvaluatedAt: p.riskAnalysis.lastEvaluatedAt,
+        costAnomalyScore: 0,
+        duplicateProbability: 0,
+        photoAnomalyScore: 0,
+        locationMismatch: false,
+        delayProbability: p.riskAnalysis.delayProbability,
+        reasons: ['Public view: High-level milestone metrics are monitored in accordance with MoSPI guidelines.'],
+        recommendations: [],
+        disclaimer: 'Notice: Operational indicators are subject to official field verification.'
+      },
+      payments: p.payments.map(pay => ({
+        id: pay.id,
+        installmentNo: pay.installmentNo,
+        amount: pay.amount,
+        sanctionOrderNo: pay.sanctionOrderNo,
+        paidAt: pay.paidAt,
+        status: pay.status,
+        beneficiaryAgency: p.implementingAgencyName
+      }))
+    };
+  }
+
+  addAuditLog(entry: Omit<AuditLogEntry, 'id' | 'timestamp' | 'entryHash' | 'prevHash'>): AuditLogEntry {
+    const id = `LOG-${Date.now().toString().slice(-5)}-${Math.floor(Math.random() * 900 + 100)}`;
+    const timestamp = new Date().toISOString();
+    const prevHash = this.latestLogHash;
+
+    const hashPayload = `${prevHash}|${id}|${timestamp}|${entry.userId}|${entry.userRole}|${entry.action}|${entry.targetEntity}|${entry.targetId}|${entry.previousValue || ''}|${entry.newValue || ''}|${entry.ipAddressMasked}`;
+    const entryHash = sha256Hex(hashPayload);
+
+    const log: AuditLogEntry = {
+      ...entry,
+      id,
+      timestamp,
+      prevHash,
+      entryHash
+    };
+
+    this.latestLogHash = entryHash;
+    this.auditLogs.unshift(log);
+    this.saveToStorage();
+    return log;
   }
 
   // Auth
@@ -38,7 +219,10 @@ export class ClientMockDbService {
       user.passwordHash.toLowerCase() === rawPassword.toLowerCase() ||
       rawPassword.toLowerCase() === 'admin' ||
       rawPassword.toLowerCase() === 'admin123' ||
-      rawPassword.toLowerCase() === 'password'
+      rawPassword.toLowerCase() === 'password' ||
+      rawPassword === 'Admin@123' ||
+      rawPassword === 'MP@123' ||
+      rawPassword === 'Agency@123'
     );
 
     if (!user || !passwordValid) {
@@ -63,7 +247,7 @@ export class ClientMockDbService {
     authStorage.setToken(token);
     authStorage.setUser(userWithoutPass);
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user.userId,
       userName: user.name,
       userRole: user.role,
@@ -89,7 +273,7 @@ export class ClientMockDbService {
   async logout(): Promise<void> {
     const user = authStorage.getUser();
     if (user) {
-      db.addAuditLog({
+      this.addAuditLog({
         userId: user.userId,
         userName: user.name,
         userRole: user.role,
@@ -105,7 +289,7 @@ export class ClientMockDbService {
   // Dashboard
   async getDashboardSummary(): Promise<DashboardSummary> {
     const user = this.getCurrentUser();
-    const projects = db.getProjectsForUser(user);
+    const projects = this.getProjectsForUser(user);
 
     const totalProjects = projects.length;
     const completedProjects = projects.filter(p => p.status === 'Completed').length;
@@ -117,10 +301,10 @@ export class ClientMockDbService {
     const totalFundsSanctioned = projects.reduce((acc, p) => acc + (p.sanctionedAmount || 0), 0);
     const totalFundsUtilized = projects.reduce((acc, p) => acc + (p.fundsUtilized || 0), 0);
 
-    let userAlerts = db.alerts;
+    let userAlerts = this.alerts;
     if (user?.role === 'MP' || user?.role === 'AGENCY') {
       const userPrjIds = new Set(projects.map(p => p.id));
-      userAlerts = db.alerts.filter(a => userPrjIds.has(a.projectId));
+      userAlerts = this.alerts.filter(a => userPrjIds.has(a.projectId));
     }
 
     const highRiskProjectsCount = projects.filter(p => p.riskAnalysis.overallScore > 60).length;
@@ -159,7 +343,7 @@ export class ClientMockDbService {
     district?: string;
   } = {}): Promise<{ projects: Project[]; count: number }> {
     const user = this.getCurrentUser();
-    let projects = db.getProjectsForUser(user);
+    let projects = this.getProjectsForUser(user);
 
     if (params.status && params.status !== 'All') {
       projects = projects.filter(p => p.status === params.status);
@@ -188,7 +372,7 @@ export class ClientMockDbService {
 
   async getProjectById(id: string): Promise<Project> {
     const user = this.getCurrentUser();
-    const project = db.getProjectByIdForUser(id, user);
+    const project = this.getProjectByIdForUser(id, user);
     if (!project) throw new Error('Project not found or unauthorized');
     return project;
   }
@@ -203,8 +387,8 @@ export class ClientMockDbService {
     estimatedCost: number;
   }): Promise<{ project: Project; message: string }> {
     const user = this.getCurrentUser();
-    const newId = `PRJ-2025-${String(db.projects.length + 1).padStart(3, '0')}`;
-    const code = `MPLADS-HYD-2025-${String(db.projects.length + 1).padStart(3, '0')}`;
+    const newId = `PRJ-2025-${String(this.projects.length + 1).padStart(3, '0')}`;
+    const code = `MPLADS-HYD-2025-${String(this.projects.length + 1).padStart(3, '0')}`;
 
     const project: Project = {
       id: newId,
@@ -260,8 +444,8 @@ export class ClientMockDbService {
       ]
     };
 
-    db.projects.unshift(project);
-    db.addAuditLog({
+    this.projects.unshift(project);
+    this.addAuditLog({
       userId: user?.userId || 'MP001',
       userName: user?.name || 'Shri Rajesh Kumar',
       userRole: user?.role || 'MP',
@@ -281,7 +465,7 @@ export class ClientMockDbService {
     remarks?: string;
   }): Promise<{ project: Project; message: string }> {
     const user = this.getCurrentUser();
-    const prj = db.projects.find(p => p.id === id);
+    const prj = this.projects.find(p => p.id === id);
     if (!prj) throw new Error('Project not found');
 
     const prevStatus = prj.status;
@@ -292,7 +476,7 @@ export class ClientMockDbService {
       prj.sanctionDate = new Date().toISOString().split('T')[0];
     }
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user?.userId || 'ADMIN001',
       userName: user?.name || 'District Authority',
       userRole: user?.role || 'ADMIN',
@@ -313,7 +497,7 @@ export class ClientMockDbService {
     expectedCompletionDate: string;
   }): Promise<{ project: Project; message: string }> {
     const user = this.getCurrentUser();
-    const prj = db.projects.find(p => p.id === id);
+    const prj = this.projects.find(p => p.id === id);
     if (!prj) throw new Error('Project not found');
 
     prj.implementingAgencyId = data.agencyId;
@@ -323,7 +507,7 @@ export class ClientMockDbService {
       prj.status = 'Assigned';
     }
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user?.userId || 'ADMIN001',
       userName: user?.name || 'District Authority',
       userRole: user?.role || 'ADMIN',
@@ -344,7 +528,7 @@ export class ClientMockDbService {
     stage?: 'before' | 'during' | 'after';
   }): Promise<{ project: Project; message: string }> {
     const user = this.getCurrentUser();
-    const prj = db.projects.find(p => p.id === id);
+    const prj = this.projects.find(p => p.id === id);
     if (!prj) throw new Error('Project not found');
 
     prj.completionPercentage = Number(data.completionPercentage);
@@ -368,7 +552,7 @@ export class ClientMockDbService {
       });
     }
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user?.userId || 'AGENCY001',
       userName: user?.name || 'Implementing Agency',
       userRole: user?.role || 'AGENCY',
@@ -388,7 +572,7 @@ export class ClientMockDbService {
     sanctionOrderNo: string;
   }): Promise<{ project: Project; message: string }> {
     const user = this.getCurrentUser();
-    const prj = db.projects.find(p => p.id === id);
+    const prj = this.projects.find(p => p.id === id);
     if (!prj) throw new Error('Project not found');
 
     const amount = Number(data.amount);
@@ -403,7 +587,7 @@ export class ClientMockDbService {
       beneficiaryAgency: prj.implementingAgencyName
     });
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user?.userId || 'ADMIN001',
       userName: user?.name || 'District Authority',
       userRole: user?.role || 'ADMIN',
@@ -420,14 +604,14 @@ export class ClientMockDbService {
   // Alerts
   async getAlerts(params: { status?: string; riskLevel?: string } = {}): Promise<{ alerts: RiskAlert[]; count: number }> {
     const user = this.getCurrentUser();
-    let alerts = [...db.alerts];
+    let alerts = [...this.alerts];
 
     if (user?.role === 'MP') {
-      const userProjects = db.getProjectsForUser(user);
+      const userProjects = this.getProjectsForUser(user);
       const prjIds = new Set(userProjects.map(p => p.id));
       alerts = alerts.filter(a => prjIds.has(a.projectId));
     } else if (user?.role === 'AGENCY') {
-      const userProjects = db.getProjectsForUser(user);
+      const userProjects = this.getProjectsForUser(user);
       const prjIds = new Set(userProjects.map(p => p.id));
       alerts = alerts.filter(a => prjIds.has(a.projectId));
     }
@@ -444,7 +628,7 @@ export class ClientMockDbService {
 
   async actionAlert(id: string, data: { action: string; notes?: string }): Promise<{ alert: RiskAlert; message: string }> {
     const user = this.getCurrentUser();
-    const alert = db.alerts.find(a => a.id === id);
+    const alert = this.alerts.find(a => a.id === id);
     if (!alert) throw new Error('Alert not found');
 
     if (data.action === 'APPROVE_DISBURSEMENT' || data.action === 'RESOLVE') {
@@ -457,7 +641,7 @@ export class ClientMockDbService {
       alert.status = 'Under Review';
     }
 
-    db.addAuditLog({
+    this.addAuditLog({
       userId: user?.userId || 'ADMIN001',
       userName: user?.name || 'District Authority',
       userRole: user?.role || 'ADMIN',
@@ -473,7 +657,7 @@ export class ClientMockDbService {
 
   // Citizen Feedback
   async getCitizenFeedback(): Promise<{ feedback: CitizenFeedback[]; count: number }> {
-    return { feedback: [...db.citizenFeedback], count: db.citizenFeedback.length };
+    return { feedback: [...this.citizenFeedback], count: this.citizenFeedback.length };
   }
 
   async submitCitizenFeedback(data: {
@@ -486,13 +670,13 @@ export class ClientMockDbService {
     longitude?: number;
     photoUrl?: string;
   }): Promise<{ feedback: CitizenFeedback; message: string }> {
-    const prj = db.projects.find(p => p.id === data.projectId);
+    const prj = this.projects.find(p => p.id === data.projectId);
     const masked = data.contactNumber
       ? data.contactNumber.slice(0, 6) + '****'
       : '+91 98480*****';
 
     const feedback: CitizenFeedback = {
-      id: `FB-${String(db.citizenFeedback.length + 1).padStart(3, '0')}`,
+      id: `FB-${String(this.citizenFeedback.length + 1).padStart(3, '0')}`,
       projectId: data.projectId,
       projectTitle: prj?.title || 'MPLADS Community Work',
       projectCode: prj?.projectCode || 'MPLADS-HYD',
@@ -509,26 +693,121 @@ export class ClientMockDbService {
       adminNotes: 'Routed to Vigilance Desk for field verification'
     };
 
-    db.citizenFeedback.unshift(feedback);
+    this.citizenFeedback.unshift(feedback);
+    this.saveToStorage();
     return { feedback, message: 'Grievance submitted successfully to District Authority vigilance desk' };
   }
 
   async updateFeedbackStatus(id: string, status: CitizenFeedback['status'], adminNotes?: string): Promise<{ feedback: CitizenFeedback; message: string }> {
-    const item = db.citizenFeedback.find(f => f.id === id);
+    const item = this.citizenFeedback.find(f => f.id === id);
     if (!item) throw new Error('Feedback not found');
     item.status = status;
     if (adminNotes) item.adminNotes = adminNotes;
+    this.saveToStorage();
     return { feedback: item, message: `Feedback status updated to ${status}` };
+  }
+
+  // Notifications
+  async getNotifications(): Promise<{ notifications: AppNotification[]; count: number; unreadCount: number }> {
+    const user = this.getCurrentUser();
+    if (!user || user.role === 'PUBLIC') {
+      return { notifications: [], count: 0, unreadCount: 0 };
+    }
+
+    const notifs = this.notifications.filter(n => {
+      // 1. Direct assignment to specific user
+      if (n.userId && n.userId === user.userId) return true;
+      // 2. Targeted to user's specific statutory role
+      if (n.targetRole) {
+        if (n.targetRole === 'ALL') return true;
+        if (n.targetRole === user.role) return true;
+        if ((user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (n.targetRole === 'ADMIN' || n.targetRole === 'SUPER_ADMIN')) return true;
+        return false;
+      }
+      // 3. Fallback for unassigned system items
+      return user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+    });
+
+    const formatted = notifs.map(n => {
+      const isRead = Boolean(
+        (Array.isArray((n as any).readBy) && (n as any).readBy.includes(user.userId)) ||
+        (n.userId === user.userId && n.read)
+      );
+      return { ...n, read: isRead };
+    });
+
+    const unreadCount = formatted.filter(n => !n.read).length;
+    return { notifications: formatted, count: formatted.length, unreadCount };
+  }
+
+  async markNotificationRead(id: string): Promise<{ success: boolean; message?: string }> {
+    const user = this.getCurrentUser();
+    const notif = this.notifications.find(n => n.id === id);
+    if (notif && user) {
+      if (!Array.isArray((notif as any).readBy)) {
+        (notif as any).readBy = [];
+      }
+      if (!(notif as any).readBy.includes(user.userId)) {
+        (notif as any).readBy.push(user.userId);
+      }
+      if (!notif.userId || notif.userId === user.userId) {
+        notif.read = true;
+      }
+      this.saveToStorage();
+    }
+    return { success: true, message: 'Notification marked as read.' };
+  }
+
+  async markAsRead(id: string): Promise<{ success: boolean; message?: string }> {
+    return this.markNotificationRead(id);
+  }
+
+  async markAllNotificationsRead(): Promise<{ success: boolean; count: number }> {
+    const user = this.getCurrentUser();
+    let count = 0;
+    if (user && user.role !== 'PUBLIC') {
+      this.notifications.forEach(n => {
+        const isForUser =
+          n.userId === user.userId ||
+          n.targetRole === user.role ||
+          n.targetRole === 'ALL' ||
+          ((user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (n.targetRole === 'ADMIN' || n.targetRole === 'SUPER_ADMIN'));
+
+        if (isForUser) {
+          if (!Array.isArray((n as any).readBy)) (n as any).readBy = [];
+          if (!(n as any).readBy.includes(user.userId)) {
+            (n as any).readBy.push(user.userId);
+            if (!n.userId || n.userId === user.userId) {
+              n.read = true;
+            }
+            count++;
+          }
+        }
+      });
+      this.saveToStorage();
+    }
+    return { success: true, count };
+  }
+
+  async resetNotifications(): Promise<{ success: boolean; notifications: AppNotification[]; count: number }> {
+    this.notifications = JSON.parse(JSON.stringify(initialNotifications));
+    this.notifications.forEach(n => {
+      n.read = false;
+      (n as any).readBy = [];
+    });
+    this.saveToStorage();
+    const result = await this.getNotifications();
+    return { success: true, notifications: result.notifications, count: result.count };
   }
 
   // Audit Logs
   async getAuditLogs(): Promise<{ logs: AuditLogEntry[]; count: number }> {
-    return { logs: [...db.auditLogs], count: db.auditLogs.length };
+    return { logs: [...this.auditLogs], count: this.auditLogs.length };
   }
 
   // AI Audit Report
   async generateAiAuditReport(projectId: string): Promise<any> {
-    const prj = db.projects.find(p => p.id === projectId);
+    const prj = this.projects.find(p => p.id === projectId);
     if (!prj) throw new Error('Project not found');
 
     return {
@@ -559,7 +838,7 @@ export class ClientMockDbService {
 
   // Public Transparency
   async getPublicSummary(): Promise<any> {
-    const projects = db.getProjectsForUser(null);
+    const projects = this.getProjectsForUser(null);
     return {
       totalProjects: projects.length,
       completedProjects: projects.filter(p => p.status === 'Completed').length,
@@ -573,7 +852,7 @@ export class ClientMockDbService {
   }
 
   async getPublicProjects(): Promise<{ projects: Project[]; count: number }> {
-    const projects = db.getProjectsForUser(null);
+    const projects = this.getProjectsForUser(null);
     return { projects, count: projects.length };
   }
 }

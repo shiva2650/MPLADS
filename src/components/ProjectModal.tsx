@@ -39,8 +39,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   duplicateCandidates = [],
   initialTab = 'overview'
 }) => {
-  if (!project) return null;
-
   const [activeTab, setActiveTab] = useState<'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report'>(initialTab);
   const [isGeneratingAiReport, setIsGeneratingAiReport] = useState(false);
   const [aiReportContent, setAiReportContent] = useState<string | null>(null);
@@ -51,6 +49,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab, project?.id]);
+
+  if (!project) return null;
 
   const handleGenerateReport = async () => {
     setIsGeneratingAiReport(true);
@@ -69,17 +69,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const isPublic = userRole === 'PUBLIC';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1B3022]/60 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#F8F9F7] rounded-2xl shadow-2xl border border-[#DDE5D4] overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-govt-navy-dark/60 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-border overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-[#1B3022] text-white flex items-center justify-between border-b border-[#2C4A34]">
+        <div className="px-6 py-4 bg-govt-navy text-white flex items-center justify-between border-b border-govt-navy-dark">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#395C40]/50 text-[#DDE5D4] border border-[#395C40]">
+            <div className="p-2 rounded-xl bg-govt-navy-light text-white border border-white/20">
               <FileText className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-[#A3B18A] font-bold">{project.projectCode}</span>
+                <span className="font-mono text-xs text-panel-bg/80 font-bold">{project.projectCode}</span>
                 <StatusBadge status={project.status} />
                 <RiskBadge level={project.riskAnalysis.riskLevel} score={project.riskAnalysis.overallScore} />
               </div>
@@ -90,20 +90,20 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           <button
             id="close-project-modal-btn"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#A3B18A] hover:text-white hover:bg-[#395C40] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-panel-bg/80 hover:text-white hover:bg-govt-navy-light transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-[#DDE5D4] bg-[#F8F9F7] px-6 overflow-x-auto gap-1 text-xs font-bold">
+        <div className="flex border-b border-slate-border bg-panel-bg px-6 overflow-x-auto gap-1 text-xs font-bold">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
               activeTab === 'overview'
-                ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                : 'border-transparent text-[#588157] hover:text-[#1B3022]'
+                ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                : 'border-transparent text-slate-muted hover:text-govt-navy'
             }`}
           >
             Project Overview & Timeline
@@ -113,14 +113,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             onClick={() => setActiveTab('ai-risk')}
             className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ai-risk'
-                ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                : 'border-transparent text-[#588157] hover:text-[#1B3022]'
+                ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                : 'border-transparent text-slate-muted hover:text-govt-navy'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#E07A5F]" />
+            <Sparkles className="w-3.5 h-3.5 text-govt-saffron" />
             AI Risk & Anomaly Assessment
             {project.riskAnalysis.overallScore > 60 && (
-              <span className="w-2 h-2 rounded-full bg-[#E07A5F]" />
+              <span className="w-2 h-2 rounded-full bg-status-flagged" />
             )}
           </button>
 
@@ -128,11 +128,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             onClick={() => setActiveTab('photos')}
             className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'photos'
-                ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                : 'border-transparent text-[#588157] hover:text-[#1B3022]'
+                ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                : 'border-transparent text-slate-muted hover:text-govt-navy'
             }`}
           >
-            <Camera className="w-3.5 h-3.5 text-[#588157]" />
+            <Camera className="w-3.5 h-3.5 text-slate-muted" />
             Site Photos ({project.photos.length})
           </button>
 
@@ -140,11 +140,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             onClick={() => setActiveTab('financials')}
             className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'financials'
-                ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                : 'border-transparent text-[#588157] hover:text-[#1B3022]'
+                ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                : 'border-transparent text-slate-muted hover:text-govt-navy'
             }`}
           >
-            <IndianRupee className="w-3.5 h-3.5 text-[#588157]" />
+            <IndianRupee className="w-3.5 h-3.5 text-slate-muted" />
             Funds & Payments
           </button>
 
@@ -152,8 +152,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             onClick={() => setActiveTab('documents')}
             className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
               activeTab === 'documents'
-                ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                : 'border-transparent text-[#588157] hover:text-[#1B3022]'
+                ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                : 'border-transparent text-slate-muted hover:text-govt-navy'
             }`}
           >
             Official Documents ({project.documents.length})
@@ -167,11 +167,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
               }}
               className={`py-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'audit-report'
-                  ? 'border-[#395C40] text-[#1B3022] bg-white rounded-t-lg'
-                  : 'border-transparent text-[#395C40] hover:text-[#1B3022]'
+                  ? 'border-govt-navy text-govt-navy bg-white rounded-t-lg'
+                  : 'border-transparent text-slate-muted hover:text-govt-navy'
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-[#395C40]" />
+              <FileText className="w-3.5 h-3.5 text-govt-navy" />
               AI Technical Audit Brief
             </button>
           )}
@@ -184,113 +184,113 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             <div className="space-y-6">
               {/* Essential Parameters Bento Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-3.5 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Sanctioned Cost</div>
-                  <div className="text-lg font-bold text-[#1B3022] mt-1">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Sanctioned Cost</div>
+                  <div className="text-lg font-bold text-slate-body mt-1">
                     ₹{(project.sanctionedAmount / 100000).toFixed(2)} Lakh
                   </div>
-                  <div className="text-xs text-[#588157]">Estimated: ₹{(project.estimatedCost / 100000).toFixed(2)}L</div>
+                  <div className="text-xs text-slate-muted">Estimated: ₹{(project.estimatedCost / 100000).toFixed(2)}L</div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Funds Utilized</div>
-                  <div className="text-lg font-bold text-[#395C40] mt-1">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Funds Utilized</div>
+                  <div className="text-lg font-bold text-status-verified mt-1">
                     ₹{(project.fundsUtilized / 100000).toFixed(2)} Lakh
                   </div>
-                  <div className="text-xs text-[#588157]">
+                  <div className="text-xs text-slate-muted">
                     {project.sanctionedAmount > 0
                       ? `${Math.round((project.fundsUtilized / project.sanctionedAmount) * 100)}% of sanction`
                       : 'Pending sanction'}
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Physical Progress</div>
-                  <div className="text-lg font-bold text-[#1B3022] mt-1 flex items-center gap-2">
+                <div className="p-3.5 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Physical Progress</div>
+                  <div className="text-lg font-bold text-slate-body mt-1 flex items-center gap-2">
                     <span>{project.completionPercentage}%</span>
-                    <div className="flex-1 bg-[#DDE5D4] h-2 rounded-full overflow-hidden">
+                    <div className="flex-1 bg-slate-border h-2 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#395C40] rounded-full"
+                        className="h-full bg-status-verified rounded-full"
                         style={{ width: `${project.completionPercentage}%` }}
                       />
                     </div>
                   </div>
-                  <div className="text-xs text-[#588157]">{project.status}</div>
+                  <div className="text-xs text-slate-muted">{project.status}</div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">AI Integrity Index</div>
+                <div className="p-3.5 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">AI Integrity Index</div>
                   <div className="mt-1">
                     <RiskBadge level={project.riskAnalysis.riskLevel} score={project.riskAnalysis.overallScore} />
                   </div>
-                  <div className="text-[11px] text-[#588157] mt-1 font-medium">
+                  <div className="text-[11px] text-slate-muted mt-1 font-medium">
                     {project.riskAnalysis.reasons.length} active flag(s)
                   </div>
                 </div>
               </div>
 
               {/* Administrative Details Table */}
-              <div className="bg-white rounded-xl border border-[#DDE5D4] shadow-xs overflow-hidden">
-                <div className="px-4 py-2.5 bg-[#F8F9F7] text-xs font-bold text-[#1B3022] uppercase tracking-wider border-b border-[#DDE5D4]">
+              <div className="bg-white rounded-xl border border-slate-border shadow-xs overflow-hidden">
+                <div className="px-4 py-2.5 bg-panel-bg text-xs font-bold text-govt-navy uppercase tracking-wider border-b border-slate-border">
                   Project Stakeholders & Territorial Jurisdiction
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#DDE5D4] text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-border text-xs">
                   <div className="p-4 space-y-2.5">
                     <div>
-                      <span className="text-[#588157]">Member of Parliament:</span>
-                      <div className="font-bold text-[#1B3022]">{project.mpName}</div>
+                      <span className="text-slate-muted">Member of Parliament:</span>
+                      <div className="font-bold text-slate-body">{project.mpName}</div>
                     </div>
                     <div>
-                      <span className="text-[#588157]">Constituency:</span>
-                      <div className="font-bold text-[#1B3022]">{project.constituency}</div>
+                      <span className="text-slate-muted">Constituency:</span>
+                      <div className="font-bold text-slate-body">{project.constituency}</div>
                     </div>
                     <div>
-                      <span className="text-[#588157]">District & State:</span>
-                      <div className="font-bold text-[#1B3022]">{project.district}, {project.state}</div>
+                      <span className="text-slate-muted">District & State:</span>
+                      <div className="font-bold text-slate-body">{project.district}, {project.state}</div>
                     </div>
                     <div>
-                      <span className="text-[#588157]">Category of Work:</span>
-                      <div className="font-bold text-[#1B3022]">{project.category}</div>
+                      <span className="text-slate-muted">Category of Work:</span>
+                      <div className="font-bold text-slate-body">{project.category}</div>
                     </div>
                   </div>
 
                   <div className="p-4 space-y-2.5">
                     <div>
-                      <span className="text-[#588157]">Implementing Agency:</span>
-                      <div className="font-bold text-[#1B3022]">{project.implementingAgencyName}</div>
+                      <span className="text-slate-muted">Implementing Agency:</span>
+                      <div className="font-bold text-slate-body">{project.implementingAgencyName}</div>
                     </div>
                     <div>
-                      <span className="text-[#588157]">Executing Vendor / Contractor:</span>
-                      <div className="font-bold text-[#1B3022]">{project.vendorName}</div>
+                      <span className="text-slate-muted">Executing Vendor / Contractor:</span>
+                      <div className="font-bold text-slate-body">{project.vendorName}</div>
                       {!isPublic && (
-                        <span className="font-mono text-[10px] text-[#588157]">PAN: {project.vendorPanMasked}</span>
+                        <span className="font-mono text-[10px] text-slate-muted">PAN: {project.vendorPanMasked}</span>
                       )}
                     </div>
                     <div>
-                      <span className="text-[#588157]">Sanctioned Site Coordinates:</span>
-                      <div className="font-mono font-bold text-[#1B3022]">
+                      <span className="text-slate-muted">Sanctioned Site Coordinates:</span>
+                      <div className="font-mono font-bold text-slate-body">
                         {project.latitude ? `${project.latitude.toFixed(4)}° N, ${project.longitude ? project.longitude.toFixed(4) : '78.4982'}° E` : 'Coordinates Pending Geotagging'}
                       </div>
                     </div>
                     <div>
-                      <span className="text-[#588157]">Physical Location Address:</span>
-                      <div className="font-medium text-[#1B3022]">{project.locationAddress}</div>
+                      <span className="text-slate-muted">Physical Location Address:</span>
+                      <div className="font-medium text-slate-body">{project.locationAddress}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Description */}
-              <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                <div className="text-xs font-bold text-[#1B3022] uppercase tracking-wider mb-1">Scope of Developmental Work</div>
-                <p className="text-xs text-[#1B3022] leading-relaxed">{project.description}</p>
+              <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
+                <div className="text-xs font-bold text-govt-navy uppercase tracking-wider mb-1">Scope of Developmental Work</div>
+                <p className="text-xs text-slate-body leading-relaxed">{project.description}</p>
               </div>
 
               {/* Lifecycle Milestones Timeline */}
-              <div className="bg-white rounded-xl border border-[#DDE5D4] p-4 shadow-xs">
-                <div className="text-xs font-bold text-[#1B3022] uppercase tracking-wider mb-4 flex items-center justify-between">
+              <div className="bg-white rounded-xl border border-slate-border p-4 shadow-xs">
+                <div className="text-xs font-bold text-govt-navy uppercase tracking-wider mb-4 flex items-center justify-between">
                   <span>MPLADS Lifecycle Progress Tracker</span>
-                  <span className="text-[11px] font-normal text-[#588157]">Stages mandated under MoSPI Guidelines</span>
+                  <span className="text-[11px] font-normal text-slate-muted">Stages mandated under MoSPI Guidelines</span>
                 </div>
 
                 <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -299,17 +299,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                           step.completed
-                            ? 'bg-[#395C40] text-white'
-                            : 'bg-[#F8F9F7] text-[#588157] border border-[#DDE5D4]'
+                            ? 'bg-govt-navy text-white'
+                            : 'bg-panel-bg text-slate-muted border border-slate-border'
                         }`}
                       >
                         {step.completed ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
                       </div>
                       <div className="text-left md:text-center">
-                        <div className="text-xs font-bold text-[#1B3022]">{step.stage}</div>
-                        {step.date && <div className="text-[10px] text-[#588157] font-mono">{step.date}</div>}
+                        <div className="text-xs font-bold text-slate-body">{step.stage}</div>
+                        {step.date && <div className="text-[10px] text-slate-muted font-mono">{step.date}</div>}
                         {step.remarks && (
-                          <div className="text-[10px] text-[#588157] italic max-w-[140px] truncate" title={step.remarks}>
+                          <div className="text-[10px] text-slate-muted italic max-w-[140px] truncate" title={step.remarks}>
                             {step.remarks}
                           </div>
                         )}
@@ -325,44 +325,44 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {activeTab === 'ai-risk' && (
             <div className="space-y-6">
               {/* Advisory Disclaimer */}
-              <div className="p-3 bg-[#FAF3E0] border border-[#E8DAB2] rounded-xl text-xs text-[#935D26] flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-[#935D26] shrink-0 mt-0.5" />
+              <div className="p-3.5 bg-panel-bg border border-status-review/40 rounded-xl text-xs text-status-review flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-status-review shrink-0 mt-0.5" />
                 <div>
                   <div className="font-bold">Human Review Advisory Mandate:</div>
-                  <div>{project.riskAnalysis.disclaimer}</div>
+                  <div className="mt-0.5 text-slate-body leading-relaxed">{project.riskAnalysis.disclaimer}</div>
                 </div>
               </div>
 
               {/* Risk Score Breakdown Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#588157] uppercase tracking-wider">Cost Anomaly Index</span>
+                    <span className="text-xs font-bold text-slate-muted uppercase tracking-wider">Cost Anomaly Index</span>
                     {project.riskAnalysis.costBaseline && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#FAF3E0] text-[#935D26] font-bold border border-[#E8DAB2]">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-panel-bg text-status-review font-bold border border-status-review/40">
                         Z-Score: {project.riskAnalysis.costBaseline.zScore > 0 ? `+${project.riskAnalysis.costBaseline.zScore}σ` : `${project.riskAnalysis.costBaseline.zScore}σ`}
                       </span>
                     )}
                   </div>
-                  <div className="text-2xl font-bold text-[#1B3022] mt-1">
+                  <div className="text-2xl font-bold text-slate-body mt-1">
                     {project.riskAnalysis.costAnomalyScore}
-                    <span className="text-xs text-[#588157] font-normal"> / 100</span>
+                    <span className="text-xs text-slate-muted font-normal"> / 100</span>
                   </div>
                   
                   {project.riskAnalysis.costBaseline ? (
                     <div className="mt-2 space-y-1 text-xs">
-                      <div className="text-[11px] text-[#588157]">
+                      <div className="text-[11px] text-slate-muted">
                         Cohort Baseline: <strong>₹{(project.riskAnalysis.costBaseline.cohortMean / 100000).toFixed(2)}L</strong> (±₹{(project.riskAnalysis.costBaseline.cohortStdDev / 100000).toFixed(2)}L)
                       </div>
-                      <div className={`text-[11px] p-2 rounded-lg font-medium ${project.riskAnalysis.costBaseline.isAnomaly ? 'bg-[#FDF0EC] text-[#B85338] border border-[#FAD2D2]' : 'bg-[#EAF0E6] text-[#395C40]'}`}>
+                      <div className={`text-[11px] p-2 rounded-lg font-medium ${project.riskAnalysis.costBaseline.isAnomaly ? 'bg-panel-bg text-status-flagged border border-status-flagged/30' : 'bg-panel-bg text-status-verified border border-status-verified/30'}`}>
                         {project.riskAnalysis.costBaseline.reason}
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-2 text-xs text-[#588157]">
+                    <div className="mt-2 text-xs text-slate-muted">
                       Category benchmark: ₹18 - 25 Lakh.
                       {project.sanctionedAmount > 2500000 && (
-                        <span className="text-[#E07A5F] font-bold block mt-1">
+                        <span className="text-status-flagged font-bold block mt-1">
                           Proposed cost exceeds standard benchmark by +
                           {Math.round(((project.sanctionedAmount - 2000000) / 2000000) * 100)}%
                         </span>
@@ -371,38 +371,38 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                   )}
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-xs font-bold text-[#588157] uppercase tracking-wider">Duplicate Probability</div>
-                  <div className="text-2xl font-bold text-[#1B3022] mt-1">
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-xs font-bold text-slate-muted uppercase tracking-wider">Duplicate Probability</div>
+                  <div className="text-2xl font-bold text-slate-body mt-1">
                     {project.riskAnalysis.duplicateProbability}%
                   </div>
-                  <div className="mt-2 text-xs text-[#588157]">
+                  <div className="mt-2 text-xs text-slate-muted">
                     {duplicateCandidates.length > 0
                       ? `${duplicateCandidates.length} spatially proximate project(s) identified within 1 km.`
                       : 'No spatial or semantic duplicate detected in database.'}
                   </div>
                 </div>
 
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#588157] uppercase tracking-wider">Delay Forecast</span>
+                    <span className="text-xs font-bold text-slate-muted uppercase tracking-wider">Delay Forecast</span>
                     {project.riskAnalysis.delayMetrics && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#FAF3E0] text-[#935D26] font-bold">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-panel-bg text-status-review font-bold border border-status-review/40">
                         {project.riskAnalysis.delayMetrics.confidenceIntervalString}
                       </span>
                     )}
                   </div>
-                  <div className="text-2xl font-bold text-[#1B3022] mt-1">
+                  <div className="text-2xl font-bold text-slate-body mt-1">
                     {project.riskAnalysis.delayProbability}%
                   </div>
-                  <div className="mt-2 space-y-1 text-xs text-[#588157]">
+                  <div className="mt-2 space-y-1 text-xs text-slate-muted">
                     {project.riskAnalysis.delayProbability > 60 ? (
-                      <span className="text-[#E07A5F] font-bold block">High risk of schedule overrun</span>
+                      <span className="text-status-flagged font-bold block">High risk of schedule overrun</span>
                     ) : (
-                      <span className="text-[#395C40] font-bold block">Trajectory conforms to scheduled target</span>
+                      <span className="text-status-verified font-bold block">Trajectory conforms to scheduled target</span>
                     )}
                     {project.riskAnalysis.delayMetrics && (
-                      <div className="text-[10px] text-[#8C7A6B] italic pt-1 border-t border-[#F0F2ED]">
+                      <div className="text-[10px] text-slate-muted italic pt-1 border-t border-slate-border">
                         {project.riskAnalysis.delayMetrics.modelTrainingStatus}
                       </div>
                     )}
@@ -412,24 +412,24 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
               {/* Observed AI Findings & Recommendations */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-[#FAF3E0] rounded-xl border border-[#E8DAB2] p-4">
-                  <div className="text-xs font-bold text-[#935D26] uppercase mb-2 flex items-center gap-1.5">
-                    <AlertOctagon className="w-4 h-4 text-[#E07A5F]" />
+                <div className="bg-panel-bg rounded-xl border border-status-review/40 p-4">
+                  <div className="text-xs font-bold text-status-review uppercase mb-2 flex items-center gap-1.5">
+                    <AlertOctagon className="w-4 h-4 text-status-review" />
                     Observed Anomaly Indicators
                   </div>
-                  <ul className="space-y-2 text-xs text-[#935D26] list-disc list-inside">
+                  <ul className="space-y-2 text-xs text-slate-body list-disc list-inside">
                     {project.riskAnalysis.reasons.map((r, i) => (
                       <li key={i} className="leading-relaxed">{r}</li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="bg-[#EAF0E6] rounded-xl border border-[#C8D5B9] p-4">
-                  <div className="text-xs font-bold text-[#395C40] uppercase mb-2 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#395C40]" />
+                <div className="bg-panel-bg rounded-xl border border-slate-border p-4">
+                  <div className="text-xs font-bold text-govt-navy uppercase mb-2 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-status-verified" />
                     Recommended Administrative Protocol
                   </div>
-                  <ul className="space-y-2 text-xs text-[#395C40] list-disc list-inside">
+                  <ul className="space-y-2 text-xs text-slate-body list-disc list-inside">
                     {project.riskAnalysis.recommendations.map((rec, i) => (
                       <li key={i} className="leading-relaxed">{rec}</li>
                     ))}
@@ -439,40 +439,40 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
               {/* Duplicate Project Candidates Comparison */}
               {duplicateCandidates.length > 0 && (
-                <div className="bg-white rounded-xl border border-[#E8DAB2] p-4 shadow-xs">
-                  <div className="text-xs font-bold text-[#935D26] uppercase mb-3 flex items-center justify-between">
+                <div className="bg-white rounded-xl border border-slate-border p-4 shadow-xs">
+                  <div className="text-xs font-bold text-status-review uppercase mb-3 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-[#935D26]" />
+                      <AlertTriangle className="w-4 h-4 text-status-review" />
                       Potential Duplicate Projects Identified for Investigation
                     </span>
-                    <span className="text-[11px] text-[#935D26] font-normal">
+                    <span className="text-[11px] text-slate-muted font-normal">
                       Based on GPS Distance & Semantic Overlap
                     </span>
                   </div>
 
                   <div className="space-y-3">
                     {duplicateCandidates.map((dup, idx) => (
-                      <div key={idx} className="p-3 bg-[#FAF3E0]/70 rounded-lg border border-[#E8DAB2] flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                      <div key={idx} className="p-3 bg-panel-bg rounded-lg border border-slate-border flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-[#1B3022]">{dup.candidateProject.projectCode}</span>
+                            <span className="font-mono text-xs font-bold text-slate-body">{dup.candidateProject.projectCode}</span>
                             <StatusBadge status={dup.candidateProject.status} />
-                            <span className="px-2 py-0.5 rounded-full bg-[#E8DAB2] text-[#935D26] font-bold text-[11px]">
+                            <span className="px-2 py-0.5 rounded-full bg-panel-bg text-status-review border border-status-review/30 font-bold text-[11px]">
                               {dup.similarityScore}% Similarity Match
                             </span>
                           </div>
-                          <div className="text-xs font-bold text-[#1B3022]">{dup.candidateProject.title}</div>
-                          <div className="text-[11px] text-[#588157]">
-                            Distance: <strong className="font-mono text-[#1B3022]">{dup.distanceMeters} meters away</strong> | Category: {dup.candidateProject.category}
+                          <div className="text-xs font-bold text-slate-body">{dup.candidateProject.title}</div>
+                          <div className="text-[11px] text-slate-muted">
+                            Distance: <strong className="font-mono text-slate-body">{dup.distanceMeters} meters away</strong> | Category: {dup.candidateProject.category}
                           </div>
-                          <div className="text-[11px] text-[#935D26] italic">
+                          <div className="text-[11px] text-slate-muted italic">
                             Factors: {dup.matchingFactors.join(', ')}
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <div className="text-xs font-bold text-[#1B3022]">₹{(dup.candidateProject.sanctionedAmount / 100000).toFixed(1)}L</div>
-                          <div className="text-[10px] text-[#588157]">Sanction Date: {dup.candidateProject.sanctionDate || 'Pending'}</div>
+                          <div className="text-xs font-bold text-slate-body">₹{(dup.candidateProject.sanctionedAmount / 100000).toFixed(1)}L</div>
+                          <div className="text-[10px] text-slate-muted">Sanction Date: {dup.candidateProject.sanctionDate || 'Pending'}</div>
                         </div>
                       </div>
                     ))}
@@ -487,23 +487,23 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-bold text-[#1B3022] uppercase tracking-wider">Geotagged Progress Photographs</h3>
-                  <p className="text-[11px] text-[#588157]">
+                  <h3 className="text-xs font-bold text-govt-navy uppercase tracking-wider">Geotagged Progress Photographs</h3>
+                  <p className="text-[11px] text-slate-muted">
                     Mandated Before, During, and After photographic verification under MPLADS framework
                   </p>
                 </div>
                 {userRole !== 'PUBLIC' && (
-                  <span className="text-xs text-[#395C40] font-bold bg-[#EAF0E6] px-2.5 py-1 rounded-full border border-[#C8D5B9]">
+                  <span className="text-xs text-status-verified font-bold bg-panel-bg px-2.5 py-1 rounded-full border border-status-verified/30">
                     Automated AI EXIF & Coordinate Matching Active
                   </span>
                 )}
               </div>
 
               {project.photos.length === 0 ? (
-                <div className="text-center py-12 bg-[#F8F9F7] rounded-xl border border-dashed border-[#DDE5D4]">
-                  <Camera className="w-8 h-8 text-[#A3B18A] mx-auto mb-2" />
-                  <div className="text-xs font-bold text-[#1B3022]">No Photographs Uploaded Yet</div>
-                  <div className="text-[11px] text-[#588157] mt-1">
+                <div className="text-center py-12 bg-panel-bg rounded-xl border border-dashed border-slate-border">
+                  <Camera className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                  <div className="text-xs font-bold text-slate-body">No Photographs Uploaded Yet</div>
+                  <div className="text-[11px] text-slate-muted mt-1">
                     The implementing agency must submit geotagged photos at each milestone stage.
                   </div>
                 </div>
@@ -512,21 +512,21 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                   {project.photos.map((photo) => (
                     <div
                       key={photo.id}
-                      className="bg-white rounded-xl border border-[#DDE5D4] overflow-hidden shadow-xs flex flex-col"
+                      className="bg-white rounded-xl border border-slate-border overflow-hidden shadow-xs flex flex-col"
                     >
-                      <div className="relative aspect-video bg-[#F8F9F7] overflow-hidden">
+                      <div className="relative aspect-video bg-panel-bg overflow-hidden">
                         <img
                           src={photo.url}
                           alt={photo.caption}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#1B3022]/85 text-white backdrop-blur-xs">
+                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-govt-navy/90 text-white backdrop-blur-xs">
                           {photo.stage} Stage
                         </div>
 
                         {photo.similarityAlert && (
-                          <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded text-[10px] font-bold bg-[#E07A5F] text-white flex items-center gap-1 shadow-md">
+                          <div className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded text-[10px] font-bold bg-red-600 text-white flex items-center gap-1 shadow-md">
                             <AlertOctagon className="w-3.5 h-3.5 shrink-0" />
                             <span>Potential Image Reuse Flagged</span>
                           </div>
@@ -535,44 +535,44 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
                       <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
                         <div>
-                          <div className="text-xs font-bold text-[#1B3022] line-clamp-1">{photo.caption}</div>
-                          <div className="text-[10px] text-[#588157] mt-0.5 flex items-center gap-1">
+                          <div className="text-xs font-bold text-slate-body line-clamp-1">{photo.caption}</div>
+                          <div className="text-[10px] text-slate-muted mt-0.5 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             <span>Uploaded {photo.uploadedAt}</span>
                           </div>
                         </div>
 
-                        <div className="pt-2 border-t border-[#F0F2ED] text-[11px] space-y-1.5">
+                        <div className="pt-2 border-t border-slate-border text-[11px] space-y-1.5">
                           {photo.latitude && photo.longitude ? (
-                            <div className="flex items-center justify-between font-mono text-[#588157]">
+                            <div className="flex items-center justify-between font-mono text-slate-muted">
                               <div className="flex items-center gap-1">
-                                <Compass className="w-3 h-3 text-[#395C40]" />
+                                <Compass className="w-3 h-3 text-govt-navy" />
                                 <span>{photo.latitude.toFixed(4)}°, {photo.longitude.toFixed(4)}°</span>
                               </div>
                               {typeof photo.gpsDistanceMeters === 'number' && (
-                                <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${photo.isGpsVerified === false || photo.gpsDistanceMeters > 500 ? 'bg-[#FDF0EC] text-[#B85338]' : 'bg-[#EAF0E6] text-[#395C40]'}`}>
+                                <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${photo.isGpsVerified === false || photo.gpsDistanceMeters > 500 ? 'bg-panel-bg text-status-flagged border border-status-flagged/30' : 'bg-panel-bg text-status-verified border border-status-verified/30'}`}>
                                   Δ {photo.gpsDistanceMeters}m
                                 </span>
                               )}
                             </div>
                           ) : (
-                            <div className="text-[#A3B18A] italic">No GPS coordinates in EXIF</div>
+                            <div className="text-slate-muted italic">No GPS coordinates in EXIF</div>
                           )}
 
                           {photo.cameraModel && (
-                            <div className="text-[10px] text-[#588157]">
-                              Hardware: <strong className="text-[#1B3022]">{photo.cameraModel}</strong>
+                            <div className="text-[10px] text-slate-muted">
+                              Hardware: <strong className="text-slate-body">{photo.cameraModel}</strong>
                             </div>
                           )}
 
                           {photo.duplicateMatchDetails && (
-                            <div className="text-[10px] p-1.5 rounded-lg bg-[#FDF0EC] text-[#B85338] border border-[#FAD2D2]">
+                            <div className="text-[10px] p-1.5 rounded-lg bg-panel-bg text-status-flagged border border-status-flagged/30">
                               Matched Archive: <strong>{photo.duplicateMatchDetails.matchedProjectCode}</strong> (Hamming Dist: {photo.duplicateMatchDetails.hammingDistance})
                             </div>
                           )}
 
                           {photo.aiVerificationNotes && (
-                            <div className={`text-[10px] p-1.5 rounded-lg ${photo.isAiVerified ? 'bg-[#EAF0E6] text-[#395C40]' : 'bg-[#FAF3E0] text-[#935D26]'}`}>
+                            <div className={`text-[10px] p-1.5 rounded-lg ${photo.isAiVerified ? 'bg-panel-bg text-status-verified border border-status-verified/30' : 'bg-panel-bg text-status-review border border-status-review/40'}`}>
                               {photo.aiVerificationNotes}
                             </div>
                           )}
@@ -589,32 +589,32 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {activeTab === 'financials' && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Sanctioned Allocation</div>
-                  <div className="text-xl font-bold text-[#1B3022] mt-1">₹{(project.sanctionedAmount / 100000).toFixed(2)} Lakh</div>
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Sanctioned Allocation</div>
+                  <div className="text-xl font-bold text-slate-body mt-1">₹{(project.sanctionedAmount / 100000).toFixed(2)} Lakh</div>
                 </div>
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Released / Disbursed</div>
-                  <div className="text-xl font-bold text-[#395C40] mt-1">₹{(project.fundsUtilized / 100000).toFixed(2)} Lakh</div>
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Released / Disbursed</div>
+                  <div className="text-xl font-bold text-status-verified mt-1">₹{(project.fundsUtilized / 100000).toFixed(2)} Lakh</div>
                 </div>
-                <div className="p-4 bg-white rounded-xl border border-[#DDE5D4] shadow-xs">
-                  <div className="text-[11px] font-bold text-[#588157] uppercase tracking-wider">Balance in Treasury</div>
-                  <div className="text-xl font-bold text-[#1B3022] mt-1">
+                <div className="p-4 bg-white rounded-xl border border-slate-border shadow-xs">
+                  <div className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Balance in Treasury</div>
+                  <div className="text-xl font-bold text-slate-body mt-1">
                     ₹{((project.sanctionedAmount - project.fundsUtilized) / 100000).toFixed(2)} Lakh
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-[#DDE5D4] overflow-hidden shadow-xs">
-                <div className="px-4 py-2.5 bg-[#F8F9F7] text-xs font-bold text-[#1B3022] uppercase tracking-wider border-b border-[#DDE5D4]">
+              <div className="bg-white rounded-xl border border-slate-border overflow-hidden shadow-xs">
+                <div className="px-4 py-2.5 bg-panel-bg text-xs font-bold text-govt-navy uppercase tracking-wider border-b border-slate-border">
                   Payment Vouchers & Tranche Disbursals
                 </div>
                 {project.payments.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-[#588157]">No payment tranches released yet.</div>
+                  <div className="p-6 text-center text-xs text-slate-muted">No payment tranches released yet.</div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-[#F8F9F7] text-[#588157] font-bold border-b border-[#DDE5D4]">
+                      <thead className="bg-panel-bg text-slate-muted font-bold border-b border-slate-border">
                         <tr>
                           <th className="p-3">Inst. #</th>
                           <th className="p-3">Sanction Order</th>
@@ -624,16 +624,16 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                           <th className="p-3">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#F0F2ED]">
+                      <tbody className="divide-y divide-slate-100">
                         {project.payments.map((pay) => (
-                          <tr key={pay.id} className="hover:bg-[#F8F9F7] transition-colors">
-                            <td className="p-3 font-bold text-[#1B3022]">Installment #{pay.installmentNo}</td>
-                            <td className="p-3 font-mono text-[#588157]">{pay.sanctionOrderNo}</td>
-                            <td className="p-3 font-bold text-[#1B3022]">₹{(pay.amount / 100000).toFixed(2)} Lakh</td>
-                            <td className="p-3 text-[#1B3022]">{pay.beneficiaryAgency}</td>
-                            <td className="p-3 font-mono text-[#588157]">{pay.paidAt}</td>
+                          <tr key={pay.id} className="hover:bg-panel-bg transition-colors">
+                            <td className="p-3 font-bold text-slate-body">Installment #{pay.installmentNo}</td>
+                            <td className="p-3 font-mono text-slate-muted">{pay.sanctionOrderNo}</td>
+                            <td className="p-3 font-bold text-slate-body">₹{(pay.amount / 100000).toFixed(2)} Lakh</td>
+                            <td className="p-3 text-slate-body">{pay.beneficiaryAgency}</td>
+                            <td className="p-3 font-mono text-slate-muted">{pay.paidAt}</td>
                             <td className="p-3">
-                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#EAF0E6] text-[#395C40]">
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-panel-bg text-status-verified border border-status-verified/30">
                                 {pay.status}
                               </span>
                             </td>
@@ -650,20 +650,20 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {/* TAB 5: DOCUMENTS */}
           {activeTab === 'documents' && (
             <div className="space-y-4">
-              <div className="text-xs font-bold text-[#1B3022] uppercase tracking-wider">Verified Administrative Repository</div>
+              <div className="text-xs font-bold text-govt-navy uppercase tracking-wider">Verified Administrative Repository</div>
               <div className="space-y-2">
                 {project.documents.map((doc) => (
                   <div
                     key={doc.id}
-                    className="p-3 bg-white rounded-xl border border-[#DDE5D4] flex items-center justify-between hover:bg-[#F8F9F7] transition-colors shadow-xs"
+                    className="p-3 bg-white rounded-xl border border-slate-border flex items-center justify-between hover:bg-panel-bg transition-colors shadow-xs"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-[#EAF0E6] text-[#395C40]">
+                      <div className="p-2 rounded-lg bg-panel-bg border border-slate-border text-govt-navy">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-[#1B3022]">{doc.name}</div>
-                        <div className="text-[10px] text-[#588157]">
+                        <div className="text-xs font-bold text-slate-body">{doc.name}</div>
+                        <div className="text-[10px] text-slate-muted">
                           {doc.type} | {doc.fileSize} | Uploaded {doc.uploadedAt}
                         </div>
                       </div>
@@ -673,7 +673,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                       href={doc.downloadUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-[#1B3022] bg-[#F8F9F7] border border-[#DDE5D4] hover:bg-[#EAF0E6] transition-colors cursor-pointer"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-govt-navy bg-panel-bg border border-slate-border hover:bg-white transition-colors cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Download</span>
@@ -687,13 +687,13 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           {/* TAB 6: AI TECHNICAL AUDIT BRIEF (GEMINI) */}
           {activeTab === 'audit-report' && !isPublic && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#DDE5D4]">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-border">
                 <div>
-                  <div className="text-xs font-bold text-[#1B3022] uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#395C40]" />
+                  <div className="text-xs font-bold text-govt-navy uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-govt-saffron" />
                     Automated Administrative Audit Brief (Gemini Technical Audit)
                   </div>
-                  <div className="text-[11px] text-[#588157]">
+                  <div className="text-[11px] text-slate-muted">
                     Comprehensive anomaly synthesis, fiscal reasonableness audit, and administrative directives.
                   </div>
                 </div>
@@ -701,25 +701,25 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 <button
                   onClick={handleGenerateReport}
                   disabled={isGeneratingAiReport}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#395C40] hover:bg-[#2C4A34] disabled:opacity-50 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-govt-navy hover:bg-govt-navy-light disabled:opacity-50 transition-colors cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5 text-govt-saffron" />
                   <span>{isGeneratingAiReport ? 'Analyzing Project...' : 'Re-Generate Brief'}</span>
                 </button>
               </div>
 
               {isGeneratingAiReport ? (
                 <div className="py-12 text-center space-y-3">
-                  <div className="w-8 h-8 border-3 border-[#395C40] border-t-transparent rounded-full animate-spin mx-auto" />
-                  <div className="text-xs font-bold text-[#1B3022]">
+                  <div className="w-8 h-8 border-3 border-govt-navy border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div className="text-xs font-bold text-slate-body">
                     Generating Technical Audit Evaluation...
                   </div>
-                  <div className="text-[11px] text-[#588157]">
+                  <div className="text-[11px] text-slate-muted">
                     Evaluating BOQ benchmarks, spatial duplicates, and photographic metadata against MoSPI guidelines.
                   </div>
                 </div>
               ) : aiReportContent ? (
-                <div className="p-6 bg-white border border-[#DDE5D4] rounded-xl font-mono text-xs leading-relaxed text-[#1B3022] whitespace-pre-wrap shadow-xs">
+                <div className="p-6 bg-white border border-slate-border rounded-xl font-mono text-xs leading-relaxed text-slate-body whitespace-pre-wrap shadow-xs">
                   {aiReportContent}
                 </div>
               ) : null}
@@ -728,16 +728,16 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 bg-[#F8F9F7] border-t border-[#DDE5D4] flex items-center justify-between text-xs text-[#588157]">
+        <div className="px-6 py-3.5 bg-panel-bg border-t border-slate-border flex items-center justify-between text-xs text-slate-muted">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#1B3022]">Project UID:</span>
-            <span className="font-mono text-[#588157]">{project.id}</span>
+            <span className="font-bold text-slate-body">Project UID:</span>
+            <span className="font-mono text-slate-muted">{project.id}</span>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-white border border-[#DDE5D4] text-[#1B3022] font-bold hover:bg-[#EAF0E6] transition-colors cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-white border border-slate-border text-slate-body font-bold hover:bg-panel-bg transition-colors cursor-pointer"
             >
               Close
             </button>
