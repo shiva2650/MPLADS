@@ -24,7 +24,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onNavigateToRecommend,
   onBackToDashboard
 }) => {
-  const { language, t, translateStatus, translateRiskLevel, translateCategory } = useLanguage();
+  const { t, translateStatus, translateRiskLevel, translateCategory } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -114,7 +114,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← {t.backToOverview}</span>
+            <span>{t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
             {t.home} &gt; {t.projects}
@@ -231,15 +231,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* Filter Stats Summary */}
       <div className="flex items-center justify-between text-xs text-slate-muted px-1">
         <div>
-          {language === 'hi' ? (
-            <>
-              {projects.length} विकास कार्यों में से <strong>{filteredProjects.length}</strong> प्रदर्शित
-            </>
-          ) : (
-            <>
-              Showing <strong>{filteredProjects.length}</strong> of {projects.length} developmental works
-            </>
-          )}
+          {t('showingProjectsCount', { filtered: filteredProjects.length, total: projects.length })}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-muted">{t.sortBy}:</span>
@@ -262,12 +254,12 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             <thead className="bg-panel-bg text-slate-muted font-bold uppercase text-[10px] border-b border-slate-border tracking-wider">
               <tr>
                 <th className="p-3">{t.workId}</th>
-                <th className="p-3">{language === 'hi' ? 'कार्य शीर्षक एवं श्रेणी' : 'Work Title & Category'}</th>
-                <th className="p-3">{language === 'hi' ? 'स्थान एवं ज़िला' : 'Location & District'}</th>
-                <th className="p-3 text-right">{language === 'hi' ? 'लागत (लाख)' : 'Cost (Lakh)'}</th>
+                <th className="p-3">{t.workTitleAndCategory}</th>
+                <th className="p-3">{t.locationAndDistrict}</th>
+                <th className="p-3 text-right">{t.costLakh}</th>
                 <th className="p-3">{t.physicalProgress}</th>
                 <th className="p-3">{t.status}</th>
-                <th className="p-3 text-center">{language === 'hi' ? 'एआई जोखिम' : 'AI Risk'}</th>
+                <th className="p-3 text-center">{t.aiRisk}</th>
                 <th className="p-3 text-right">{t.actions}</th>
               </tr>
             </thead>
@@ -300,7 +292,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                     </td>
 
                     <td className="p-3 text-right whitespace-nowrap font-mono font-semibold text-slate-body">
-                      ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(2)} {language === 'hi' ? 'लाख' : 'L'}
+                      ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(2)} {t.lakhShort}
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
@@ -337,7 +329,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                         }}
                         className="px-2.5 py-1 text-xs font-bold text-govt-navy bg-panel-bg border border-slate-border rounded-lg hover:bg-white transition-colors cursor-pointer"
                       >
-                        {language === 'hi' ? 'ऑडिट विवरण' : 'Audit Details'}
+                        {t.auditDetails}
                       </button>
                     </td>
                   </tr>

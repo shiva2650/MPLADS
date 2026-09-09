@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Info
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface VerificationStatusPageProps {
   projects: Project[];
@@ -28,6 +29,7 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
   onSelectProject,
   onBackToDashboard
 }) => {
+  const { language, t, translateCategory, translateVerificationStatus } = useLanguage();
   const [filterState, setFilterState] = useState<'ALL' | 'Verified' | 'Under Review' | 'Flagged'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -83,10 +85,10 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Verification Status
+            {t.home} &gt; {language === 'hi' ? 'सत्यापन स्थिति' : 'Verification Status'}
           </span>
         </div>
       )}
@@ -98,25 +100,30 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-govt-navy uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-status-verified" />
-                Public Transparency Verification
+                {language === 'hi' ? 'सार्वजनिक पारदर्शिता सत्यापन' : 'Public Transparency Verification'}
               </span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-govt-navy font-semibold border border-emerald-200">
-                Official MoSPI Feed
+                {language === 'hi' ? 'आधिकारिक सांख्यिकी मंत्रालय (MoSPI) फ़ीड' : 'Official MoSPI Feed'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-body mt-1">
-              Project Verification Status
+              {language === 'hi' ? 'परियोजना सत्यापन स्थिति' : 'Project Verification Status'}
             </h1>
             <p className="text-xs text-slate-muted mt-1 max-w-2xl leading-relaxed">
-              Every MPLADS project undergoes field milestone checks, photographic matching, and financial auditing.
-              Inspect verification records below in simple language.
+              {language === 'hi'
+                ? 'प्रत्येक सांसद निधि परियोजना जमीनी मील के पत्थर की जांच, फोटो मिलान और वित्तीय ऑडिट से गुजरती है। नीचे विवरण देखें।'
+                : 'Every MPLADS project undergoes field milestone checks, photographic matching, and financial auditing. Inspect verification records below in simple language.'}
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <PlainTooltip
-              term="Verification Process"
-              explanation="Works are labeled 'Verified' when photographs match GPS locations and expenditures align with official estimates. 'Under Review' works are awaiting documentation, and 'Flagged' works require field inspection."
+              term={language === 'hi' ? 'सत्यापन प्रक्रिया' : 'Verification Process'}
+              explanation={
+                language === 'hi'
+                  ? "कार्यों को 'सत्यापित' तब चिह्नित किया जाता है जब तस्वीरें जीपीएस स्थान से मेल खाती हैं और खर्च आधिकारिक अनुमानों के अनुरूप होते हैं।"
+                  : "Works are labeled 'Verified' when photographs match GPS locations and expenditures align with official estimates. 'Under Review' works are awaiting documentation, and 'Flagged' works require field inspection."
+              }
             />
           </div>
         </div>
@@ -134,12 +141,12 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-status-verified flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4" />
-                Verified Works
+                {language === 'hi' ? 'सत्यापित कार्य' : 'Verified Works'}
               </span>
               <span className="text-lg font-bold text-status-verified">{counts.verified}</span>
             </div>
             <p className="text-[11px] text-slate-muted mt-1">
-              Confirmed on-ground progress and verified milestone records.
+              {language === 'hi' ? 'पुष्ट जमीनी प्रगति और सत्यापित मील के पत्थर रिकॉर्ड।' : 'Confirmed on-ground progress and verified milestone records.'}
             </p>
           </button>
 
@@ -154,12 +161,12 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-status-review flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
-                Under Review
+                {language === 'hi' ? 'समीक्षाधीन' : 'Under Review'}
               </span>
               <span className="text-lg font-bold text-status-review">{counts.underReview}</span>
             </div>
             <p className="text-[11px] text-slate-muted mt-1">
-              Field reports or routine documentation currently pending review.
+              {language === 'hi' ? 'फील्ड रिपोर्ट या नियमित दस्तावेज़ वर्तमान में समीक्षाधीन हैं।' : 'Field reports or routine documentation currently pending review.'}
             </p>
           </button>
 
@@ -174,12 +181,12 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-status-flagged flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" />
-                Flagged for Inspection
+                {language === 'hi' ? 'निरीक्षण हेतु चिह्नित' : 'Flagged for Inspection'}
               </span>
               <span className="text-lg font-bold text-status-flagged">{counts.flagged}</span>
             </div>
             <p className="text-[11px] text-slate-muted mt-1">
-              Unusual timeline or photographic disparity requiring district verification.
+              {language === 'hi' ? 'असामान्य समय-सीमा या फ़ोटो विसंगति जिसके लिए ज़िला सत्यापन आवश्यक है।' : 'Unusual timeline or photographic disparity requiring district verification.'}
             </p>
           </button>
         </div>
@@ -196,13 +203,13 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by title, constituency, or ID..."
+            placeholder={language === 'hi' ? 'शीर्षक, निर्वाचन क्षेत्र या आईडी से खोजें...' : 'Search by title, constituency, or ID...'}
             className="w-full pl-9 pr-3 py-2 bg-panel-bg hover:bg-white focus:bg-white text-xs text-slate-body border border-slate-border rounded-lg focus:outline-hidden focus:ring-1 focus:ring-govt-navy"
           />
         </div>
 
         <div className="flex items-center gap-1.5 self-end sm:self-auto text-xs">
-          <span className="text-slate-muted font-medium mr-1">Status:</span>
+          <span className="text-slate-muted font-medium mr-1">{language === 'hi' ? 'स्थिति:' : 'Status:'}</span>
           {(['ALL', 'Verified', 'Under Review', 'Flagged'] as const).map(s => (
             <button
               key={s}
@@ -213,7 +220,7 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
                   : 'bg-panel-bg text-slate-body hover:bg-slate-border'
               }`}
             >
-              {s}
+              {s === 'ALL' ? (language === 'hi' ? 'सभी' : 'ALL') : translateVerificationStatus(s)}
             </button>
           ))}
         </div>
@@ -242,23 +249,23 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
               <div className="mt-2.5 text-xs text-slate-muted space-y-1">
                 <div className="flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-govt-navy shrink-0" />
-                  <span className="truncate">{project.constituency} &bull; {project.category}</span>
+                  <span className="truncate">{project.constituency} &bull; {translateCategory(project.category)}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-muted shrink-0" />
-                  <span>Sanctioned: ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(1)} Lakh</span>
+                  <span>{language === 'hi' ? 'स्वीकृत:' : 'Sanctioned:'} ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(1)} {language === 'hi' ? 'लाख' : 'Lakh'}</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-border flex items-center justify-between text-xs">
               <span className="text-slate-muted">
-                {project.vStatus === 'Verified' && 'All checks passed'}
-                {project.vStatus === 'Under Review' && 'Awaiting site report'}
-                {project.vStatus === 'Flagged' && 'Requires review'}
+                {project.vStatus === 'Verified' && (language === 'hi' ? 'सभी जांच सफल' : 'All checks passed')}
+                {project.vStatus === 'Under Review' && (language === 'hi' ? 'साइट रिपोर्ट प्रतीक्षित' : 'Awaiting site report')}
+                {project.vStatus === 'Flagged' && (language === 'hi' ? 'समीक्षा आवश्यक' : 'Requires review')}
               </span>
               <span className="text-govt-navy font-semibold hover:underline flex items-center gap-1">
-                Details &rarr;
+                {language === 'hi' ? 'विवरण' : 'Details'} &rarr;
               </span>
             </div>
           </div>
@@ -267,7 +274,7 @@ export const VerificationStatusPage: React.FC<VerificationStatusPageProps> = ({
 
       {filteredProjects.length === 0 && (
         <div className="bg-white rounded-xl border border-slate-border p-8 text-center text-xs text-slate-muted">
-          No projects match the selected verification criteria.
+          {language === 'hi' ? 'चयनित सत्यापन मानदंडों से कोई परियोजना मेल नहीं खाती।' : 'No projects match the selected verification criteria.'}
         </div>
       )}
     </div>

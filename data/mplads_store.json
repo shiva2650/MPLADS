@@ -107,6 +107,504 @@
   ],
   "projects": [
     {
+      "id": "PRJ-PERSIST-4796",
+      "projectCode": "MPLADS-2024-TEST-4796",
+      "title": "Automated Resilience Test Project for Restart Verification",
+      "category": "Drinking Water & Sanitation",
+      "description": "Testing persistence across application server restart cycles",
+      "locationAddress": "Survey 108, Jubilee Hills",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "mpName": "Hon. MP User",
+      "mpId": "MP001",
+      "constituency": "Hyderabad Central",
+      "status": "Recommended",
+      "estimatedCost": 2500000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "completionPercentage": 0,
+      "implementingAgencyId": "AG-001",
+      "implementingAgencyName": "State Water Works Dept",
+      "vendorName": "Deccan Infra Works",
+      "vendorPanMasked": "ABCDE****F",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "latitude": 17.432,
+      "longitude": 78.407,
+      "timeline": [],
+      "photos": [],
+      "documents": [],
+      "payments": [],
+      "riskAnalysis": {
+        "overallScore": 12,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:15:44.796Z",
+        "costAnomalyScore": 10,
+        "duplicateProbability": 5,
+        "photoAnomalyScore": 0,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Initial recommendation."
+        ],
+        "recommendations": [
+          "Administrative verification."
+        ],
+        "disclaimer": "Model predictions are advisory."
+      }
+    },
+    {
+      "id": "PRJ-2025-057",
+      "projectCode": "MPLADS-HYD-2025-057",
+      "title": "Sanctioned Community Health Sub-centre",
+      "description": "Developmental work recommended under MPLADS scheme.",
+      "category": "Healthcare",
+      "mpId": "MP001",
+      "mpName": "Shri Rajesh Kumar",
+      "constituency": "Hyderabad North",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "locationAddress": "Ward 4, Secunderabad",
+      "latitude": 17.41,
+      "longitude": 78.49,
+      "estimatedCost": 1800000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "implementingAgencyId": "AGENCY001",
+      "implementingAgencyName": "TSUDA - Hyderabad Zone",
+      "vendorName": "Under Technical Sanction",
+      "vendorPanMasked": "PENDING",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "status": "Recommended",
+      "completionPercentage": 0,
+      "riskAnalysis": {
+        "overallScore": 28,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:15:44.588Z",
+        "costAnomalyScore": 12,
+        "duplicateProbability": 99,
+        "photoAnomalyScore": 10,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Duplicate risk: Specification & proximity corridor overlap (99%) with Sanctioned Community Health Sub-centre in Hyderabad."
+        ],
+        "recommendations": [
+          "Verify territorial demographic overlap before disbursing further tranches."
+        ],
+        "disclaimer": "Notice: The AI risk score is an advisory indicator for human administrative review, not proof of fraud or corruption.",
+        "costBaseline": {
+          "mean": 1800000,
+          "stdDev": 396000,
+          "zScore": 0,
+          "cohortSize": 24,
+          "category": "Healthcare",
+          "state": "Telangana",
+          "zThreshold": 2,
+          "isAnomaly": false,
+          "reason": "Cost is well within normal empirical distribution (z-score: 0.0, mean: ₹18.0L) for Healthcare in Telangana."
+        },
+        "delayMetrics": {
+          "delayDays": 0,
+          "confidenceScore": 40,
+          "marginOfErrorDays": 30,
+          "confidenceInterval": "40% confidence (schedule pending)",
+          "modelTrainingStatus": "Model trained on synthetic data — validation pending",
+          "holdoutValidation": {
+            "precision": 0.923,
+            "recall": 1,
+            "f1Score": 0.96,
+            "accuracy": 0.947,
+            "sampleSize": 19,
+            "datasetSplit": "70% Training / 30% Holdout Validation",
+            "status": "Model trained on synthetic data — validation pending"
+          }
+        }
+      },
+      "photos": [],
+      "documents": [
+        {
+          "id": "doc_1788974144586",
+          "name": "MP_Recommendation_MPLADS-HYD-2025-057.pdf",
+          "type": "Recommendation",
+          "fileSize": "1.2 MB",
+          "uploadedAt": "2026-09-09",
+          "uploadedBy": "MP001",
+          "downloadUrl": "/docs/recommendation-new.pdf"
+        }
+      ],
+      "payments": [],
+      "timeline": [
+        {
+          "stage": "Recommendation",
+          "completed": true,
+          "date": "2026-09-09",
+          "remarks": "Recommended by Shri Rajesh Kumar"
+        },
+        {
+          "stage": "Feasibility Check",
+          "completed": false
+        },
+        {
+          "stage": "Sanction",
+          "completed": false
+        },
+        {
+          "stage": "Agency Assignment",
+          "completed": false
+        },
+        {
+          "stage": "Execution",
+          "completed": false
+        },
+        {
+          "stage": "Payment",
+          "completed": false
+        },
+        {
+          "stage": "Completion",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "PRJ-PERSIST-7644",
+      "projectCode": "MPLADS-2024-TEST-7644",
+      "title": "Automated Resilience Test Project for Restart Verification",
+      "category": "Drinking Water & Sanitation",
+      "description": "Testing persistence across application server restart cycles",
+      "locationAddress": "Survey 108, Jubilee Hills",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "mpName": "Hon. MP User",
+      "mpId": "MP001",
+      "constituency": "Hyderabad Central",
+      "status": "Recommended",
+      "estimatedCost": 2500000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "completionPercentage": 0,
+      "implementingAgencyId": "AG-001",
+      "implementingAgencyName": "State Water Works Dept",
+      "vendorName": "Deccan Infra Works",
+      "vendorPanMasked": "ABCDE****F",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "latitude": 17.432,
+      "longitude": 78.407,
+      "timeline": [],
+      "photos": [],
+      "documents": [],
+      "payments": [],
+      "riskAnalysis": {
+        "overallScore": 12,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:11:57.644Z",
+        "costAnomalyScore": 10,
+        "duplicateProbability": 5,
+        "photoAnomalyScore": 0,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Initial recommendation."
+        ],
+        "recommendations": [
+          "Administrative verification."
+        ],
+        "disclaimer": "Model predictions are advisory."
+      }
+    },
+    {
+      "id": "PRJ-2025-055",
+      "projectCode": "MPLADS-HYD-2025-055",
+      "title": "Sanctioned Community Health Sub-centre",
+      "description": "Developmental work recommended under MPLADS scheme.",
+      "category": "Healthcare",
+      "mpId": "MP001",
+      "mpName": "Shri Rajesh Kumar",
+      "constituency": "Hyderabad North",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "locationAddress": "Ward 4, Secunderabad",
+      "latitude": 17.41,
+      "longitude": 78.49,
+      "estimatedCost": 1800000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "implementingAgencyId": "AGENCY001",
+      "implementingAgencyName": "TSUDA - Hyderabad Zone",
+      "vendorName": "Under Technical Sanction",
+      "vendorPanMasked": "PENDING",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "status": "Recommended",
+      "completionPercentage": 0,
+      "riskAnalysis": {
+        "overallScore": 28,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:11:57.575Z",
+        "costAnomalyScore": 12,
+        "duplicateProbability": 99,
+        "photoAnomalyScore": 10,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Duplicate risk: Specification & proximity corridor overlap (99%) with Sanctioned Community Health Sub-centre in Hyderabad."
+        ],
+        "recommendations": [
+          "Verify territorial demographic overlap before disbursing further tranches."
+        ],
+        "disclaimer": "Notice: The AI risk score is an advisory indicator for human administrative review, not proof of fraud or corruption.",
+        "costBaseline": {
+          "mean": 1800000,
+          "stdDev": 396000,
+          "zScore": 0,
+          "cohortSize": 23,
+          "category": "Healthcare",
+          "state": "Telangana",
+          "zThreshold": 2,
+          "isAnomaly": false,
+          "reason": "Cost is well within normal empirical distribution (z-score: 0.0, mean: ₹18.0L) for Healthcare in Telangana."
+        },
+        "delayMetrics": {
+          "delayDays": 0,
+          "confidenceScore": 40,
+          "marginOfErrorDays": 30,
+          "confidenceInterval": "40% confidence (schedule pending)",
+          "modelTrainingStatus": "Model trained on synthetic data — validation pending",
+          "holdoutValidation": {
+            "precision": 0.923,
+            "recall": 1,
+            "f1Score": 0.96,
+            "accuracy": 0.947,
+            "sampleSize": 19,
+            "datasetSplit": "70% Training / 30% Holdout Validation",
+            "status": "Model trained on synthetic data — validation pending"
+          }
+        }
+      },
+      "photos": [],
+      "documents": [
+        {
+          "id": "doc_1788973917573",
+          "name": "MP_Recommendation_MPLADS-HYD-2025-055.pdf",
+          "type": "Recommendation",
+          "fileSize": "1.2 MB",
+          "uploadedAt": "2026-09-09",
+          "uploadedBy": "MP001",
+          "downloadUrl": "/docs/recommendation-new.pdf"
+        }
+      ],
+      "payments": [],
+      "timeline": [
+        {
+          "stage": "Recommendation",
+          "completed": true,
+          "date": "2026-09-09",
+          "remarks": "Recommended by Shri Rajesh Kumar"
+        },
+        {
+          "stage": "Feasibility Check",
+          "completed": false
+        },
+        {
+          "stage": "Sanction",
+          "completed": false
+        },
+        {
+          "stage": "Agency Assignment",
+          "completed": false
+        },
+        {
+          "stage": "Execution",
+          "completed": false
+        },
+        {
+          "stage": "Payment",
+          "completed": false
+        },
+        {
+          "stage": "Completion",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "PRJ-PERSIST-0271",
+      "projectCode": "MPLADS-2024-TEST-0271",
+      "title": "Automated Resilience Test Project for Restart Verification",
+      "category": "Drinking Water & Sanitation",
+      "description": "Testing persistence across application server restart cycles",
+      "locationAddress": "Survey 108, Jubilee Hills",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "mpName": "Hon. MP User",
+      "mpId": "MP001",
+      "constituency": "Hyderabad Central",
+      "status": "Recommended",
+      "estimatedCost": 2500000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "completionPercentage": 0,
+      "implementingAgencyId": "AG-001",
+      "implementingAgencyName": "State Water Works Dept",
+      "vendorName": "Deccan Infra Works",
+      "vendorPanMasked": "ABCDE****F",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "latitude": 17.432,
+      "longitude": 78.407,
+      "timeline": [],
+      "photos": [],
+      "documents": [],
+      "payments": [],
+      "riskAnalysis": {
+        "overallScore": 12,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:10:20.271Z",
+        "costAnomalyScore": 10,
+        "duplicateProbability": 5,
+        "photoAnomalyScore": 0,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Initial recommendation."
+        ],
+        "recommendations": [
+          "Administrative verification."
+        ],
+        "disclaimer": "Model predictions are advisory."
+      }
+    },
+    {
+      "id": "PRJ-2025-053",
+      "projectCode": "MPLADS-HYD-2025-053",
+      "title": "Sanctioned Community Health Sub-centre",
+      "description": "Developmental work recommended under MPLADS scheme.",
+      "category": "Healthcare",
+      "mpId": "MP001",
+      "mpName": "Shri Rajesh Kumar",
+      "constituency": "Hyderabad North",
+      "district": "Hyderabad",
+      "state": "Telangana",
+      "locationAddress": "Ward 4, Secunderabad",
+      "latitude": 17.41,
+      "longitude": 78.49,
+      "estimatedCost": 1800000,
+      "sanctionedAmount": 0,
+      "fundsUtilized": 0,
+      "implementingAgencyId": "AGENCY001",
+      "implementingAgencyName": "TSUDA - Hyderabad Zone",
+      "vendorName": "Under Technical Sanction",
+      "vendorPanMasked": "PENDING",
+      "recommendationDate": "2026-09-09",
+      "sanctionDate": "",
+      "startDate": "",
+      "expectedCompletionDate": "",
+      "status": "Recommended",
+      "completionPercentage": 0,
+      "riskAnalysis": {
+        "overallScore": 28,
+        "riskLevel": "LOW",
+        "lastEvaluatedAt": "2026-09-09T17:10:20.191Z",
+        "costAnomalyScore": 12,
+        "duplicateProbability": 99,
+        "photoAnomalyScore": 10,
+        "locationMismatch": false,
+        "delayProbability": 10,
+        "reasons": [
+          "Duplicate risk: Specification & proximity corridor overlap (99%) with Sanctioned Community Health Sub-centre in Hyderabad."
+        ],
+        "recommendations": [
+          "Verify territorial demographic overlap before disbursing further tranches."
+        ],
+        "disclaimer": "Notice: The AI risk score is an advisory indicator for human administrative review, not proof of fraud or corruption.",
+        "costBaseline": {
+          "mean": 1800000,
+          "stdDev": 396000,
+          "zScore": 0,
+          "cohortSize": 22,
+          "category": "Healthcare",
+          "state": "Telangana",
+          "zThreshold": 2,
+          "isAnomaly": false,
+          "reason": "Cost is well within normal empirical distribution (z-score: 0.0, mean: ₹18.0L) for Healthcare in Telangana."
+        },
+        "delayMetrics": {
+          "delayDays": 0,
+          "confidenceScore": 40,
+          "marginOfErrorDays": 30,
+          "confidenceInterval": "40% confidence (schedule pending)",
+          "modelTrainingStatus": "Model trained on synthetic data — validation pending",
+          "holdoutValidation": {
+            "precision": 0.923,
+            "recall": 1,
+            "f1Score": 0.96,
+            "accuracy": 0.947,
+            "sampleSize": 19,
+            "datasetSplit": "70% Training / 30% Holdout Validation",
+            "status": "Model trained on synthetic data — validation pending"
+          }
+        }
+      },
+      "photos": [],
+      "documents": [
+        {
+          "id": "doc_1788973820189",
+          "name": "MP_Recommendation_MPLADS-HYD-2025-053.pdf",
+          "type": "Recommendation",
+          "fileSize": "1.2 MB",
+          "uploadedAt": "2026-09-09",
+          "uploadedBy": "MP001",
+          "downloadUrl": "/docs/recommendation-new.pdf"
+        }
+      ],
+      "payments": [],
+      "timeline": [
+        {
+          "stage": "Recommendation",
+          "completed": true,
+          "date": "2026-09-09",
+          "remarks": "Recommended by Shri Rajesh Kumar"
+        },
+        {
+          "stage": "Feasibility Check",
+          "completed": false
+        },
+        {
+          "stage": "Sanction",
+          "completed": false
+        },
+        {
+          "stage": "Agency Assignment",
+          "completed": false
+        },
+        {
+          "stage": "Execution",
+          "completed": false
+        },
+        {
+          "stage": "Payment",
+          "completed": false
+        },
+        {
+          "stage": "Completion",
+          "completed": false
+        }
+      ]
+    },
+    {
       "id": "PRJ-PERSIST-5935",
       "projectCode": "MPLADS-2024-TEST-5935",
       "title": "Automated Resilience Test Project for Restart Verification",
@@ -3186,7 +3684,7 @@
       "longitude": 78.5202,
       "estimatedCost": 4800000,
       "sanctionedAmount": 50000000,
-      "fundsUtilized": 14880000,
+      "fundsUtilized": 16680000,
       "implementingAgencyId": "AGENCY001",
       "implementingAgencyName": "TSUDA - Hyderabad Zone",
       "vendorName": "Sri Sai Ram Infra Projects Ltd",
@@ -3200,7 +3698,7 @@
       "riskAnalysis": {
         "overallScore": 39,
         "riskLevel": "MEDIUM",
-        "lastEvaluatedAt": "2026-09-09T13:41:45.877Z",
+        "lastEvaluatedAt": "2026-09-09T17:15:44.597Z",
         "costAnomalyScore": 33,
         "duplicateProbability": 10,
         "photoAnomalyScore": 10,
@@ -3501,6 +3999,36 @@
         {
           "id": "pay_1788961305882",
           "installmentNo": 22,
+          "amount": 600000,
+          "sanctionOrderNo": "SAN/DISBURSE/2025/001",
+          "paidAt": "2026-09-09",
+          "status": "Disbursed",
+          "beneficiaryAgency": "TSUDA - Hyderabad Zone",
+          "remarks": "Sanctioned milestone disbursement"
+        },
+        {
+          "id": "pay_1788973820204",
+          "installmentNo": 23,
+          "amount": 600000,
+          "sanctionOrderNo": "SAN/DISBURSE/2025/001",
+          "paidAt": "2026-09-09",
+          "status": "Disbursed",
+          "beneficiaryAgency": "TSUDA - Hyderabad Zone",
+          "remarks": "Sanctioned milestone disbursement"
+        },
+        {
+          "id": "pay_1788973917592",
+          "installmentNo": 24,
+          "amount": 600000,
+          "sanctionOrderNo": "SAN/DISBURSE/2025/001",
+          "paidAt": "2026-09-09",
+          "status": "Disbursed",
+          "beneficiaryAgency": "TSUDA - Hyderabad Zone",
+          "remarks": "Sanctioned milestone disbursement"
+        },
+        {
+          "id": "pay_1788974144602",
+          "installmentNo": 25,
           "amount": 600000,
           "sanctionOrderNo": "SAN/DISBURSE/2025/001",
           "paidAt": "2026-09-09",
@@ -5725,6 +6253,48 @@
   ],
   "alerts": [
     {
+      "id": "ALT-4589",
+      "projectId": "PRJ-2025-057",
+      "projectCode": "MPLADS-HYD-2025-057",
+      "projectTitle": "Sanctioned Community Health Sub-centre",
+      "district": "Hyderabad",
+      "mpName": "Shri Rajesh Kumar",
+      "agencyName": "TSUDA - Hyderabad Zone",
+      "alertType": "Possible Duplicate",
+      "riskLevel": "HIGH",
+      "reason": "Possible duplicate identified with Sanctioned Community Health Sub-centre (99% match, 0m away).",
+      "createdAt": "2026-09-09T17:15:44.589Z",
+      "status": "New"
+    },
+    {
+      "id": "ALT-7576",
+      "projectId": "PRJ-2025-055",
+      "projectCode": "MPLADS-HYD-2025-055",
+      "projectTitle": "Sanctioned Community Health Sub-centre",
+      "district": "Hyderabad",
+      "mpName": "Shri Rajesh Kumar",
+      "agencyName": "TSUDA - Hyderabad Zone",
+      "alertType": "Possible Duplicate",
+      "riskLevel": "HIGH",
+      "reason": "Possible duplicate identified with Sanctioned Community Health Sub-centre (99% match, 0m away).",
+      "createdAt": "2026-09-09T17:11:57.576Z",
+      "status": "New"
+    },
+    {
+      "id": "ALT-0192",
+      "projectId": "PRJ-2025-053",
+      "projectCode": "MPLADS-HYD-2025-053",
+      "projectTitle": "Sanctioned Community Health Sub-centre",
+      "district": "Hyderabad",
+      "mpName": "Shri Rajesh Kumar",
+      "agencyName": "TSUDA - Hyderabad Zone",
+      "alertType": "Possible Duplicate",
+      "riskLevel": "HIGH",
+      "reason": "Possible duplicate identified with Sanctioned Community Health Sub-centre (99% match, 0m away).",
+      "createdAt": "2026-09-09T17:10:20.192Z",
+      "status": "New"
+    },
+    {
       "id": "ALT-5870",
       "projectId": "PRJ-2025-051",
       "projectCode": "MPLADS-HYD-2025-051",
@@ -6117,6 +6687,48 @@
   ],
   "citizenFeedback": [
     {
+      "id": "FB-027",
+      "projectId": "PRJ-2024-001",
+      "projectTitle": "Construction of Multipurpose Community Hall at Amberpet",
+      "projectCode": "MPLADS-HYD-2024-001",
+      "district": "Hyderabad",
+      "citizenName": "Anonymous Resident",
+      "issueType": "Quality of Work",
+      "description": "Road surface leveling is uneven near water pipeline junction.",
+      "latitude": 17.3984,
+      "longitude": 78.5202,
+      "submittedAt": "2026-09-09T17:15:44.595Z",
+      "status": "New"
+    },
+    {
+      "id": "FB-026",
+      "projectId": "PRJ-2024-001",
+      "projectTitle": "Construction of Multipurpose Community Hall at Amberpet",
+      "projectCode": "MPLADS-HYD-2024-001",
+      "district": "Hyderabad",
+      "citizenName": "Anonymous Resident",
+      "issueType": "Quality of Work",
+      "description": "Road surface leveling is uneven near water pipeline junction.",
+      "latitude": 17.3984,
+      "longitude": 78.5202,
+      "submittedAt": "2026-09-09T17:11:57.582Z",
+      "status": "New"
+    },
+    {
+      "id": "FB-025",
+      "projectId": "PRJ-2024-001",
+      "projectTitle": "Construction of Multipurpose Community Hall at Amberpet",
+      "projectCode": "MPLADS-HYD-2024-001",
+      "district": "Hyderabad",
+      "citizenName": "Anonymous Resident",
+      "issueType": "Quality of Work",
+      "description": "Road surface leveling is uneven near water pipeline junction.",
+      "latitude": 17.3984,
+      "longitude": 78.5202,
+      "submittedAt": "2026-09-09T17:10:20.198Z",
+      "status": "New"
+    },
+    {
       "id": "FB-024",
       "projectId": "PRJ-2024-001",
       "projectTitle": "Construction of Multipurpose Community Hall at Amberpet",
@@ -6457,6 +7069,301 @@
     }
   ],
   "auditLogs": [
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PAYMENT_DISBURSED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "newValue": "Amount: ₹6.00 Lakh | Status: Disbursed",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44602-602",
+      "timestamp": "2026-09-09T17:15:44.602Z",
+      "prevHash": "3d6b40506e24be39b1519a004272c5f4ad64a2ec1d1c50e615ef5b1d93b2aaf0",
+      "entryHash": "890cced0dc66723171e746eebc616af6900bf3fd7646283c3fc69d8e7cbc2923"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PROJECT_STATUS_UPDATE",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "previousValue": "Status: Sanctioned",
+      "newValue": "Status: Sanctioned | Remarks: Approved after technical scrutiny",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44597-204",
+      "timestamp": "2026-09-09T17:15:44.597Z",
+      "prevHash": "01b7f910337a49b3b12add91047d281c00674da4e7a8c6c5e2b7348e7a363c34",
+      "entryHash": "3d6b40506e24be39b1519a004272c5f4ad64a2ec1d1c50e615ef5b1d93b2aaf0"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "NEW_RECOMMENDATION_SUBMITTED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2025-057",
+      "newValue": "Submitted recommendation: Sanctioned Community Health Sub-centre (Est. ₹18.0L)",
+      "ipAddressMasked": "10.24.18.***",
+      "id": "LOG-44589-319",
+      "timestamp": "2026-09-09T17:15:44.589Z",
+      "prevHash": "68bb8edc19b22719771919d0da318f828ca5d82518a3d89ded2f1a714129882a",
+      "entryHash": "01b7f910337a49b3b12add91047d281c00674da4e7a8c6c5e2b7348e7a363c34"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGOUT",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44511-219",
+      "timestamp": "2026-09-09T17:15:44.511Z",
+      "prevHash": "d966fb74ca66d24b4ca13377aa02a72e6910af6026285a28f00ae407961f5deb",
+      "entryHash": "68bb8edc19b22719771919d0da318f828ca5d82518a3d89ded2f1a714129882a"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "ADMIN001",
+      "newValue": "Logged in with role ADMIN via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44498-175",
+      "timestamp": "2026-09-09T17:15:44.498Z",
+      "prevHash": "9c90bea6e79cd68e11b1a179ced457336b1b321836f89a2bb7613eea644e9de1",
+      "entryHash": "d966fb74ca66d24b4ca13377aa02a72e6910af6026285a28f00ae407961f5deb"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "newValue": "Logged in with role MP via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44457-322",
+      "timestamp": "2026-09-09T17:15:44.457Z",
+      "prevHash": "4fb55c8fdf26f80289e603878861e7388ef00d40eb3f84ccd29719d38f3ad944",
+      "entryHash": "9c90bea6e79cd68e11b1a179ced457336b1b321836f89a2bb7613eea644e9de1"
+    },
+    {
+      "userId": "AGENCY001",
+      "userName": "Telangana State Urban Development Authority (TSUDA)",
+      "userRole": "AGENCY",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "AGENCY001",
+      "newValue": "Logged in with role AGENCY via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44426-178",
+      "timestamp": "2026-09-09T17:15:44.426Z",
+      "prevHash": "b00c19cb6012676f9d8c65bb490235293b1d8ca44b4b0a44791a61c92c40a6ca",
+      "entryHash": "4fb55c8fdf26f80289e603878861e7388ef00d40eb3f84ccd29719d38f3ad944"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "ADMIN001",
+      "newValue": "Logged in with role ADMIN via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44396-319",
+      "timestamp": "2026-09-09T17:15:44.396Z",
+      "prevHash": "4ba008486726f5a17bcc6358807e9e9dda977ddf7b5ebdeb5f7e1f74c1417c23",
+      "entryHash": "b00c19cb6012676f9d8c65bb490235293b1d8ca44b4b0a44791a61c92c40a6ca"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "newValue": "Logged in with role MP via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-44368-427",
+      "timestamp": "2026-09-09T17:15:44.368Z",
+      "prevHash": "7ce58127fbd95efa0592660c26bbc0956975bbe46d530956a0e127c5e4e6becd",
+      "entryHash": "4ba008486726f5a17bcc6358807e9e9dda977ddf7b5ebdeb5f7e1f74c1417c23"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PAYMENT_DISBURSED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "newValue": "Amount: ₹6.00 Lakh | Status: Disbursed",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17592-929",
+      "timestamp": "2026-09-09T17:11:57.592Z",
+      "prevHash": "93280e92586a23a4d5b1fdb2448b15043cba4b516b472fed3be8694c18ec3de5",
+      "entryHash": "7ce58127fbd95efa0592660c26bbc0956975bbe46d530956a0e127c5e4e6becd"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PROJECT_STATUS_UPDATE",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "previousValue": "Status: Sanctioned",
+      "newValue": "Status: Sanctioned | Remarks: Approved after technical scrutiny",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17584-582",
+      "timestamp": "2026-09-09T17:11:57.584Z",
+      "prevHash": "4db26eff796b0f50dac1a43cf4226b6aa418fbb882f0a2158b48da33d66fe8ca",
+      "entryHash": "93280e92586a23a4d5b1fdb2448b15043cba4b516b472fed3be8694c18ec3de5"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "NEW_RECOMMENDATION_SUBMITTED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2025-055",
+      "newValue": "Submitted recommendation: Sanctioned Community Health Sub-centre (Est. ₹18.0L)",
+      "ipAddressMasked": "10.24.18.***",
+      "id": "LOG-17576-928",
+      "timestamp": "2026-09-09T17:11:57.576Z",
+      "prevHash": "93f19da4dea3580d00565923384144c97784d48d03b7934371e3f80ad8b34856",
+      "entryHash": "4db26eff796b0f50dac1a43cf4226b6aa418fbb882f0a2158b48da33d66fe8ca"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGOUT",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17494-597",
+      "timestamp": "2026-09-09T17:11:57.494Z",
+      "prevHash": "fcd590305d5c0d9052159bdcf98d2d38c1c23f8c5522f6a2c2bded9e78252dd3",
+      "entryHash": "93f19da4dea3580d00565923384144c97784d48d03b7934371e3f80ad8b34856"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "ADMIN001",
+      "newValue": "Logged in with role ADMIN via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17477-100",
+      "timestamp": "2026-09-09T17:11:57.477Z",
+      "prevHash": "8a54ff4df362ce05ec4a56384b854c01fb1d989ce03f24c412291a05eb777beb",
+      "entryHash": "fcd590305d5c0d9052159bdcf98d2d38c1c23f8c5522f6a2c2bded9e78252dd3"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "newValue": "Logged in with role MP via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17448-661",
+      "timestamp": "2026-09-09T17:11:57.448Z",
+      "prevHash": "e57a0df1eb164a6d6a6b2a3695de3c142161e99eea9a0f1a17e93b6580e5e7c6",
+      "entryHash": "8a54ff4df362ce05ec4a56384b854c01fb1d989ce03f24c412291a05eb777beb"
+    },
+    {
+      "userId": "AGENCY001",
+      "userName": "Telangana State Urban Development Authority (TSUDA)",
+      "userRole": "AGENCY",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "AGENCY001",
+      "newValue": "Logged in with role AGENCY via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17420-346",
+      "timestamp": "2026-09-09T17:11:57.420Z",
+      "prevHash": "d2af3c981b63fbcd8f8a0c29c9276bc4b11f5afa91a7e861831f6cc8219f4721",
+      "entryHash": "e57a0df1eb164a6d6a6b2a3695de3c142161e99eea9a0f1a17e93b6580e5e7c6"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "ADMIN001",
+      "newValue": "Logged in with role ADMIN via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17391-372",
+      "timestamp": "2026-09-09T17:11:57.391Z",
+      "prevHash": "7bad666582358496515e0aec2741da27dc79cd0cb4450bcdf1688c7e504a5239",
+      "entryHash": "d2af3c981b63fbcd8f8a0c29c9276bc4b11f5afa91a7e861831f6cc8219f4721"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "USER_LOGIN",
+      "targetEntity": "Auth",
+      "targetId": "MP001",
+      "newValue": "Logged in with role MP via cryptographically signed JWT",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-17361-353",
+      "timestamp": "2026-09-09T17:11:57.361Z",
+      "prevHash": "db821bf88101263605f3a7a468a606e1b27382b3fbc8b1b17e00b05b0a9797e9",
+      "entryHash": "7bad666582358496515e0aec2741da27dc79cd0cb4450bcdf1688c7e504a5239"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PAYMENT_DISBURSED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "newValue": "Amount: ₹6.00 Lakh | Status: Disbursed",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-20204-115",
+      "timestamp": "2026-09-09T17:10:20.204Z",
+      "prevHash": "b70d82cc945533c532871ef4c5f0ba071da81a77c8fd2520cae03f2981601cb4",
+      "entryHash": "db821bf88101263605f3a7a468a606e1b27382b3fbc8b1b17e00b05b0a9797e9"
+    },
+    {
+      "userId": "ADMIN001",
+      "userName": "Dr. Ananya Sharma, IAS",
+      "userRole": "ADMIN",
+      "action": "PROJECT_STATUS_UPDATE",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2024-001",
+      "previousValue": "Status: Sanctioned",
+      "newValue": "Status: Sanctioned | Remarks: Approved after technical scrutiny",
+      "ipAddressMasked": "10.14.02.***",
+      "id": "LOG-20199-348",
+      "timestamp": "2026-09-09T17:10:20.199Z",
+      "prevHash": "224b379db9d17c777ec3f577141d72f3f7df7ecdef042211f2688400761150fd",
+      "entryHash": "b70d82cc945533c532871ef4c5f0ba071da81a77c8fd2520cae03f2981601cb4"
+    },
+    {
+      "userId": "MP001",
+      "userName": "Shri Rajesh Kumar",
+      "userRole": "MP",
+      "action": "NEW_RECOMMENDATION_SUBMITTED",
+      "targetEntity": "Project",
+      "targetId": "PRJ-2025-053",
+      "newValue": "Submitted recommendation: Sanctioned Community Health Sub-centre (Est. ₹18.0L)",
+      "ipAddressMasked": "10.24.18.***",
+      "id": "LOG-20192-147",
+      "timestamp": "2026-09-09T17:10:20.192Z",
+      "prevHash": "d2d8d41d89c3bec9ab639993f3a4267e1e210a4c9e548722629a463697cdeb3c",
+      "entryHash": "224b379db9d17c777ec3f577141d72f3f7df7ecdef042211f2688400761150fd"
+    },
     {
       "userId": "ADMIN001",
       "userName": "Dr. Ananya Sharma, IAS",
@@ -7794,6 +8701,6 @@
     }
   ],
   "aiInteractions": [],
-  "latestLogHash": "d2d8d41d89c3bec9ab639993f3a4267e1e210a4c9e548722629a463697cdeb3c",
-  "lastSavedAt": "2026-09-09T13:41:45.935Z"
+  "latestLogHash": "890cced0dc66723171e746eebc616af6900bf3fd7646283c3fc69d8e7cbc2923",
+  "lastSavedAt": "2026-09-09T17:15:44.796Z"
 }

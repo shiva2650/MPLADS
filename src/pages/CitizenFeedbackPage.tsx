@@ -61,7 +61,7 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
             <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            {t.home} &gt; {t.grievances}
+            {t.home} &gt; {language === 'hi' ? 'शिकायतें' : 'Grievances'}
           </span>
         </div>
       )}

@@ -38,7 +38,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateToRecommend,
   onNavigateToMap
 }) => {
-  const { language, t, translateRole, translateStatus } = useLanguage();
+  const { t, translateRole, translateAlertType } = useLanguage();
 
   const highRiskProjects = projects
     .filter(p => p.riskAnalysis.overallScore > 40)
@@ -75,7 +75,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/10 text-panel-bg border border-white/20">
-              {userRole === 'PUBLIC' ? t.citizenViewTag : `${translateRole(userRole)} ${t.officerConsoleTag}`}
+              {userRole === 'PUBLIC'
+                ? t.citizenViewTag
+                : t('officerConsoleTag', { role: translateRole(userRole) })}
             </span>
             <span className="text-xs text-panel-bg/80">
               {t.govIndia} &bull; {t.mospiTitle}
@@ -125,11 +127,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="text-2xl font-bold text-slate-body mt-2">{summary?.totalProjects ?? 0}</div>
           <div className="text-[11px] text-slate-muted mt-1 flex items-center gap-1.5">
             <span className="font-semibold text-status-verified">
-              {summary?.completedProjects ?? 0} {language === 'hi' ? 'पूर्ण' : 'Completed'}
+              {summary?.completedProjects ?? 0} {t.completed}
             </span>
             <span>&bull;</span>
             <span className="font-semibold text-slate-body">
-              {summary?.activeProjects ?? 0} {language === 'hi' ? 'सक्रिय' : 'Active'}
+              {summary?.activeProjects ?? 0} {t.active}
             </span>
           </div>
         </div>
@@ -145,12 +147,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
           </div>
           <div className="text-2xl font-bold text-slate-body mt-2">
-            ₹{sanctionedCr} <span className="text-xs font-normal text-slate-muted">{language === 'hi' ? 'करोड़' : 'Cr'}</span>
+            ₹{sanctionedCr} <span className="text-xs font-normal text-slate-muted">{t.cr}</span>
           </div>
           <div className="text-[11px] text-slate-muted mt-1">
-            {language === 'hi'
-              ? `${summary?.totalProjects ?? 0} स्थानीय विकास कार्यों में`
-              : `Across ${summary?.totalProjects ?? 0} local development works`}
+            {t('acrossWorks', { count: summary?.totalProjects ?? 0 })}
           </div>
         </div>
 
@@ -165,7 +165,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
           </div>
           <div className="text-2xl font-bold text-govt-navy mt-2">
-            ₹{utilizedCr} <span className="text-xs font-normal text-slate-muted">{language === 'hi' ? 'करोड़' : 'Cr'}</span>
+            ₹{utilizedCr} <span className="text-xs font-normal text-slate-muted">{t.cr}</span>
           </div>
           <div className="text-[11px] text-slate-muted mt-1 flex items-center gap-2">
             <span>{t.utilizationRate}: <strong>{utilizationRate}%</strong></span>
@@ -179,7 +179,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div className="bg-white rounded-xl p-4 border border-slate-border shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-status-review uppercase tracking-wider">
-              {language === 'hi' ? 'समीक्षा स्थिति' : 'Review Status'}
+              {t.reviewStatus}
             </span>
             <div className="p-2 rounded-lg bg-panel-bg border border-slate-border text-status-review">
               <AlertTriangle className="w-4 h-4" />
@@ -187,15 +187,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="text-2xl font-bold text-status-review mt-2">
             {summary?.totalPendingReviews ?? 0}
-            <span className="text-xs font-normal text-slate-muted ml-1.5">{language === 'hi' ? 'नोटिस' : 'notices'}</span>
+            <span className="text-xs font-normal text-slate-muted ml-1.5">{t.notices}</span>
           </div>
           <div className="text-[11px] text-slate-muted mt-1 flex items-center gap-1.5">
             <span className="text-status-flagged font-semibold">
-              {summary?.highRiskProjectsCount ?? 0} {language === 'hi' ? 'चिह्नित' : 'Flagged'}
+              {summary?.highRiskProjectsCount ?? 0} {t.flagged}
             </span>
             <span>&bull;</span>
             <span className="text-status-review font-semibold">
-              {summary?.delayedProjects ?? 0} {language === 'hi' ? 'विलंबित' : 'Delayed'}
+              {summary?.delayedProjects ?? 0} {t.delayed}
             </span>
           </div>
         </div>
@@ -216,19 +216,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <ShieldCheck className="w-4 h-4" />
               </span>
               <h2 className="text-xs font-bold tracking-tight text-govt-navy uppercase">
-                {language === 'hi' ? 'सतत निगरानी एवं निरीक्षण सारांश' : 'Continuous Oversight & Inspection Summary'}
+                {t.continuousOversightTitle}
               </h2>
               <PlainTooltip
-                term={language === 'hi' ? 'सतत निगरानी' : 'Continuous Oversight'}
-                explanation={language === 'hi'
-                  ? 'स्वचालित नियमित जांच ठेकेदार के बिलों का मानक अनुसूची से मिलान करती है और साइट की तस्वीरों को जीपीएस निर्देशांक से सत्यापित करती है।'
-                  : 'Automated routine checks verify contractor invoices against standard district schedules and match site photographs with GPS coordinates.'}
+                term={t.continuousOversightTerm}
+                explanation={t.continuousOversightExplanation}
               />
             </div>
             <p className="text-xs text-slate-muted mt-0.5">
-              {language === 'hi'
-                ? 'ज़िला अभियंता समीक्षा या ज़मीनी निरीक्षण के लिए चिह्नित वस्तुओं का सारांश।'
-                : 'Summary of items identified for district engineer review or field inspection.'}
+              {t.continuousOversightDesc}
             </p>
           </div>
 
@@ -244,49 +240,49 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-xs">
           <div className="p-3 bg-white rounded-lg border border-slate-border">
             <div className="text-slate-muted text-[11px] font-medium">
-              {language === 'hi' ? 'लागत सत्यापन' : 'Cost Checks'}
+              {t.costChecks}
             </div>
             <div className="text-xl font-bold text-status-review mt-1">
               {summary?.costAnomaliesCount ?? 0}
             </div>
             <div className="text-[10px] text-slate-muted mt-0.5">
-              {language === 'hi' ? 'मानक दर से अधिक संभावित' : 'May exceed standard rate'}
+              {t.costChecksNote}
             </div>
           </div>
 
           <div className="p-3 bg-white rounded-lg border border-slate-border">
             <div className="text-slate-muted text-[11px] font-medium">
-              {language === 'hi' ? 'संभावित डुप्लिकेट' : 'Potential Duplicates'}
+              {t.potentialDuplicates}
             </div>
             <div className="text-xl font-bold text-govt-navy mt-1">
               {summary?.possibleDuplicatesCount ?? 0}
             </div>
             <div className="text-[10px] text-slate-muted mt-0.5">
-              {language === 'hi' ? 'निकटवर्ती या समान प्रस्ताव' : 'Nearby or similar proposal'}
+              {t.duplicatesNote}
             </div>
           </div>
 
           <div className="p-3 bg-white rounded-lg border border-slate-border">
             <div className="text-slate-muted text-[11px] font-medium">
-              {language === 'hi' ? 'तस्वीर एवं स्थान सत्यापन' : 'Photo & Location Checks'}
+              {t.photoVerification}
             </div>
             <div className="text-xl font-bold text-status-flagged mt-1">
               {(summary?.photoAnomaliesCount ?? 0) + (summary?.locationMismatchesCount ?? 0)}
             </div>
             <div className="text-[10px] text-slate-muted mt-0.5">
-              {language === 'hi' ? 'स्पष्ट जीपीएस छवि प्रतीक्षित' : 'Awaiting clear GPS image'}
+              {t.photoVerificationNote}
             </div>
           </div>
 
           <div className="p-3 bg-white rounded-lg border border-slate-border">
             <div className="text-slate-muted text-[11px] font-medium">
-              {language === 'hi' ? 'समयसीमा अनुवर्ती' : 'Timeline Follow-ups'}
+              {t.locationAccuracy}
             </div>
             <div className="text-xl font-bold text-slate-body mt-1">
               {summary?.delayRisksCount ?? 0}
             </div>
             <div className="text-[10px] text-slate-muted mt-0.5">
-              {language === 'hi' ? 'लक्षित समयसीमा समाप्त' : 'Past target schedule date'}
+              {t.locationAccuracyNote}
             </div>
           </div>
         </div>
@@ -304,7 +300,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </h2>
             </div>
             <span className="text-[11px] text-slate-muted">
-              {language === 'hi' ? `प्रदर्शित: ${highRiskProjects.length}` : `Showing ${highRiskProjects.length}`}
+              {t('showingResults', { start: 1, end: highRiskProjects.length, total: highRiskProjects.length })}
             </span>
           </div>
 
@@ -324,19 +320,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </div>
                   <div className="font-bold text-slate-body truncate">{project.title}</div>
                   <div className="text-[11px] text-slate-muted">
-                    {t.district}: {project.district} &bull; {t.sanctionedAmount}: ₹{(project.sanctionedAmount / 100000).toFixed(1)} {language === 'hi' ? 'लाख' : 'L'} &bull; {t.progress}: {project.completionPercentage}%
-                  </div>
-                  <div className="text-[11px] text-status-review line-clamp-1">
-                    {language === 'hi'
-                      ? 'नोटिस: इस कार्य की मील का पत्थर समयसीमा अथवा दस्तावेजों की समीक्षा आवश्यक हो सकती है।'
-                      : 'Notice: This project may need review due to milestone timeline or documentation.'}
+                    {t.district}: {project.district} &bull; {t.sanctionedAmount}: ₹{(project.sanctionedAmount / 100000).toFixed(1)} {t.lakhShort} &bull; {t.progress}: {project.completionPercentage}%
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
                   <VerificationBadge status={project.riskAnalysis.overallScore > 60 ? 'Flagged' : 'Under Review'} />
                   <div className="text-[11px] text-govt-navy font-semibold mt-2 flex items-center justify-end gap-0.5">
-                    <span>{language === 'hi' ? 'निरीक्षण' : 'Inspect'}</span>
+                    <span>{t.viewDetails}</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
                 </div>
@@ -386,7 +377,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 text-[11px] text-slate-muted">
-                      <span className="text-govt-navy font-medium">{alert.alertType}</span>
+                      <span className="text-govt-navy font-medium">{translateAlertType(alert.alertType)}</span>
                       <span>&bull;</span>
                       <span>{alert.district}</span>
                       <span>&bull;</span>

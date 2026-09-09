@@ -3,6 +3,7 @@
  * Runs RBAC Enforcement Tests and AI Anomalies & Integrity Verification Tests
  */
 
+import { runAuthTests } from './auth.test.js';
 import { runRbacTests } from './rbac.test.js';
 import { runAnomalyTests } from './anomalies.test.js';
 import { runResilienceAndNotificationTests } from './resilience_and_notifications.test.js';
@@ -15,6 +16,7 @@ async function main() {
   const startTime = Date.now();
 
   try {
+    await runAuthTests();
     await runRbacTests();
     await runAnomalyTests();
     await runResilienceAndNotificationTests();

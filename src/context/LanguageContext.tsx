@@ -8,7 +8,8 @@ import {
   verificationStateTranslations,
   categoryTranslations,
   issueTypeTranslations,
-  roleTranslations
+  roleTranslations,
+  paymentStatusTranslations
 } from '../i18n/statusTranslations.js';
 
 export type { Language };
@@ -27,9 +28,11 @@ export interface LanguageContextType {
   translateAlertStatus: (status?: string | null) => string;
   translateAlertType: (type?: string | null) => string;
   translateVerificationState: (state?: string | null) => string;
+  translateVerificationStatus: (state?: string | null) => string;
   translateCategory: (category?: string | null) => string;
   translateIssueType: (issueType?: string | null) => string;
   translateRole: (role?: string | null) => string;
+  translatePaymentStatus: (status?: string | null) => string;
   formatCurrency: (amount: number, options?: { inCrores?: boolean; inLakhs?: boolean; precision?: number }) => string;
   formatDate: (dateStr: string | Date, options?: Intl.DateTimeFormatOptions) => string;
   formatNumber: (num: number) => string;
@@ -58,9 +61,11 @@ const defaultContext: LanguageContextType = {
   translateAlertStatus: s => s || '',
   translateAlertType: t => t || '',
   translateVerificationState: v => v || '',
+  translateVerificationStatus: v => v || '',
   translateCategory: c => c || '',
   translateIssueType: i => i || '',
   translateRole: r => r || '',
+  translatePaymentStatus: p => p || '',
   formatCurrency: amt => `₹${amt.toLocaleString('en-IN')}`,
   formatDate: d => new Date(d).toLocaleDateString('en-IN'),
   formatNumber: n => n.toLocaleString('en-IN')
@@ -141,6 +146,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return roleTranslations[language]?.[role] || roleTranslations.en?.[role] || role;
   };
 
+  const translatePaymentStatus = (status?: string | null): string => {
+    if (!status) return '';
+    return paymentStatusTranslations[language]?.[status] || paymentStatusTranslations.en?.[status] || status;
+  };
+
   const formatCurrency = (
     amount: number,
     options?: { inCrores?: boolean; inLakhs?: boolean; precision?: number }
@@ -205,9 +215,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         translateAlertStatus,
         translateAlertType,
         translateVerificationState,
+        translateVerificationStatus: translateVerificationState,
         translateCategory,
         translateIssueType,
         translateRole,
+        translatePaymentStatus,
         formatCurrency,
         formatDate,
         formatNumber

@@ -75,34 +75,28 @@ async function extractMediaBuffer(mediaData: string): Promise<{ buffer: Buffer; 
 // --- AUTHENTICATION ROUTES ---
 
 apiRouter.post('/auth/login', (req: Request, res: Response) => {
-  const { userId, password } = req.body;
+  const { userId, password } = req.body || {};
 
   if (!userId || !password) {
     return res.status(400).json({ error: 'User ID and password are required.' });
   }
 
-  const rawId = sanitizeString(String(userId).trim().toUpperCase(), 50);
-  let normalizedId = rawId;
-  if (rawId === 'ADMIN' || rawId === 'COLLECTOR' || rawId === 'DM') {
-    normalizedId = 'ADMIN001';
-  } else if (rawId === 'MP' || rawId === 'MEMBER' || rawId === 'RAJESH') {
-    normalizedId = 'MP001';
-  } else if (rawId === 'AGENCY' || rawId === 'TSUDA' || rawId === 'ENGINEER') {
-    normalizedId = 'AGENCY001';
-  }
+  const normalizedId = sanitizeString(String(userId).trim().toUpperCase(), 50);
+  const rawPassword = String(password);
 
-  const user = db.users.find(u => u.userId.toUpperCase() === normalizedId) || users.find(u => u.userId.toUpperCase() === normalizedId);
+  const user = db.getUserByUserId(normalizedId);
 
-  const rawPassword = String(password).trim();
-  // Strictly enforce password matching against stored credential (salted PBKDF2 or plaintext fallback)
-  const passwordValid = user && (
-    (user.salt && verifyPassword(rawPassword, user.passwordHash, user.salt)) ||
-    user.passwordHash === rawPassword
+  // Strictly enforce password matching against salted PBKDF2 hash (timing-safe)
+  const passwordValid = Boolean(
+    user &&
+    user.salt &&
+    user.passwordHash &&
+    verifyPassword(rawPassword, user.passwordHash, user.salt)
   );
 
   if (!user || !passwordValid) {
     return res.status(401).json({
-      error: 'Invalid User ID or Password. Demo credentials: ADMIN001 / Admin@123, MP001 / MP@123, AGENCY001 / Agency@123'
+      error: 'Invalid User ID or password.'
     });
   }
 

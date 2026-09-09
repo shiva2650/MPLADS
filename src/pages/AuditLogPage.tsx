@@ -71,7 +71,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
             <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            {t.home} &gt; {t.auditLogs}
+            {t.home} &gt; {language === 'hi' ? 'ऑडिट लॉग' : 'Audit Logs'}
           </span>
         </div>
       )}

@@ -73,23 +73,52 @@ export interface LoginResponse {
 
 export const AuthService = {
   login: async (userId: string, password: string): Promise<LoginResponse> => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userId, password })
-    });
+    const trimmedId = (userId || '').trim();
+    const cleanPassword = password || '';
+
+    if (!trimmedId || !cleanPassword) {
+      throw new Error('User ID and password are required.');
+    }
+
+    let response: Response;
+    try {
+      response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: trimmedId, password: cleanPassword })
+      });
+    } catch (networkErr) {
+      throw new Error('Authentication service is temporarily unavailable. Please verify your network connection.');
+    }
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('Invalid User ID or Password.');
+        throw new Error('Invalid User ID or password.');
       }
-      const errorPayload = await response.json().catch(() => ({ error: 'Authentication failed' }));
-      throw new Error(errorPayload.error || `Authentication failed (Status ${response.status})`);
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Account access is restricted or deactivated.');
+      }
+      if (response.status === 404 || response.status >= 500) {
+        throw new Error('Authentication service is temporarily unavailable. Please try again.');
+      }
+      const errorPayload = await response.json().catch(() => ({ error: 'Invalid User ID or password.' }));
+      throw new Error(errorPayload.error || 'Invalid User ID or password.');
     }
 
-    const data: LoginResponse = await response.json();
+    let data: LoginResponse;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error('Authentication service is temporarily unavailable. Please try again.');
+    }
+
+    if (!data || !data.token || !data.user || !data.user.role) {
+      throw new Error('Invalid authentication response from server.');
+    }
+
     authStorage.setToken(data.token);
     authStorage.setUser(data.user);
     return data;

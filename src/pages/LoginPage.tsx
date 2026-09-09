@@ -239,6 +239,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
               </div>
             )}
 
+            {/* Official User ID Input */}
             <div>
               <label className="block font-bold text-slate-body mb-1">
                 {isHindi ? 'आधिकारिक यूज़र आईडी / कर्मचारी कोड' : 'Official User ID / Employee Code'}
@@ -250,6 +251,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                 <input
                   type="text"
                   required
+                  autoFocus
+                  autoComplete="username"
                   value={userId}
                   onChange={e => {
                     setUserId(e.target.value);

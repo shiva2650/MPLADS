@@ -98,6 +98,16 @@ export interface TranslationDictionary {
   pageOf: string;
   total: string;
   srNo: string;
+  completed: string;
+  active: string;
+  cr: string;
+  lakh: string;
+  lakhShort: string;
+  acrossWorks: string;
+  reviewStatus: string;
+  notices: string;
+  flagged: string;
+  delayed: string;
 
   // Dashboard Specific
   totalProjects: string;
@@ -125,6 +135,26 @@ export interface TranslationDictionary {
   adminOverviewTitle: string;
   agencyOverviewTitle: string;
   publicOverviewTitle: string;
+  continuousOversightTitle: string;
+  continuousOversightTerm: string;
+  continuousOversightExplanation: string;
+  continuousOversightDesc: string;
+  costChecks: string;
+  costChecksNote: string;
+  potentialDuplicates: string;
+  duplicatesNote: string;
+  photoVerification: string;
+  photoVerificationNote: string;
+  locationAccuracy: string;
+  locationAccuracyNote: string;
+  highRiskWorksNeedingReview: string;
+  highRiskWorksDesc: string;
+  aiIntegrityAnomalies: string;
+  aiIntegrityAnomaliesDesc: string;
+  viewAllAnomalies: string;
+  viewAllWorks: string;
+  noHighRiskProjects: string;
+  auditDetails: string;
 
   // Projects Specific
   projectsPageTitle: string;
@@ -157,6 +187,11 @@ export interface TranslationDictionary {
   startDate: string;
   workId: string;
   locationAddress: string;
+  showingProjectsCount: string;
+  workTitleAndCategory: string;
+  locationAndDistrict: string;
+  costLakh: string;
+  aiRisk: string;
 
   // Financials & Funds Ledger
   fundsPageTitle: string;
@@ -175,6 +210,17 @@ export interface TranslationDictionary {
   disbursedOn: string;
   sanctionOrder: string;
   beneficiaryAgency: string;
+  sectoralAllocation: string;
+  sanctionedColon: string;
+  utilizedColon: string;
+  spent: string;
+  certifiedPaymentsLedger: string;
+  disbursalsCount: string;
+  sanctionOrderRef: string;
+  projectTitle: string;
+  amountInr: string;
+  disbursedDate: string;
+  physicalExecutionDrawdown: string;
 
   // Alerts & Vigilance Review
   alertsPageTitle: string;
@@ -193,6 +239,17 @@ export interface TranslationDictionary {
   actionEscalate: string;
   actionFalsePositive: string;
   actionNotesPlaceholder: string;
+  aiAlertManagementTitle: string;
+  aiAlertManagementSubtitle: string;
+  alertRef: string;
+  anomalyType: string;
+  associatedProject: string;
+  districtAndAgency: string;
+  detectionObservation: string;
+  administrativeAction: string;
+  takeActionBtn: string;
+  showingAlertsCount: string;
+  noAlertsMatchCriteria: string;
 
   // Evidence & Verification
   verificationPageTitle: string;
@@ -208,9 +265,29 @@ export interface TranslationDictionary {
   aiSynthesized: string;
   verified: string;
   underReview: string;
-  flagged: string;
   sanctioned: string;
   utilized: string;
+  publicTransparencyVerification: string;
+  officialMospiFeed: string;
+  projectVerificationStatusTitle: string;
+  projectVerificationStatusDesc: string;
+  verificationProcessTerm: string;
+  verificationProcessExplanation: string;
+  verifiedWorks: string;
+  underReviewWorks: string;
+  flaggedWorks: string;
+  allWorksFilter: string;
+  searchVerificationPlaceholder: string;
+  workVerificationCard: string;
+  photographicTelemetry: string;
+  gpsAccuracy: string;
+  financialAlignment: string;
+  physicalInspection: string;
+  verifiedDesc: string;
+  underReviewDesc: string;
+  flaggedDesc: string;
+  viewFullInspectionReport: string;
+  noVerificationRecordsMatch: string;
 
   // Reports
   reportsPageTitle: string;
@@ -219,6 +296,16 @@ export interface TranslationDictionary {
   downloadExcel: string;
   auditCompliance: string;
   constituencyPerformance: string;
+  officialReportsTitle: string;
+  officialReportsSubtitle: string;
+  printOfficialBrief: string;
+  exportCsvDataset: string;
+  selectReportType: string;
+  masterAuditReport: string;
+  riskVigilanceReport: string;
+  financialLedgerReport: string;
+  agencyScorecardReport: string;
+  reportGeneratedNotice: string;
 
   // Citizen Feedback & Ground Observations
   feedbackPageTitle: string;
@@ -233,6 +320,112 @@ export interface TranslationDictionary {
   feedbackSubmittedSuccess: string;
   publicGrievances: string;
   noFeedbackYet: string;
+  citizenFeedbackTitle: string;
+  citizenFeedbackSubtitle: string;
+  registerNewGrievance: string;
+  noGrievancesJurisdiction: string;
+  reportedOn: string;
+  associatedProjectColon: string;
+  citizenWhistleblowerReport: string;
+  authorityActionLog: string;
+  adjudicateGrievance: string;
+  adjudicateGrievanceTitle: string;
+  updateStatus: string;
+  adjudicationNotes: string;
+  adjudicationNotesPlaceholder: string;
+  updating: string;
+
+  // AI Vigilance & Anomalies
+  vigilanceDecisionEngine: string;
+  aiAnomaliesTitle: string;
+  aiAnomaliesSubtitle: string;
+  statutoryAdvisory: string;
+  statutoryAdvisoryText: string;
+  allModulesOverview: string;
+  costBenchmarkAnomalies: string;
+  spatialDuplicateDetection: string;
+  photoIntegrityAnomalies: string;
+  locationMismatchAnomalies: string;
+  executionDelayRisks: string;
+  sanctionedCost: string;
+  benchmarkCost: string;
+  costDeviation: string;
+  investigateWork: string;
+  inspectEvidence: string;
+  inspectGroundPhotos: string;
+  inspectGpsCoordinates: string;
+
+  // Agency Workdesk
+  agencyWorkdeskTitle: string;
+  agencyWorkdeskSubtitle: string;
+  agencyProtocolNotice: string;
+  agencyProtocolDesc: string;
+  updateProgressAndPhotos: string;
+  submitPaymentClaim: string;
+  paymentClaimTitle: string;
+  claimAmountLakhLabel: string;
+  voucherRemarksLabel: string;
+  voucherRemarksPlaceholder: string;
+  submittingVoucher: string;
+  submitVoucherBtn: string;
+
+  // Vendor Analytics
+  vendorMatrixTitle: string;
+  vendorMatrixSubtitle: string;
+  antiCartelizationNotice: string;
+  antiCartelizationDesc: string;
+  registeredGovtContractor: string;
+  totalWorks: string;
+  contractValue: string;
+  completedWorks: string;
+  delayedOrAtRisk: string;
+  timelyCompletionRate: string;
+  categoriesLabel: string;
+  loadingVendorAnalytics: string;
+
+  // Audit Logs
+  auditLogTitle: string;
+  auditLogSubtitle: string;
+  verifyIntegrityBtn: string;
+  validatingHashes: string;
+  hashChainVerified: string;
+  hashChainBroken: string;
+  genesisAnchorValidated: string;
+  algorithm: string;
+  verifiedAt: string;
+  loadingAuditSequence: string;
+
+  // Data Ingestion Impact
+  dataIngestionTitle: string;
+  dataIngestionSubtitle: string;
+  ingestSampleData: string;
+  simulateTamper: string;
+  verifyAuditChain: string;
+  restoreChain: string;
+
+  // Contractor Network Fraud
+  networkFraudTitle: string;
+  networkFraudSubtitle: string;
+  graphAnalyticsBadge: string;
+  recomputeGraph: string;
+  contractorsAudited: string;
+  collusionRingsFlagged: string;
+  graphEdgesModeled: string;
+  allVendors: string;
+  suspiciousOnly: string;
+  shellOnly: string;
+
+  // Recommendations Page
+  recommendationsTitle: string;
+  recommendationsSubtitle: string;
+  submitNewRecommendation: string;
+  noRecommendationsLogged: string;
+  sanctionWorkBtn: string;
+  sanctionWorkModalTitle: string;
+  sanctionAmountLakhLabel: string;
+  sanctionRemarksLabel: string;
+  sanctionRemarksPlaceholder: string;
+  sanctioning: string;
 
   // Citizen Chatbot
   chatbotTitle: string;
@@ -306,6 +499,35 @@ export interface TranslationDictionary {
   worksCompletedLabel: string;
   viewWorksLabel: string;
   noMpsFound: string;
+
+  // Additional System & Anomalies Keys
+  gisSurveillance: string;
+  gisMapTitle: string;
+  gisMapSubtitle: string;
+  loadingMpladsDataset: string;
+  auditBoqJustification: string;
+  actionRequired: string;
+  siteReconciliation: string;
+  inspectSubmittedPhotographs: string;
+  closeInspector: string;
+  openInProjectWorkspace: string;
+  issueShowCauseRule14: string;
+  directSdmFieldVerification: string;
+  investigateAndResolve: string;
+  pendingAdjudicationText: string;
+  registeredAlertsCount: string;
+  filterByType: string;
+  filterByStatus: string;
+  allTypes: string;
+  alertRefHeader: string;
+  anomalyTypeHeader: string;
+  associatedProjectHeader: string;
+  districtAgencyHeader: string;
+  detectionObservationHeader: string;
+  reviewStatusHeader: string;
+  administrativeActionHeader: string;
+  estimatedProposal: string;
+  sanctionOrderAndRemarks: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -407,6 +629,16 @@ export const translations: Record<Language, TranslationDictionary> = {
     pageOf: 'Page {current} of {total}',
     total: 'Total',
     srNo: 'Sr No',
+    completed: 'Completed',
+    active: 'Active',
+    cr: 'Cr',
+    lakh: 'Lakh',
+    lakhShort: 'L',
+    acrossWorks: 'Across {count} local development works',
+    reviewStatus: 'Review Status',
+    notices: 'notices',
+    flagged: 'Flagged',
+    delayed: 'Delayed',
 
     // Dashboard Specific
     totalProjects: 'Total Works',
@@ -434,6 +666,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     adminOverviewTitle: 'District Authority Oversight & Verification Dashboard',
     agencyOverviewTitle: 'Implementing Agency Workdesk & Progress Log',
     publicOverviewTitle: 'MPLADS National Transparency & Project Oversight',
+    continuousOversightTitle: 'Continuous Oversight & Inspection Summary',
+    continuousOversightTerm: 'Continuous Oversight',
+    continuousOversightExplanation: 'Automated routine checks verify contractor invoices against standard district schedules and match site photographs with GPS coordinates.',
+    continuousOversightDesc: 'Summary of items identified for district engineer review or field inspection.',
+    costChecks: 'Cost Checks',
+    costChecksNote: 'May exceed standard rate',
+    potentialDuplicates: 'Potential Duplicates',
+    duplicatesNote: 'Co-located within 50m',
+    photoVerification: 'Photo Verification',
+    photoVerificationNote: 'Valid EXIF & timestamp',
+    locationAccuracy: 'Location Accuracy',
+    locationAccuracyNote: 'Within 250m perimeter',
+    highRiskWorksNeedingReview: 'High-Risk Works Requiring Technical Review',
+    highRiskWorksDesc: 'Prioritized by composite anomaly score combining cost deviations, duplicate flags, and timeline delays.',
+    aiIntegrityAnomalies: 'AI Vigilance & Integrity Discrepancies',
+    aiIntegrityAnomaliesDesc: 'Automated algorithmic alerts flagged for District Authority human review.',
+    viewAllAnomalies: 'View All Anomalies',
+    viewAllWorks: 'View All Works',
+    noHighRiskProjects: 'No projects currently flagged with high risk scores.',
+    auditDetails: 'Audit Details',
 
     // Projects Specific
     projectsPageTitle: 'Constituency Development Works Directory',
@@ -466,6 +718,11 @@ export const translations: Record<Language, TranslationDictionary> = {
     startDate: 'Commencement Date',
     workId: 'Work ID / Project Code',
     locationAddress: 'Location Address',
+    showingProjectsCount: 'Showing {filtered} of {total} developmental works',
+    workTitleAndCategory: 'Work Title & Category',
+    locationAndDistrict: 'Location & District',
+    costLakh: 'Cost (Lakh)',
+    aiRisk: 'AI Risk',
 
     // Financials & Funds Ledger
     fundsPageTitle: 'MPLADS Financial Ledger & Fund Disbursals',
@@ -484,6 +741,17 @@ export const translations: Record<Language, TranslationDictionary> = {
     disbursedOn: 'Disbursed on {date}',
     sanctionOrder: 'Sanction Order: {order}',
     beneficiaryAgency: 'Beneficiary Agency',
+    sectoralAllocation: 'Developmental Category Expenditure Allocation',
+    sanctionedColon: 'Sanctioned:',
+    utilizedColon: 'Utilized:',
+    spent: 'spent',
+    certifiedPaymentsLedger: 'Certified Milestone Payments Ledger',
+    disbursalsCount: '{count} Disbursals',
+    sanctionOrderRef: 'Sanction Order Ref',
+    projectTitle: 'Project Title',
+    amountInr: 'Amount (INR)',
+    disbursedDate: 'Disbursed Date',
+    physicalExecutionDrawdown: 'Physical execution drawdown:',
 
     // Alerts & Vigilance Review
     alertsPageTitle: 'AI Alert Management & Vigilance Review Desk',
@@ -502,6 +770,17 @@ export const translations: Record<Language, TranslationDictionary> = {
     actionEscalate: 'Escalate for Ground Inspection',
     actionFalsePositive: 'Mark as False Positive',
     actionNotesPlaceholder: 'Enter official reasoning and adjudication notes...',
+    aiAlertManagementTitle: 'AI Alert Management & Vigilance Review Desk',
+    aiAlertManagementSubtitle: 'District Authority human adjudication queue for AI-detected discrepancies',
+    alertRef: 'Alert Ref',
+    anomalyType: 'Anomaly Type',
+    associatedProject: 'Associated Project',
+    districtAndAgency: 'District & Agency',
+    detectionObservation: 'Detection Observation',
+    administrativeAction: 'Administrative Action',
+    takeActionBtn: 'Take Action',
+    showingAlertsCount: 'Showing {filtered} of {total} registered alerts',
+    noAlertsMatchCriteria: 'No alerts match selected criteria.',
 
     // Evidence & Verification
     verificationPageTitle: 'Cryptographic Evidence & Multi-Modal Verification',
@@ -517,9 +796,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     aiSynthesized: 'Possible AI Generated / Filtered',
     verified: 'Verified',
     underReview: 'Under Review',
-    flagged: 'Flagged for Inspection',
     sanctioned: 'Sanctioned Allocation',
     utilized: 'Funds Utilized',
+    publicTransparencyVerification: 'Public Transparency Verification',
+    officialMospiFeed: 'Official MoSPI Feed',
+    projectVerificationStatusTitle: 'Project Verification Status',
+    projectVerificationStatusDesc: 'Every MPLADS project undergoes field milestone checks, photographic matching, and financial auditing. Inspect verification records below in simple language.',
+    verificationProcessTerm: 'Verification Process',
+    verificationProcessExplanation: "Works are labeled 'Verified' when photographs match GPS locations and expenditures align with official estimates. 'Under Review' works are awaiting documentation, and 'Flagged' works require field inspection.",
+    verifiedWorks: 'Verified Works',
+    underReviewWorks: 'Works Under Review',
+    flaggedWorks: 'Flagged for Inspection',
+    allWorksFilter: 'All Works',
+    searchVerificationPlaceholder: 'Search by project code, title, constituency...',
+    workVerificationCard: 'Work Verification Card',
+    photographicTelemetry: 'Photographic Telemetry',
+    gpsAccuracy: 'GPS Accuracy',
+    financialAlignment: 'Financial Alignment',
+    physicalInspection: 'Physical Inspection',
+    verifiedDesc: 'All photographic, GPS, and expenditure milestones verified authentic.',
+    underReviewDesc: 'Awaiting supplementary documentation or engineer certification.',
+    flaggedDesc: 'Discrepancy detected. Scheduled for executive engineer ground inspection.',
+    viewFullInspectionReport: 'View Full Inspection Report',
+    noVerificationRecordsMatch: 'No verification records match selected criteria.',
 
     // Reports
     reportsPageTitle: 'Official Scheme Reports & Statutory Audits',
@@ -528,6 +827,16 @@ export const translations: Record<Language, TranslationDictionary> = {
     downloadExcel: 'Download Master Excel Sheet',
     auditCompliance: 'MoSPI 2023 Guidelines Compliance',
     constituencyPerformance: 'Constituency Execution Scorecard',
+    officialReportsTitle: 'Official Audit Reports & Data Export Center',
+    officialReportsSubtitle: 'Standardized MoSPI compliance documentation, CAG audit tables, and vigilance briefs',
+    printOfficialBrief: 'Print Official Brief',
+    exportCsvDataset: 'Export CSV Dataset',
+    selectReportType: 'Select Report Template',
+    masterAuditReport: 'Master Works & Expenditure Audit',
+    riskVigilanceReport: 'AI Vigilance & Anomaly Register',
+    financialLedgerReport: 'Statutory Financial Ledger',
+    agencyScorecardReport: 'Implementing Agency Delivery Scorecard',
+    reportGeneratedNotice: 'Report generated from live MoSPI cryptographically anchored records.',
 
     // Citizen Feedback & Ground Observations
     feedbackPageTitle: 'Citizen Feedback & Ground Observation Desk',
@@ -542,6 +851,112 @@ export const translations: Record<Language, TranslationDictionary> = {
     feedbackSubmittedSuccess: 'Observation registered successfully! Tracking ID: {id}',
     publicGrievances: 'Recent Ground Observations',
     noFeedbackYet: 'No public grievances registered yet. Be the first to share ground observation!',
+    citizenFeedbackTitle: 'Citizen Grievance Redressal & Public Feedback',
+    citizenFeedbackSubtitle: 'Whistleblower reports and public civil works monitoring directly submitted to District Authority',
+    registerNewGrievance: 'Register New Citizen Grievance',
+    noGrievancesJurisdiction: 'No public grievances registered in jurisdiction.',
+    reportedOn: 'Reported on:',
+    associatedProjectColon: 'Associated Project:',
+    citizenWhistleblowerReport: 'Citizen Observation / Whistleblower Report:',
+    authorityActionLog: 'District Authority Action & Adjudication Log:',
+    adjudicateGrievance: 'Adjudicate Grievance',
+    adjudicateGrievanceTitle: 'Official Grievance Adjudication',
+    updateStatus: 'Update Status',
+    adjudicationNotes: 'Adjudication Notes / Action Taken',
+    adjudicationNotesPlaceholder: 'Enter administrative action taken or field inspection notes...',
+    updating: 'Updating...',
+
+    // AI Vigilance & Anomalies
+    vigilanceDecisionEngine: 'Vigilance Decision Support Engine',
+    aiAnomaliesTitle: 'AI Integrity & Anomaly Detection Center',
+    aiAnomaliesSubtitle: 'Continuous algorithmic surveillance cross-verifying financial allocations, geospatial duplicates, physical photographic metadata, and execution trajectories under MoSPI guidelines.',
+    statutoryAdvisory: 'Statutory Administrative Advisory:',
+    statutoryAdvisoryText: 'The AI risk score is an indicator for human review, not proof of fraud or corruption. All flagged items require on-site technical inspection by an authorized Executive Engineer or Sub-Divisional Magistrate.',
+    allModulesOverview: 'All Modules Overview',
+    costBenchmarkAnomalies: '1. Cost Benchmark Anomalies',
+    spatialDuplicateDetection: '2. Spatial Duplicate Detection',
+    photoIntegrityAnomalies: '3. Photo & Telemetry Integrity',
+    locationMismatchAnomalies: '4. GPS Geofence Mismatch',
+    executionDelayRisks: '5. Execution Trajectory Delays',
+    sanctionedCost: 'Sanctioned Cost',
+    benchmarkCost: 'Benchmark Cost',
+    costDeviation: 'Cost Deviation',
+    investigateWork: 'Investigate Work',
+    inspectEvidence: 'Inspect Evidence',
+    inspectGroundPhotos: 'Inspect Ground Photos',
+    inspectGpsCoordinates: 'Inspect GPS Coordinates',
+
+    // Agency Workdesk
+    agencyWorkdeskTitle: 'Implementing Agency Field Workdesk',
+    agencyWorkdeskSubtitle: 'Execution tracking, milestone verification, geotagged photograph uploads, and payment vouchers',
+    agencyProtocolNotice: 'Agency Protocol Notice:',
+    agencyProtocolDesc: 'Photographic submissions must contain authentic EXIF GPS telemetry within 250 meters of the sanctioned site. Duplicate image re-use across projects is tracked automatically and triggers vigilance audit.',
+    updateProgressAndPhotos: 'Update Progress & Upload Photos',
+    submitPaymentClaim: 'Submit Payment Voucher',
+    paymentClaimTitle: 'Submit Certified Payment Voucher',
+    claimAmountLakhLabel: 'Claim Amount (₹ Lakh)',
+    voucherRemarksLabel: 'Milestone / Voucher Remarks',
+    voucherRemarksPlaceholder: 'e.g., Stage 2 Plinth & Column completion invoice certified by site engineer',
+    submittingVoucher: 'Submitting...',
+    submitVoucherBtn: 'Submit Voucher',
+
+    // Vendor Analytics
+    vendorMatrixTitle: 'Contractor & Vendor Concentration Matrix',
+    vendorMatrixSubtitle: 'Vigilance profiling tracking contractor allocation caps, execution delays, and risk concentration',
+    antiCartelizationNotice: 'Anti-Cartelization & Concentration Vigilance:',
+    antiCartelizationDesc: 'Under CVC (Central Vigilance Commission) directives, high concentration of projects or repeat delays under single contractors trigger automated alerts to prevent monopolistic distribution of constituency works.',
+    registeredGovtContractor: 'Registered Govt Contractor',
+    totalWorks: 'Total Works',
+    contractValue: 'Contract Value',
+    completedWorks: 'Completed',
+    delayedOrAtRisk: 'Delayed / At Risk',
+    timelyCompletionRate: 'Timely Completion Rate',
+    categoriesLabel: 'Categories',
+    loadingVendorAnalytics: 'Loading vendor integrity analytics...',
+
+    // Audit Logs
+    auditLogTitle: 'Tamper-Evident System Audit Trail & Security Logs',
+    auditLogSubtitle: 'Cryptographically chained SHA-256 ledger recording all administrative, financial, and AI verification events',
+    verifyIntegrityBtn: 'Verify Cryptographic Integrity',
+    validatingHashes: 'Validating Hashes...',
+    hashChainVerified: 'Cryptographic Hash Chain Verified: 100% Intact ({count} Entries)',
+    hashChainBroken: 'Integrity Anomaly: Broken chain detected at {id}',
+    genesisAnchorValidated: 'Genesis Anchor Validated',
+    algorithm: 'Algorithm:',
+    verifiedAt: 'Verified At:',
+    loadingAuditSequence: 'Verifying & loading immutable audit sequence...',
+
+    // Data Ingestion Impact
+    dataIngestionTitle: 'Data Ingestion, Schema Normalization & Anomaly Impact Studio',
+    dataIngestionSubtitle: 'Multi-source bulk batch processing, automated AI data quality scoring, and cryptographic audit trail tamper simulation',
+    ingestSampleData: 'Ingest MoSPI Batch Export',
+    simulateTamper: 'Simulate Tamper Attack',
+    verifyAuditChain: 'Verify Ledger Chain',
+    restoreChain: 'Restore Tampered Chain',
+
+    // Contractor Network Fraud
+    networkFraudTitle: 'Contractor & Vendor Network Fraud Detection',
+    networkFraudSubtitle: 'Models relationships across Contractors, Members of Parliament, Implementing Districts, and Projects to identify shell collusion cartels.',
+    graphAnalyticsBadge: 'Graph Analytics & Shell Detection',
+    recomputeGraph: 'Recompute Graph',
+    contractorsAudited: 'Contractors Audited',
+    collusionRingsFlagged: 'Collusion Rings Flagged',
+    graphEdgesModeled: 'Graph Edges Modeled',
+    allVendors: 'All Contractors',
+    suspiciousOnly: 'Suspicious Only',
+    shellOnly: 'Shell Indicators Only',
+
+    // Recommendations Page
+    recommendationsTitle: 'MP Recommendations & Administrative Sanctions',
+    recommendationsSubtitle: 'Work proposal lifecycle from Member of Parliament submission to District Authority technical sanction',
+    submitNewRecommendation: 'Submit New Recommendation',
+    noRecommendationsLogged: 'No active recommendations currently logged.',
+    sanctionWorkBtn: 'Sanction Work',
+    sanctionWorkModalTitle: 'Sanction Project: {code}',
+    sanctionAmountLakhLabel: 'Sanction Amount (₹ Lakh)',
+    sanctionRemarksLabel: 'Sanction Order Number & Remarks',
+    sanctionRemarksPlaceholder: 'e.g., Sanction Order No. DC/MPLADS/2024/781 approved following site feasibility check',
+    sanctioning: 'Sanctioning...',
 
     // Citizen Chatbot
     chatbotTitle: 'MPLADS Citizen Inquiry AI',
@@ -614,7 +1029,36 @@ export const translations: Record<Language, TranslationDictionary> = {
     worksSanctionedLabel: 'Works Sanctioned',
     worksCompletedLabel: 'Works Completed',
     viewWorksLabel: 'View Works',
-    noMpsFound: 'No MP records match the current filter selection.'
+    noMpsFound: 'No MP records match the current filter selection.',
+
+    // Additional System & Anomalies Keys
+    gisSurveillance: 'GIS Surveillance',
+    gisMapTitle: 'Geographic Information System (GIS) Surveillance',
+    gisMapSubtitle: 'Georeferenced project footprints, territorial proximity analysis, and duplicate cluster detection',
+    loadingMpladsDataset: 'Loading official MPLADS dataset & executing AI integrity heuristics...',
+    auditBoqJustification: 'Audit BOQ & Justification',
+    actionRequired: 'Action Required',
+    siteReconciliation: 'Site Reconciliation',
+    inspectSubmittedPhotographs: 'Inspect Submitted Photographs',
+    closeInspector: 'Close Inspector',
+    openInProjectWorkspace: 'Open in Project Workspace',
+    issueShowCauseRule14: 'Issue Show-Cause Notice under Rule 14',
+    directSdmFieldVerification: 'Direct SDM Field Verification',
+    investigateAndResolve: 'Investigate & Resolve',
+    pendingAdjudicationText: 'Pending Adjudication',
+    registeredAlertsCount: 'Showing {filtered} of {total} registered alerts',
+    filterByType: 'Alert Type',
+    filterByStatus: 'Review Status',
+    allTypes: 'All',
+    alertRefHeader: 'Alert Ref',
+    anomalyTypeHeader: 'Anomaly Type',
+    associatedProjectHeader: 'Associated Project',
+    districtAgencyHeader: 'District & Agency',
+    detectionObservationHeader: 'Detection Observation',
+    reviewStatusHeader: 'Review Status',
+    administrativeActionHeader: 'Administrative Action',
+    estimatedProposal: 'Estimated Proposal',
+    sanctionOrderAndRemarks: 'Sanction Order Number & Remarks'
   },
   hi: {
     // Brand / Portal
@@ -714,6 +1158,16 @@ export const translations: Record<Language, TranslationDictionary> = {
     pageOf: 'पृष्ठ {current} का {total}',
     total: 'कुल',
     srNo: 'क्र.सं.',
+    completed: 'पूर्ण',
+    active: 'सक्रिय',
+    cr: 'करोड़',
+    lakh: 'लाख',
+    lakhShort: 'लाख',
+    acrossWorks: '{count} स्थानीय विकास कार्यों में',
+    reviewStatus: 'समीक्षा स्थिति',
+    notices: 'नोटिस',
+    flagged: 'चिह्नित',
+    delayed: 'विलंबित',
 
     // Dashboard Specific
     totalProjects: 'कुल कार्य',
@@ -741,6 +1195,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     adminOverviewTitle: 'ज़िला प्राधिकारी निगरानी एवं सत्यापन डैशबोर्ड',
     agencyOverviewTitle: 'कार्यान्वयन एजेंसी कार्यडेस्क एवं प्रगति लॉग',
     publicOverviewTitle: 'सांसद निधि राष्ट्रीय पारदर्शिता एवं परियोजना निगरानी',
+    continuousOversightTitle: 'सतत निगरानी एवं निरीक्षण सारांश',
+    continuousOversightTerm: 'सतत निगरानी',
+    continuousOversightExplanation: 'स्वचालित नियमित जांच ठेकेदार के बिलों का मानक अनुसूची से मिलान करती है और साइट की तस्वीरों को जीपीएस निर्देशांक से सत्यापित करती है।',
+    continuousOversightDesc: 'ज़िला अभियंता समीक्षा या ज़मीनी निरीक्षण के लिए चिह्नित वस्तुओं का सारांश।',
+    costChecks: 'लागत सत्यापन',
+    costChecksNote: 'मानक दर से अधिक संभावित',
+    potentialDuplicates: 'संभावित डुप्लिकेट',
+    duplicatesNote: '50 मी के भीतर सह-स्थित',
+    photoVerification: 'फोटो सत्यापन',
+    photoVerificationNote: 'मान्य EXIF एवं समय-मुहर',
+    locationAccuracy: 'स्थान सटीकता',
+    locationAccuracyNote: '250 मी परिधि के भीतर',
+    highRiskWorksNeedingReview: 'तकनीकी समीक्षा हेतु उच्च जोखिम वाले कार्य',
+    highRiskWorksDesc: 'लागत विचलन, डुप्लिकेट संकेत और समयसीमा विलंब के समग्र स्कोर द्वारा प्राथमिकता दी गई।',
+    aiIntegrityAnomalies: 'एआई सतर्कता एवं सत्यनिष्ठा विसंगतियां',
+    aiIntegrityAnomaliesDesc: 'ज़िला प्राधिकारी मानवीय समीक्षा हेतु स्वचालित एल्गोरिद्मिक अलर्ट।',
+    viewAllAnomalies: 'सभी विसंगतियां देखें',
+    viewAllWorks: 'सभी कार्य देखें',
+    noHighRiskProjects: 'वर्तमान में कोई परियोजना उच्च जोखिम स्कोर के साथ चिह्नित नहीं है।',
+    auditDetails: 'ऑडिट विवरण',
 
     // Projects Specific
     projectsPageTitle: 'संसदीय क्षेत्र विकास कार्य निर्देशिका',
@@ -773,6 +1247,11 @@ export const translations: Record<Language, TranslationDictionary> = {
     startDate: 'कार्य प्रारंभ तिथि',
     workId: 'कार्य आईडी / परियोजना कोड',
     locationAddress: 'स्थान का पता',
+    showingProjectsCount: '{total} विकास कार्यों में से {filtered} प्रदर्शित',
+    workTitleAndCategory: 'कार्य शीर्षक एवं श्रेणी',
+    locationAndDistrict: 'स्थान एवं ज़िला',
+    costLakh: 'लागत (लाख)',
+    aiRisk: 'एआई जोखिम',
 
     // Financials & Funds Ledger
     fundsPageTitle: 'सांसद निधि वित्तीय बहीखाता और संवितरण',
@@ -791,6 +1270,17 @@ export const translations: Record<Language, TranslationDictionary> = {
     disbursedOn: '{date} को संवितरित',
     sanctionOrder: 'स्वीकृति आदेश: {order}',
     beneficiaryAgency: 'लाभार्थी एजेंसी',
+    sectoralAllocation: 'विकास श्रेणीवार व्यय आवंटन',
+    sanctionedColon: 'स्वीकृत:',
+    utilizedColon: 'उपयोग:',
+    spent: 'व्यय',
+    certifiedPaymentsLedger: 'प्रमाणित मील का पत्थर भुगतान खाता',
+    disbursalsCount: '{count} संवितरण',
+    sanctionOrderRef: 'स्वीकृति आदेश सं.',
+    projectTitle: 'परियोजना शीर्षक',
+    amountInr: 'राशि (रुपये)',
+    disbursedDate: 'संवितरण तिथि',
+    physicalExecutionDrawdown: 'भौतिक निष्पादन उपभोग:',
 
     // Alerts & Vigilance Review
     alertsPageTitle: 'एआई अलर्ट प्रबंधन एवं सतर्कता समीक्षा डेस्क',
@@ -809,6 +1299,17 @@ export const translations: Record<Language, TranslationDictionary> = {
     actionEscalate: 'धरातलीय निरीक्षण हेतु अग्रसारित करें',
     actionFalsePositive: 'गलत संकेत चिह्नित करें',
     actionNotesPlaceholder: 'आधिकारिक कारण और समीक्षा टिप्पणी दर्ज करें...',
+    aiAlertManagementTitle: 'एआई अलर्ट प्रबंधन एवं सतर्कता समीक्षा डेस्क',
+    aiAlertManagementSubtitle: 'एआई द्वारा खोजी गई विसंगतियों हेतु ज़िला प्राधिकारी मानवीय निर्णय कतार',
+    alertRef: 'अलर्ट संदर्भ',
+    anomalyType: 'विसंगति प्रकार',
+    associatedProject: 'संबंधित परियोजना',
+    districtAndAgency: 'ज़िला एवं एजेंसी',
+    detectionObservation: 'पहचान अवलोकन',
+    administrativeAction: 'प्रशासनिक कार्रवाई',
+    takeActionBtn: 'कार्रवाई करें',
+    showingAlertsCount: '{total} पंजीकृत अलर्ट में से {filtered} प्रदर्शित',
+    noAlertsMatchCriteria: 'चयनित मानदंडों से मेल खाने वाला कोई अलर्ट नहीं है।',
 
     // Evidence & Verification
     verificationPageTitle: 'क्रिप्टोग्राफिक साक्ष्य एवं बहु-आयामी सत्यापन',
@@ -824,9 +1325,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     aiSynthesized: 'संभावित एआई निर्मित / फ़िल्टर की गई फोटो',
     verified: 'सत्यापित',
     underReview: 'समीक्षाधीन',
-    flagged: 'जांच हेतु चिह्नित',
     sanctioned: 'स्वीकृत राशि',
     utilized: 'उपयोग की गई राशि',
+    publicTransparencyVerification: 'सार्वजनिक पारदर्शिता सत्यापन',
+    officialMospiFeed: 'आधिकारिक MoSPI फीड',
+    projectVerificationStatusTitle: 'परियोजना सत्यापन स्थिति',
+    projectVerificationStatusDesc: 'प्रत्येक सांसद निधि परियोजना में फील्ड मील के पत्थर की जांच, फोटो मिलान और वित्तीय ऑडिट किया जाता है। सरल भाषा में सत्यापन रिकॉर्ड देखें।',
+    verificationProcessTerm: 'सत्यापन प्रक्रिया',
+    verificationProcessExplanation: 'कार्यों को तब "सत्यापित" कहा जाता है जब तस्वीरें जीपीएस स्थानों से मेल खाती हैं और व्यय आधिकारिक अनुमानों के अनुरूप होता है। "समीक्षाधीन" कार्य दस्तावेजीकरण की प्रतीक्षा कर रहे हैं, और "जांच हेतु चिह्नित" कार्यों के लिए फील्ड निरीक्षण आवश्यक है।',
+    verifiedWorks: 'सत्यापित कार्य',
+    underReviewWorks: 'समीक्षाधीन कार्य',
+    flaggedWorks: 'जांच हेतु चिह्नित कार्य',
+    allWorksFilter: 'सभी कार्य',
+    searchVerificationPlaceholder: 'परियोजना कोड, शीर्षक, संसदीय क्षेत्र द्वारा खोजें...',
+    workVerificationCard: 'कार्य सत्यापन कार्ड',
+    photographicTelemetry: 'फोटोग्राफिक टेलीमेट्री',
+    gpsAccuracy: 'जीपीएस सटीकता',
+    financialAlignment: 'वित्तीय संरेखण',
+    physicalInspection: 'भौतिक निरीक्षण',
+    verifiedDesc: 'सभी फोटोग्राफिक, जीपीएस और व्यय मील के पत्थर प्रामाणिक सत्यापित हैं।',
+    underReviewDesc: 'पूरक दस्तावेज़ या अभियंता प्रमाणन की प्रतीक्षा है।',
+    flaggedDesc: 'विसंगति पाई गई। कार्यपालक अभियंता धरातलीय निरीक्षण हेतु निर्धारित।',
+    viewFullInspectionReport: 'पूर्ण निरीक्षण रिपोर्ट देखें',
+    noVerificationRecordsMatch: 'चयनित मानदंडों से मेल खाने वाला कोई सत्यापन रिकॉर्ड नहीं है।',
 
     // Reports
     reportsPageTitle: 'आधिकारिक योजना रिपोर्ट एवं वैधानिक लेखापरीक्षा',
@@ -835,6 +1356,16 @@ export const translations: Record<Language, TranslationDictionary> = {
     downloadExcel: 'मास्टर एक्सेल शीट डाउनलोड करें',
     auditCompliance: 'MoSPI 2023 दिशानिर्देश अनुपालन',
     constituencyPerformance: 'संसदीय क्षेत्र निष्पादन स्कोरकार्ड',
+    officialReportsTitle: 'आधिकारिक ऑडिट रिपोर्ट एवं डेटा निर्यात केंद्र',
+    officialReportsSubtitle: 'मानकीकृत MoSPI अनुपालन दस्तावेज़, CAG ऑडिट सारणियां एवं सतर्कता विवरण',
+    printOfficialBrief: 'आधिकारिक विवरण प्रिंट करें',
+    exportCsvDataset: 'सीएसवी डेटा निर्यात करें',
+    selectReportType: 'रिपोर्ट प्रारूप चुनें',
+    masterAuditReport: 'मास्टर कार्य एवं व्यय ऑडिट',
+    riskVigilanceReport: 'एआई सतर्कता एवं विसंगति रजिस्टर',
+    financialLedgerReport: 'वैधानिक वित्तीय बहीखाता',
+    agencyScorecardReport: 'कार्यान्वयन एजेंसी निष्पादन स्कोरकार्ड',
+    reportGeneratedNotice: 'लाइव MoSPI क्रिप्टोग्राफिक रूप से जुड़े रिकॉर्ड से तैयार रिपोर्ट।',
 
     // Citizen Feedback & Ground Observations
     feedbackPageTitle: 'नागरिक प्रतिपुष्टि एवं धरातलीय अवलोकन डेस्क',
@@ -849,6 +1380,112 @@ export const translations: Record<Language, TranslationDictionary> = {
     feedbackSubmittedSuccess: 'अवलोकन सफलतापूर्वक दर्ज किया गया! ट्रैकिंग आईडी: {id}',
     publicGrievances: 'हालिया धरातलीय अवलोकन',
     noFeedbackYet: 'अभी तक कोई नागरिक शिकायत दर्ज नहीं की गई है। पहला अवलोकन आप साझा करें!',
+    citizenFeedbackTitle: 'नागरिक शिकायत निवारण एवं जन प्रतिक्रिया',
+    citizenFeedbackSubtitle: 'सीधे ज़िला प्रशासन को प्रेषित विसलब्लोअर रिपोर्ट एवं सार्वजनिक निगरानी',
+    registerNewGrievance: 'नई नागरिक शिकायत दर्ज करें',
+    noGrievancesJurisdiction: 'अधिकार क्षेत्र में कोई सार्वजनिक शिकायत दर्ज नहीं है।',
+    reportedOn: 'दर्ज तिथि:',
+    associatedProjectColon: 'संबंधित परियोजना:',
+    citizenWhistleblowerReport: 'नागरिक अवलोकन / विसलब्लोअर रिपोर्ट:',
+    authorityActionLog: 'ज़िला प्राधिकारी कार्रवाई एवं निर्णय लॉग:',
+    adjudicateGrievance: 'शिकायत का निवारण करें',
+    adjudicateGrievanceTitle: 'आधिकारिक शिकायत निवारण',
+    updateStatus: 'स्थिति अपडेट करें',
+    adjudicationNotes: 'निर्णय टिप्पणी / की गई कार्रवाई',
+    adjudicationNotesPlaceholder: 'की गई प्रशासनिक कार्रवाई या फील्ड निरीक्षण नोट दर्ज करें...',
+    updating: 'अपडेट हो रहा है...',
+
+    // AI Vigilance & Anomalies
+    vigilanceDecisionEngine: 'सतर्कता निर्णय सहायता इंजन',
+    aiAnomaliesTitle: 'एआई सत्यनिष्ठा एवं विसंगति पहचान केंद्र',
+    aiAnomaliesSubtitle: 'MoSPI दिशानिर्देशों के तहत वित्तीय आवंटन, भू-स्थानिक डुप्लिकेट, फोटोग्राफिक मेटाडेटा और निष्पादन पथ की निरंतर निगरानी।',
+    statutoryAdvisory: 'वैधानिक प्रशासनिक परामर्श:',
+    statutoryAdvisoryText: 'एआई जोखिम स्कोर मानवीय समीक्षा के लिए एक संकेतक है, धोखाधड़ी का प्रमाण नहीं। सभी चिह्नित मदों के लिए अधिकृत कार्यपालक अभियंता या एसडीएम द्वारा ऑन-साइट तकनीकी निरीक्षण आवश्यक है।',
+    allModulesOverview: 'सभी मॉड्यूल अवलोकन',
+    costBenchmarkAnomalies: '1. लागत मानक विसंगतियां',
+    spatialDuplicateDetection: '2. स्थानिक डुप्लिकेट पहचान',
+    photoIntegrityAnomalies: '3. फोटो एवं टेलीमेट्री सत्यनिष्ठा',
+    locationMismatchAnomalies: '4. जीपीएस जियोफेंस बेमेल',
+    executionDelayRisks: '5. निष्पादन प्रक्षेपवक्र विलंब',
+    sanctionedCost: 'स्वीकृत लागत',
+    benchmarkCost: 'मानक लागत',
+    costDeviation: 'लागत विचलन',
+    investigateWork: 'कार्य की जांच करें',
+    inspectEvidence: 'साक्ष्य का निरीक्षण करें',
+    inspectGroundPhotos: 'धरातलीय फोटो जांचें',
+    inspectGpsCoordinates: 'जीपीएस निर्देशांक जांचें',
+
+    // Agency Workdesk
+    agencyWorkdeskTitle: 'कार्यान्वयन एजेंसी कार्यडेस्क',
+    agencyWorkdeskSubtitle: 'निष्पादन ट्रैकिंग, मील का पत्थर सत्यापन, जियोटैग्ड फोटो अपलोड और भुगतान वाउचर',
+    agencyProtocolNotice: 'एजेंसी प्रोटोकॉल सूचना:',
+    agencyProtocolDesc: 'फोटोग्राफिक सबमिशन में स्वीकृत साइट के 250 मीटर के भीतर प्रामाणिक EXIF GPS टेलीमेट्री होनी चाहिए। परियोजनाओं में डुप्लिकेट छवियों का पुन: उपयोग स्वचालित रूप से ट्रैक किया जाता है।',
+    updateProgressAndPhotos: 'प्रगति अपडेट करें एवं फोटो अपलोड करें',
+    submitPaymentClaim: 'भुगतान वाउचर प्रस्तुत करें',
+    paymentClaimTitle: 'प्रमाणित भुगतान वाउचर प्रस्तुत करें',
+    claimAmountLakhLabel: 'दावा राशि (₹ लाख)',
+    voucherRemarksLabel: 'मील का पत्थर / वाउचर विवरण',
+    voucherRemarksPlaceholder: 'उदा. साइट इंजीनियर द्वारा प्रमाणित चरण 2 प्लिंथ एवं कॉलम पूर्णता बिल',
+    submittingVoucher: 'जमा हो रहा है...',
+    submitVoucherBtn: 'वाउचर जमा करें',
+
+    // Vendor Analytics
+    vendorMatrixTitle: 'ठेकेदार एवं विक्रेता एकाग्रता मैट्रिक्स',
+    vendorMatrixSubtitle: 'ठेकेदार आवंटन सीमा, निष्पादन विलंब और जोखिम एकाग्रता पर नज़र रखने वाली सतर्कता प्रोफाइलिंग',
+    antiCartelizationNotice: 'एंटी-कार्टेलाइजेशन एवं एकाग्रता सतर्कता:',
+    antiCartelizationDesc: 'सीवीसी (केंद्रीय सतर्कता आयोग) के निर्देशों के तहत, एकल ठेकेदारों के तहत परियोजनाओं की उच्च एकाग्रता या बार-बार विलंब स्वचालित अलर्ट ट्रिगर करता है।',
+    registeredGovtContractor: 'पंजीकृत सरकारी ठेकेदार',
+    totalWorks: 'कुल कार्य',
+    contractValue: 'अनुबंध मूल्य',
+    completedWorks: 'पूर्ण',
+    delayedOrAtRisk: 'विलंबित / जोखिम पर',
+    timelyCompletionRate: 'समय पर पूर्णता दर',
+    categoriesLabel: 'श्रेणियां',
+    loadingVendorAnalytics: 'विक्रेता सत्यनिष्ठा विश्लेषण लोड हो रहा है...',
+
+    // Audit Logs
+    auditLogTitle: 'अपरिवर्तनीय सिस्टम ऑडिट ट्रेल एवं सुरक्षा लॉग',
+    auditLogSubtitle: 'प्रशासनिक, वित्तीय और एआई सत्यापन घटनाओं को रिकॉर्ड करने वाला क्रिप्टोग्राफिक SHA-256 खाता',
+    verifyIntegrityBtn: 'क्रिप्टोग्राफिक अखंडता सत्यापित करें',
+    validatingHashes: 'हैश सत्यापन जारी...',
+    hashChainVerified: 'क्रिप्टोग्राफिक हैश श्रृंखला सत्यापित: 100% सुरक्षित ({count} प्रविष्टियां)',
+    hashChainBroken: 'सत्यनिष्ठा विसंगति: {id} पर टूटी हुई श्रृंखला पाई गई',
+    genesisAnchorValidated: 'जेनेसिस एंकर मान्य',
+    algorithm: 'एल्गोरिदम:',
+    verifiedAt: 'सत्यापन समय:',
+    loadingAuditSequence: 'अपरिवर्तनीय ऑडिट अनुक्रम का सत्यापन एवं लोड किया जा रहा है...',
+
+    // Data Ingestion Impact
+    dataIngestionTitle: 'डेटा अंतर्ग्रहण, स्कीमा सामान्यीकरण एवं विसंगति प्रभाव स्टूडियो',
+    dataIngestionSubtitle: 'मल्टी-सोर्स बल्क बैच प्रोसेसिंग, स्वचालित एआई डेटा गुणवत्ता स्कोरिंग, और ऑडिट ट्रेल सिमुलेशन',
+    ingestSampleData: 'MoSPI बैच निर्यात अंतर्ग्रहण करें',
+    simulateTamper: 'छेड़छाड़ हमले का अनुकरण करें',
+    verifyAuditChain: 'बहीखाता श्रृंखला सत्यापित करें',
+    restoreChain: 'छेड़छाड़ की गई श्रृंखला पुनर्स्थापित करें',
+
+    // Contractor Network Fraud
+    networkFraudTitle: 'ठेकेदार एवं विक्रेता नेटवर्क धोखाधड़ी पहचान',
+    networkFraudSubtitle: 'शेल सांठगांठ कार्टेल की पहचान करने के लिए ठेकेदारों, सांसदों, कार्यान्वयन जिलों और परियोजनाओं के बीच संबंधों का मॉडल तैयार करता है।',
+    graphAnalyticsBadge: 'ग्राफ एनालिटिक्स एवं शेल पहचान',
+    recomputeGraph: 'ग्राफ की पुनर्गणना करें',
+    contractorsAudited: 'ऑडिट किए गए ठेकेदार',
+    collusionRingsFlagged: 'सांठगांठ रिंग चिह्नित',
+    graphEdgesModeled: 'ग्राफ किनारे मॉडल किए गए',
+    allVendors: 'सभी ठेकेदार',
+    suspiciousOnly: 'केवल संदिग्ध',
+    shellOnly: 'केवल शेल संकेतक',
+
+    // Recommendations Page
+    recommendationsTitle: 'सांसद अनुशंसाएं एवं प्रशासनिक स्वीकृतियां',
+    recommendationsSubtitle: 'संसद सदस्य द्वारा कार्य प्रस्ताव प्रस्तुत करने से लेकर ज़िला प्राधिकरण द्वारा तकनीकी स्वीकृति तक का जीवनचक्र',
+    submitNewRecommendation: 'नई अनुशंसा प्रस्तुत करें',
+    noRecommendationsLogged: 'वर्तमान में कोई सक्रिय अनुशंसा दर्ज नहीं है।',
+    sanctionWorkBtn: 'कार्य स्वीकृत करें',
+    sanctionWorkModalTitle: 'परियोजना स्वीकृत करें: {code}',
+    sanctionAmountLakhLabel: 'स्वीकृत राशि (₹ लाख)',
+    sanctionRemarksLabel: 'स्वीकृति आदेश संख्या एवं टिप्पणी',
+    sanctionRemarksPlaceholder: 'उदा. साइट व्यवहार्यता जांच के बाद स्वीकृत आदेश सं. DC/MPLADS/2024/781',
+    sanctioning: 'स्वीकृत किया जा रहा है...',
 
     // Citizen Chatbot
     chatbotTitle: 'सांसद निधि नागरिक सहायता एआई',
@@ -921,6 +1558,35 @@ export const translations: Record<Language, TranslationDictionary> = {
     worksSanctionedLabel: 'स्वीकृत कार्य',
     worksCompletedLabel: 'पूर्ण कार्य',
     viewWorksLabel: 'कार्य देखें',
-    noMpsFound: 'चयनित फ़िल्टर के अनुसार कोई सांसद रिकॉर्ड नहीं मिला।'
+    noMpsFound: 'चयनित फ़िल्टर के अनुसार कोई सांसद रिकॉर्ड नहीं मिला।',
+
+    // Additional System & Anomalies Keys
+    gisSurveillance: 'जीआईएस निगरानी',
+    gisMapTitle: 'भौगोलिक सूचना प्रणाली (GIS) निगरानी',
+    gisMapSubtitle: 'जियोरेफरेंस परियोजना पदचिह्न, क्षेत्रीय निकटता विश्लेषण एवं डुप्लिकेट क्लस्टर पहचान',
+    loadingMpladsDataset: 'आधिकारिक एमपीलैड्स डेटासेट लोड हो रहा है और एआई अखंडता विश्लेषण जारी है...',
+    auditBoqJustification: 'बीओक्यू एवं औचित्य ऑडिट करें',
+    actionRequired: 'कार्रवाई आवश्यक',
+    siteReconciliation: 'साइट समाधान',
+    inspectSubmittedPhotographs: 'प्रस्तुत तस्वीरों का निरीक्षण करें',
+    closeInspector: 'निरीक्षक बंद करें',
+    openInProjectWorkspace: 'परियोजना कार्यक्षेत्र में खोलें',
+    issueShowCauseRule14: 'नियम 14 के तहत कारण बताओ नोटिस जारी करें',
+    directSdmFieldVerification: 'एसडीएम फील्ड सत्यापन का निर्देश दें',
+    investigateAndResolve: 'जांच एवं समाधान करें',
+    pendingAdjudicationText: 'निर्णय हेतु लंबित',
+    registeredAlertsCount: '{total} पंजीकृत अलर्ट में से {filtered} प्रदर्शित',
+    filterByType: 'अलर्ट प्रकार',
+    filterByStatus: 'समीक्षा स्थिति',
+    allTypes: 'सभी',
+    alertRefHeader: 'अलर्ट संदर्भ',
+    anomalyTypeHeader: 'विसंगति प्रकार',
+    associatedProjectHeader: 'संबद्ध परियोजना',
+    districtAgencyHeader: 'ज़िला एवं एजेंसी',
+    detectionObservationHeader: 'पहचान अवलोकन',
+    reviewStatusHeader: 'समीक्षा स्थिति',
+    administrativeActionHeader: 'प्रशासनिक कार्रवाई',
+    estimatedProposal: 'अनुमानित प्रस्ताव',
+    sanctionOrderAndRemarks: 'स्वीकृति आदेश संख्या एवं टिप्पणियां'
   }
 };

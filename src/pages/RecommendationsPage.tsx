@@ -70,7 +70,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
             <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            {t.home} &gt; {t.recommendations}
+            {t.home} &gt; {language === 'hi' ? 'अनुशंसाएँ' : 'Recommendations'}
           </span>
         </div>
       )}

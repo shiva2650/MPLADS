@@ -17,12 +17,14 @@ import {
   SlidersHorizontal,
   ArrowLeft
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface ContractorNetworkFraudPageProps {
   onBackToDashboard?: () => void;
 }
 
 export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProps> = ({ onBackToDashboard }) => {
+  const { language, t } = useLanguage();
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedVendor, setSelectedVendor] = useState<any | null>(null);
@@ -77,10 +79,10 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Network Fraud
+            {t.home} &gt; {language === 'hi' ? 'ठेकेदार नेटवर्क फ्रॉड' : 'Network Fraud'}
           </span>
         </div>
       )}
@@ -95,14 +97,16 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg sm:text-xl font-bold text-slate-body">
-                  Contractor & Vendor Network Fraud Detection
+                  {language === 'hi' ? 'ठेकेदार एवं वेंडर नेटवर्क धोखाधड़ी विश्लेषण' : 'Contractor & Vendor Network Fraud Detection'}
                 </h1>
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-govt-navy font-semibold border border-emerald-200">
-                  Graph Analytics & Shell Detection
+                  {language === 'hi' ? 'ग्राफ एनालिटिक्स एवं शेल कंपनी जांच' : 'Graph Analytics & Shell Detection'}
                 </span>
               </div>
               <p className="text-xs text-slate-muted mt-0.5 max-w-3xl">
-                Models relationships across Contractors, Members of Parliament, Implementing Districts, and Projects. Employs concentration z-scores, rapid-fire award burst detection, and shared address/director PIN matching to identify shell collusion cartels.
+                {language === 'hi'
+                  ? 'ठेकेदारों, संसद सदस्यों, क्रियान्वयन ज़िलों और परियोजनाओं के संबंधों का विश्लेषण। सिंडिकेट और शेल कंपनियों की पहचान हेतु उन्नत ग्राफ तकनीक।'
+                  : 'Models relationships across Contractors, Members of Parliament, Implementing Districts, and Projects. Employs concentration z-scores, rapid-fire award burst detection, and shared address/director PIN matching to identify shell collusion cartels.'}
               </p>
             </div>
           </div>
@@ -113,7 +117,7 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-govt-navy hover:bg-govt-navy-light disabled:opacity-50 transition-colors shadow-xs cursor-pointer shrink-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Recompute Graph</span>
+            <span>{language === 'hi' ? 'ग्राफ पुनर्गणना' : 'Recompute Graph'}</span>
           </button>
         </div>
 
@@ -121,30 +125,30 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
         {data && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-border">
             <div className="bg-panel-bg p-3 rounded-lg border border-slate-border">
-              <span className="text-[11px] text-slate-muted font-semibold uppercase">Contractors Audited</span>
+              <span className="text-[11px] text-slate-muted font-semibold uppercase">{language === 'hi' ? 'ऑडिट किए गए ठेकेदार' : 'Contractors Audited'}</span>
               <div className="text-xl font-bold text-slate-body mt-0.5">{data.totalVendorsAnalyzed}</div>
-              <span className="text-[10px] text-slate-500">Across active MPLADS ledger</span>
+              <span className="text-[10px] text-slate-500">{language === 'hi' ? 'सक्रिय सांसद निधि लेजर में' : 'Across active MPLADS ledger'}</span>
             </div>
 
             <div className="bg-red-50/50 p-3 rounded-lg border border-red-200">
-              <span className="text-[11px] text-red-800 font-semibold uppercase">Collusion Rings Flagged</span>
+              <span className="text-[11px] text-red-800 font-semibold uppercase">{language === 'hi' ? 'संदिग्ध सिंडिकेट रिंग्स' : 'Collusion Rings Flagged'}</span>
               <div className="text-xl font-bold text-red-700 mt-0.5">{data.flaggedClustersCount}</div>
-              <span className="text-[10px] text-red-600">&ge; 2 Independent Anomaly Signals</span>
+              <span className="text-[10px] text-red-600">&ge; 2 {language === 'hi' ? 'स्वतंत्र विसंगति संकेत' : 'Independent Anomaly Signals'}</span>
             </div>
 
             <div className="bg-panel-bg p-3 rounded-lg border border-slate-border">
-              <span className="text-[11px] text-slate-muted font-semibold uppercase">Graph Edges Modeled</span>
+              <span className="text-[11px] text-slate-muted font-semibold uppercase">{language === 'hi' ? 'ग्राफ संबंध मॉडल' : 'Graph Edges Modeled'}</span>
               <div className="text-xl font-bold text-slate-body mt-0.5">{data.edges?.length || 0}</div>
-              <span className="text-[10px] text-slate-500">Awards, Executions & Co-location</span>
+              <span className="text-[10px] text-slate-500">{language === 'hi' ? 'आवंटन, निष्पादन एवं सह-स्थान' : 'Awards, Executions & Co-location'}</span>
             </div>
 
             <div className="bg-panel-bg p-3 rounded-lg border border-slate-border">
-              <span className="text-[11px] text-slate-muted font-semibold uppercase">False-Positive Safeguard</span>
+              <span className="text-[11px] text-slate-muted font-semibold uppercase">{language === 'hi' ? 'गलत संकेत सुरक्षा' : 'False-Positive Safeguard'}</span>
               <div className="text-xs font-bold text-status-verified mt-1 flex items-center gap-1">
                 <CheckCircle className="w-3.5 h-3.5 text-status-verified" />
-                <span>Multi-Factor Enforced</span>
+                <span>{language === 'hi' ? 'मल्टी-फैक्टर अनिवार्य' : 'Multi-Factor Enforced'}</span>
               </div>
-              <span className="text-[10px] text-slate-500">Single signal does not flag</span>
+              <span className="text-[10px] text-slate-500">{language === 'hi' ? 'एकल संकेत पर फ्लैग नहीं' : 'Single signal does not flag'}</span>
             </div>
           </div>
         )}
@@ -162,7 +166,7 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search contractor or MP..."
+                placeholder={language === 'hi' ? 'ठेकेदार या सांसद खोजें...' : 'Search contractor or MP...'}
                 className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-border bg-panel-bg text-slate-body focus:outline-hidden focus:ring-1 focus:ring-govt-navy"
               />
             </div>
@@ -176,7 +180,7 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
                     : 'bg-panel-bg text-slate-muted hover:bg-slate-200'
                 }`}
               >
-                All
+                {language === 'hi' ? 'सभी' : 'All'}
               </button>
               <button
                 onClick={() => setFilterMode('SUSPICIOUS_ONLY')}
@@ -186,7 +190,7 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
                     : 'bg-panel-bg text-slate-muted hover:bg-slate-200'
                 }`}
               >
-                High Risk Rings
+                {language === 'hi' ? 'उच्च जोखिम रिंग' : 'High Risk Rings'}
               </button>
               <button
                 onClick={() => setFilterMode('SHELL_ONLY')}
@@ -196,7 +200,7 @@ export const ContractorNetworkFraudPage: React.FC<ContractorNetworkFraudPageProp
                     : 'bg-panel-bg text-slate-muted hover:bg-slate-200'
                 }`}
               >
-                Shell Overlaps
+                {language === 'hi' ? 'शेल कंपनी ओवरलैप' : 'Shell Overlaps'}
               </button>
             </div>
           </div>

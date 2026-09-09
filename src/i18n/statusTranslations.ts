@@ -153,3 +153,23 @@ export const roleTranslations: Record<Language, Record<string, string>> = {
     'VIEWER': 'सार्वजनिक दर्शक'
   }
 };
+
+export const paymentStatusTranslations: Record<Language, Record<string, string>> = {
+  en: {
+    'Paid': 'Paid',
+    'Pending': 'Pending',
+    'Processing': 'Processing',
+    'Failed': 'Failed',
+    'Completed': 'Completed',
+    'Under Review': 'Under Review'
+  },
+  hi: {
+    'Paid': 'संवितरित',
+    'Pending': 'लंबित',
+    'Processing': 'प्रक्रियाधीन',
+    'Failed': 'विफल',
+    'Completed': 'पूर्ण',
+    'Under Review': 'समीक्षाधीन'
+  }
+};
+

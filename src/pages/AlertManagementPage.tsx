@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ArrowLeft
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface AlertManagementPageProps {
   alerts: RiskAlert[];
@@ -27,6 +28,7 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
   onSelectProject,
   onBackToDashboard
 }) => {
+  const { language, t, translateAlertType, translateAlertStatus } = useLanguage();
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
 
@@ -39,6 +41,8 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
   const types = ['All', 'Cost Anomaly', 'Possible Duplicate', 'Photo Anomaly', 'Location Mismatch', 'Delay Risk'];
   const statuses = ['All', 'New', 'Under Review', 'Escalated', 'Resolved', 'False Positive'];
 
+  const pendingCount = alerts.filter(a => a.status === 'New' || a.status === 'Under Review').length;
+
   return (
     <div className="space-y-4">
       {/* Top Persistent Back Button */}
@@ -49,10 +53,10 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Alerts
+            {t.home} &gt; {t.alerts}
           </span>
         </div>
       )}
@@ -60,16 +64,16 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-body tracking-tight">
-            AI Alert Management & Vigilance Review Desk
+            {t.alertsPageTitle}
           </h1>
           <p className="text-xs text-slate-muted">
-            District Authority human adjudication queue for AI-detected discrepancies
+            {t.alertsPageSubtitle}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold px-2.5 py-1 bg-panel-bg text-status-review rounded-full border border-status-review/30">
-            {alerts.filter(a => a.status === 'New' || a.status === 'Under Review').length} Pending Adjudication
+            {pendingCount} {t.pendingAdjudicationText}
           </span>
         </div>
       </div>
@@ -77,33 +81,37 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
       {/* Filter Row */}
       <div className="bg-white rounded-2xl p-4 border border-slate-border shadow-xs flex flex-wrap items-center gap-4 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-muted uppercase tracking-wider text-[11px]">Alert Type:</span>
+          <span className="font-bold text-slate-muted uppercase tracking-wider text-[11px]">{t.filterByType}:</span>
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
             className="px-3 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-slate-body text-xs"
           >
-            {types.map(t => (
-              <option key={t} value={t}>{t}</option>
+            {types.map(item => (
+              <option key={item} value={item}>
+                {item === 'All' ? t.allTypes : translateAlertType(item)}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-muted uppercase tracking-wider text-[11px]">Review Status:</span>
+          <span className="font-bold text-slate-muted uppercase tracking-wider text-[11px]">{t.filterByStatus}:</span>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             className="px-3 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-slate-body text-xs"
           >
-            {statuses.map(s => (
-              <option key={s} value={s}>{s}</option>
+            {statuses.map(item => (
+              <option key={item} value={item}>
+                {item === 'All' ? t.allStatuses : translateAlertStatus(item)}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="text-slate-muted text-[11px] ml-auto">
-          Showing <strong>{filteredAlerts.length}</strong> of {alerts.length} registered alerts
+          {t('registeredAlertsCount', { filtered: filteredAlerts.length, total: alerts.length })}
         </div>
       </div>
 
@@ -113,20 +121,20 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-panel-bg text-slate-muted font-bold uppercase text-[10px] border-b border-slate-border tracking-wider">
               <tr>
-                <th className="p-3">Alert Ref</th>
-                <th className="p-3">Anomaly Type</th>
-                <th className="p-3">Associated Project</th>
-                <th className="p-3">District & Agency</th>
-                <th className="p-3">Detection Observation</th>
-                <th className="p-3">Review Status</th>
-                <th className="p-3 text-right">Administrative Action</th>
+                <th className="p-3">{t.alertRefHeader}</th>
+                <th className="p-3">{t.anomalyTypeHeader}</th>
+                <th className="p-3">{t.associatedProjectHeader}</th>
+                <th className="p-3">{t.districtAgencyHeader}</th>
+                <th className="p-3">{t.detectionObservationHeader}</th>
+                <th className="p-3">{t.reviewStatusHeader}</th>
+                <th className="p-3 text-right">{t.administrativeActionHeader}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-border">
               {filteredAlerts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-muted">
-                    No alerts match selected criteria.
+                    {t.noAlertsMatchCriteria}
                   </td>
                 </tr>
               ) : (
@@ -139,7 +147,7 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
                       </td>
 
                       <td className="p-3 whitespace-nowrap">
-                        <span className="font-semibold text-slate-body">{alert.alertType}</span>
+                        <span className="font-semibold text-slate-body">{translateAlertType(alert.alertType)}</span>
                         <div className="mt-0.5">
                           <RiskBadge level={alert.riskLevel} />
                         </div>
@@ -164,7 +172,7 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
                         <p className="text-slate-body line-clamp-2">{alert.reason}</p>
                         {alert.reviewNotes && (
                           <div className="text-[10px] text-govt-navy font-medium italic mt-1 bg-panel-bg p-1.5 rounded-lg border border-slate-border">
-                            Action Note: {alert.reviewNotes}
+                            {language === 'hi' ? 'कार्रवाई टिप्पणी:' : 'Action Note:'} {alert.reviewNotes}
                           </div>
                         )}
                       </td>
@@ -178,7 +186,7 @@ export const AlertManagementPage: React.FC<AlertManagementPageProps> = ({
                           onClick={() => onOpenAlertAction(alert)}
                           className="px-3 py-1.5 bg-govt-navy hover:bg-govt-navy-light text-white font-bold rounded-lg transition-colors shadow-xs cursor-pointer"
                         >
-                          Investigate & Resolve
+                          {t.investigateAndResolve}
                         </button>
                       </td>
                     </tr>

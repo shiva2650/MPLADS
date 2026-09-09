@@ -4,6 +4,7 @@ import { StatusBadge, RiskBadge } from '../components/Badges.js';
 import { HardHat, Camera, IndianRupee, CheckCircle2, AlertCircle, Compass, FileText, ArrowLeft } from 'lucide-react';
 import { AgencyUpdateModal } from '../components/AgencyUpdateModal.js';
 import { api } from '../services/api.js';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface AgencyWorkdeskPageProps {
   projects: Project[];
@@ -20,6 +21,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
   onRefresh,
   onBackToDashboard
 }) => {
+  const { language, t } = useLanguage();
   const [selectedProjectForUpdate, setSelectedProjectForUpdate] = useState<Project | null>(null);
   const [paymentModalProject, setPaymentModalProject] = useState<Project | null>(null);
   const [claimAmountLakh, setClaimAmountLakh] = useState('');
@@ -49,7 +51,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
       onRefresh();
     } catch (err: any) {
       console.error(err);
-      setClaimError(err?.message || 'Failed to submit payment claim. Please check details.');
+      setClaimError(err?.message || (language === 'hi' ? 'भुगतान दावा सबमिट करने में विफल।' : 'Failed to submit payment claim. Please check details.'));
     } finally {
       setSubmittingClaim(false);
     }
@@ -65,20 +67,20 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Agency Workdesk
+            {t.home} &gt; {t.agencyBilling}
           </span>
         </div>
       )}
 
       <div>
         <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-          Implementing Agency Field Workdesk
+          {t.agencyWorkdeskTitle}
         </h1>
         <p className="text-xs text-gray-500">
-          Execution tracking, milestone verification, geotagged photograph uploads, and payment vouchers
+          {t.agencyWorkdeskSubtitle}
         </p>
       </div>
 
@@ -86,9 +88,9 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
       <div className="p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-xl text-xs text-govt-navy flex items-start gap-2.5">
         <HardHat className="w-5 h-5 text-govt-navy shrink-0 mt-0.5" />
         <div>
-          <div className="font-bold">Agency Protocol Notice:</div>
+          <div className="font-bold">{t.agencyProtocolNotice}</div>
           <div className="text-[11px] leading-relaxed mt-0.5 text-slate-muted">
-            Photographic submissions must contain authentic EXIF GPS telemetry within 250 meters of the sanctioned site. Duplicate image re-use across projects is tracked automatically and triggers vigilance audit.
+            {t.agencyProtocolDesc}
           </div>
         </div>
       </div>
@@ -115,15 +117,15 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
               </h3>
 
               <div className="text-[11px] text-slate-muted space-x-2">
-                <span>Vendor: <strong>{project.vendorName}</strong></span>
+                <span>{language === 'hi' ? 'ठेकेदार / विक्रेता:' : 'Vendor:'} <strong>{project.vendorName}</strong></span>
                 <span>•</span>
-                <span>Location: {project.locationAddress}</span>
+                <span>{language === 'hi' ? 'स्थान:' : 'Location:'} {project.locationAddress}</span>
               </div>
 
               {/* Progress and Photos count */}
               <div className="flex items-center gap-4 text-[11px]">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-muted">Physical Progress:</span>
+                  <span className="text-slate-muted">{t.physicalProgress}:</span>
                   <strong className="font-mono">{project.completionPercentage}%</strong>
                   <div className="w-20 bg-gray-200 h-2 rounded-full overflow-hidden">
                     <div
@@ -134,11 +136,11 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
                 </div>
 
                 <div className="text-slate-muted">
-                  Photos Logged: <strong className="text-slate-body">{project.photos.length}</strong>
+                  {language === 'hi' ? 'तस्वीरें दर्ज:' : 'Photos Logged:'} <strong className="text-slate-body">{project.photos.length}</strong>
                 </div>
 
                 <div className="text-slate-muted">
-                  Utilized: <strong className="text-slate-body">₹{(project.fundsUtilized / 100000).toFixed(1)}L</strong> of ₹{(project.sanctionedAmount / 100000).toFixed(1)}L
+                  {language === 'hi' ? 'व्यय:' : 'Utilized:'} <strong className="text-slate-body">₹{(project.fundsUtilized / 100000).toFixed(1)}L</strong> / ₹{(project.sanctionedAmount / 100000).toFixed(1)}L
                 </div>
               </div>
             </div>
@@ -150,7 +152,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
                 className="px-3 py-2 bg-govt-navy hover:bg-govt-navy-light text-white rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Update Progress & Geotag</span>
+                <span>{t.updateProgressAndPhotos}</span>
               </button>
 
               <button
@@ -161,7 +163,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
                 className="px-3 py-1.5 bg-white border border-slate-border text-slate-body hover:bg-panel-bg rounded-md text-xs font-medium flex items-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 <IndianRupee className="w-3.5 h-3.5 text-govt-navy" />
-                <span>Claim Payment Voucher</span>
+                <span>{t.submitPaymentClaim}</span>
               </button>
             </div>
           </div>
@@ -184,7 +186,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 space-y-4 text-xs">
             <h3 className="text-sm font-bold text-slate-body">
-              Submit Milestone Payment Voucher Claim
+              {t.paymentClaimTitle}
             </h3>
             <div className="p-2.5 bg-panel-bg rounded border border-slate-border">
               <div className="font-mono text-slate-muted text-[11px]">{paymentModalProject.projectCode}</div>
@@ -199,7 +201,7 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
               )}
               <div>
                 <label className="block font-semibold text-slate-body mb-1">
-                  Voucher Claim Amount (₹ in Lakh) *
+                  {t.claimAmountLakhLabel} *
                 </label>
                 <input
                   type="number"
@@ -213,13 +215,13 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
 
               <div>
                 <label className="block font-semibold text-slate-body mb-1">
-                  Measurement Book (M-Book) & Work Stage Reference
+                  {t.voucherRemarksLabel}
                 </label>
                 <textarea
                   rows={2}
                   value={voucherRemarks}
                   onChange={e => setVoucherRemarks(e.target.value)}
-                  placeholder="e.g., M-Book No. 42, Page 18-22. First running bill for completed civil plinth stage."
+                  placeholder={t.voucherRemarksPlaceholder}
                   className="w-full px-3 py-2 border border-slate-border rounded-md text-slate-body"
                 />
               </div>
@@ -230,14 +232,14 @@ export const AgencyWorkdeskPage: React.FC<AgencyWorkdeskPageProps> = ({
                   onClick={() => setPaymentModalProject(null)}
                   className="px-4 py-2 border border-slate-border rounded text-slate-body font-medium"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={submittingClaim}
                   className="px-5 py-2 bg-govt-navy text-white rounded font-semibold hover:bg-govt-navy-light disabled:opacity-50"
                 >
-                  {submittingClaim ? 'Submitting...' : 'Submit Claim Voucher'}
+                  {submittingClaim ? t.submittingVoucher : t.submitVoucherBtn}
                 </button>
               </div>
             </form>
