@@ -81,13 +81,18 @@ const parseAuthError = (err: any, isHindi: boolean): AuthError => {
   };
 };
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, onLoginSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, onLoginSuccess, initialRole }) => {
   const { login } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
   const isHindi = language === 'hi';
 
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(() => {
+    if (initialRole === 'ADMIN') return 'ADMIN001';
+    if (initialRole === 'MP') return 'MP001';
+    if (initialRole === 'AGENCY') return 'AGENCY001';
+    return '';
+  });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

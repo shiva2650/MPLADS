@@ -7,8 +7,16 @@ import {
   DashboardSummary,
   AppNotification
 } from '../types/index.js';
+import { initialVendors } from '../data/mockData.js';
+import { isStaticMode } from '../utils/environment.js';
 import { AuthService, authStorage } from './authService.js';
 import { clientMockDb } from './clientMockDb.js';
+import {
+  getStaticContractorNetwork,
+  analyzeStaticGrievanceFeedback,
+  executeStaticChatbotQuery,
+  calculateStaticImpactMetrics
+} from './staticServices.js';
 
 export { AuthService, authStorage };
 
@@ -72,8 +80,12 @@ export const api = {
   getMe: AuthService.getMe,
   logout: AuthService.logout,
 
-  // Dashboard
+  // Dashboard Summary
   getDashboardSummary: async (): Promise<DashboardSummary> => {
+    if (isStaticMode()) {
+      return clientMockDb.getDashboardSummary();
+    }
+
     try {
       const summary = await fetchWithAuth('/api/dashboard/summary');
       if (summary && typeof summary === 'object' && 'totalProjects' in summary) {
@@ -110,6 +122,10 @@ export const api = {
     riskLevel?: string;
     search?: string;
   }): Promise<{ projects: Project[]; count: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.getProjects(filters);
+    }
+
     const params = new URLSearchParams();
     if (filters?.status && filters.status !== 'All') params.set('status', filters.status);
     if (filters?.category && filters.category !== 'All') params.set('category', filters.category);
@@ -122,10 +138,27 @@ export const api = {
   },
 
   getProjectById: async (id: string): Promise<{ project: Project; duplicateCandidates?: any[] }> => {
+    if (isStaticMode()) {
+      const prj = await clientMockDb.getProjectById(id);
+      if (!prj) throw new Error('Project not found');
+      return { project: prj, duplicateCandidates: [] };
+    }
     return fetchWithAuth(`/api/projects/${id}`);
   },
 
   recommendProject: async (projectData: Partial<Project>): Promise<{ success: boolean; project: Project }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.recommendProject({
+        title: projectData.title || 'Untitled Project',
+        category: projectData.category || 'Roads & Bridges',
+        description: projectData.description || '',
+        locationAddress: projectData.locationAddress || 'Constituency Site',
+        latitude: projectData.latitude || 17.385,
+        longitude: projectData.longitude || 78.4867,
+        estimatedCost: projectData.estimatedCost || 1000000
+      });
+      return { success: true, project: res.project };
+    }
     return fetchWithAuth('/api/projects/recommend', {
       method: 'POST',
       body: JSON.stringify(projectData)
@@ -138,6 +171,14 @@ export const api = {
     sanctionedAmount?: number,
     remarks?: string
   ): Promise<{ success: boolean; project: Project }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.updateProjectStatus(id, {
+        status: status as Project['status'],
+        sanctionedAmount,
+        remarks
+      });
+      return { success: true, project: res.project };
+    }
     return fetchWithAuth(`/api/projects/${id}/status`, {
       method: 'POST',
       body: JSON.stringify({ status, sanctionedAmount, remarks })
@@ -154,6 +195,14 @@ export const api = {
       expectedCompletionDate?: string;
     }
   ): Promise<{ success: boolean; project: Project }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.assignAgency(id, {
+        agencyId: data.agencyId,
+        agencyName: data.agencyName,
+        expectedCompletionDate: data.expectedCompletionDate || new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0]
+      });
+      return { success: true, project: res.project };
+    }
     return fetchWithAuth(`/api/projects/${id}/assign-agency`, {
       method: 'POST',
       body: JSON.stringify(data)
@@ -173,6 +222,15 @@ export const api = {
       photoLon?: number;
     }
   ): Promise<{ success: boolean; project: Project }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.updateProgress(id, {
+        completionPercentage: data.completionPercentage ?? 50,
+        photoUrl: data.photoUrl,
+        caption: data.photoCaption || data.remarks,
+        stage: (data.photoStage as any) || 'during'
+      });
+      return { success: true, project: res.project };
+    }
     return fetchWithAuth(`/api/projects/${id}/progress`, {
       method: 'POST',
       body: JSON.stringify(data)
@@ -183,6 +241,14 @@ export const api = {
     id: string,
     data: { amount: number; sanctionOrderNo?: string; remarks?: string }
   ): Promise<{ success: boolean; payment: any; project: Project }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.addPayment(id, {
+        installmentNo: 1,
+        amount: data.amount,
+        sanctionOrderNo: data.sanctionOrderNo || `SAN-${Date.now()}`
+      });
+      return { success: true, payment: res.project.payments[0], project: res.project };
+    }
     return fetchWithAuth(`/api/projects/${id}/payments`, {
       method: 'POST',
       body: JSON.stringify(data)
@@ -191,6 +257,10 @@ export const api = {
 
   // Alerts
   getAlerts: async (params?: { status?: string; riskLevel?: string }): Promise<{ alerts: RiskAlert[]; count: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.getAlerts(params);
+    }
+
     try {
       const searchParams = new URLSearchParams();
       if (params?.status && params.status !== 'All') searchParams.set('status', params.status);
@@ -213,6 +283,10 @@ export const api = {
     status: string,
     reviewNotes?: string
   ): Promise<{ success: boolean; alert: RiskAlert }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.actionAlert(id, { action: status, notes: reviewNotes });
+      return { success: true, alert: res.alert };
+    }
     return fetchWithAuth(`/api/alerts/${id}/action`, {
       method: 'POST',
       body: JSON.stringify({ status, reviewNotes })
@@ -221,6 +295,10 @@ export const api = {
 
   // Notifications
   getNotifications: async (): Promise<{ notifications: AppNotification[]; count: number; unreadCount?: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.getNotifications();
+    }
+
     try {
       const res = await fetchWithAuth('/api/notifications');
       if (res && Array.isArray(res.notifications)) {
@@ -234,28 +312,47 @@ export const api = {
   },
 
   markAsRead: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    if (isStaticMode()) {
+      return clientMockDb.markAsRead(id);
+    }
     return fetchWithAuth(`/api/notifications/${id}/read`, { method: 'POST' });
   },
 
   markNotificationRead: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    if (isStaticMode()) {
+      return clientMockDb.markNotificationRead(id);
+    }
     return api.markAsRead(id);
   },
 
   markAllNotificationsRead: async (): Promise<{ success: boolean; count?: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.markAllNotificationsRead();
+    }
     return fetchWithAuth('/api/notifications/read-all', { method: 'POST' });
   },
 
   resetNotifications: async (): Promise<{ success: boolean; notifications: AppNotification[]; count?: number; unreadCount?: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.resetNotifications();
+    }
     return fetchWithAuth('/api/notifications/reset', { method: 'POST' });
   },
 
   // Vendors
   getVendors: async (): Promise<{ vendors: any[] }> => {
+    if (isStaticMode()) {
+      return { vendors: initialVendors };
+    }
     return fetchWithAuth('/api/analytics/vendors');
   },
 
   // Citizen Feedback
   getCitizenFeedback: async (): Promise<{ feedback: CitizenFeedback[]; count: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.getCitizenFeedback();
+    }
+
     try {
       const res = await fetchWithAuth('/api/citizen-feedback');
       if (res && Array.isArray(res.feedback)) {
@@ -269,6 +366,10 @@ export const api = {
   },
 
   submitCitizenFeedback: async (data: any): Promise<{ success: boolean; feedbackId: string }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.submitCitizenFeedback(data);
+      return { success: true, feedbackId: res.feedback.id };
+    }
     return fetchWithAuth('/api/citizen-feedback', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -276,6 +377,10 @@ export const api = {
   },
 
   updateFeedbackStatus: async (id: string, status: string, adminNotes?: string): Promise<{ success: boolean }> => {
+    if (isStaticMode()) {
+      await clientMockDb.updateFeedbackStatus(id, status as any, adminNotes);
+      return { success: true };
+    }
     return fetchWithAuth(`/api/citizen-feedback/${id}/status`, {
       method: 'POST',
       body: JSON.stringify({ status, adminNotes })
@@ -284,6 +389,10 @@ export const api = {
 
   // Audit Logs
   getAuditLogs: async (): Promise<{ auditLogs: AuditLogEntry[]; count: number }> => {
+    if (isStaticMode()) {
+      const res = await clientMockDb.getAuditLogs();
+      return { auditLogs: res.logs, count: res.count };
+    }
     return fetchWithAuth('/api/audit-logs');
   },
 
@@ -295,16 +404,25 @@ export const api = {
     genesisHash: string;
     verifiedAt: string;
   }> => {
+    if (isStaticMode()) {
+      return clientMockDb.verifyAuditLogsIntegrity();
+    }
     return fetchWithAuth('/api/audit-logs/verify');
   },
 
   simulateTamper: async (): Promise<{ success: boolean; result: any; message: string }> => {
+    if (isStaticMode()) {
+      return clientMockDb.simulateTamper();
+    }
     return fetchWithAuth('/api/audit-logs/simulate-tamper', {
       method: 'POST'
     });
   },
 
   restoreAuditLogs: async (): Promise<{ success: boolean }> => {
+    if (isStaticMode()) {
+      return clientMockDb.restoreAuditLogs();
+    }
     return fetchWithAuth('/api/audit-logs/restore', {
       method: 'POST'
     });
@@ -320,14 +438,36 @@ export const api = {
     isVideo?: boolean;
     gpsThresholdMeters?: number;
   }): Promise<{ success: boolean; verification: any }> => {
+    if (isStaticMode()) {
+      return {
+        success: true,
+        verification: {
+          passed: true,
+          status: 'VERIFIED_GENUINE',
+          geoFenceMatch: true,
+          distanceMeters: 42.5,
+          timestampMatch: true,
+          compressionArtifactsScore: 0.12,
+          notes: 'Evidence geocoordinates and cryptographic metadata verified against project site bounds.'
+        }
+      };
+    }
     return fetchWithAuth('/api/evidence/verify', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   },
 
-  // AI Report (Gemini API / Heuristic)
+  // AI Report
   generateAiAuditReport: async (projectId: string): Promise<{ report: string; projectCode: string; title: string }> => {
+    if (isStaticMode()) {
+      const rep = await clientMockDb.generateAiAuditReport(projectId);
+      return {
+        report: JSON.stringify(rep, null, 2),
+        projectCode: rep.projectCode,
+        title: rep.title
+      };
+    }
     return fetchWithAuth(`/api/ai/audit-report/${projectId}`, {
       method: 'POST'
     });
@@ -335,20 +475,34 @@ export const api = {
 
   // Public Transparency
   getPublicSummary: async (): Promise<any> => {
+    if (isStaticMode()) {
+      return clientMockDb.getPublicSummary();
+    }
     return fetchWithAuth('/api/public/summary');
   },
 
   getPublicProjects: async (): Promise<{ projects: Project[]; count: number }> => {
+    if (isStaticMode()) {
+      return clientMockDb.getPublicProjects();
+    }
     return fetchWithAuth('/api/public/projects');
   },
 
   // Contractor Network Fraud Analysis
   getContractorNetwork: async (): Promise<any> => {
+    if (isStaticMode()) {
+      const prjs = (await clientMockDb.getProjects()).projects;
+      return getStaticContractorNetwork(prjs);
+    }
     return fetchWithAuth('/api/network/contractors');
   },
 
   // Multilingual RAG Citizen Chatbot
   queryChatbot: async (query: string, language?: string): Promise<any> => {
+    if (isStaticMode()) {
+      const prjs = (await clientMockDb.getProjects()).projects;
+      return executeStaticChatbotQuery(query, prjs, language);
+    }
     return fetchWithAuth('/api/chat/query', {
       method: 'POST',
       body: JSON.stringify({ query, language })
@@ -357,6 +511,12 @@ export const api = {
 
   // NLP Feedback Intelligence
   analyzeGrievanceFeedback: async (data: { feedbackId?: string; subject: string; description: string; projectId?: string }): Promise<any> => {
+    if (isStaticMode()) {
+      const prjs = (await clientMockDb.getProjects()).projects;
+      const project = data.projectId ? prjs.find(p => p.id === data.projectId) : undefined;
+      const analysis = analyzeStaticGrievanceFeedback(data, project);
+      return { success: true, analysis };
+    }
     return fetchWithAuth('/api/nlp/analyze-feedback', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -365,10 +525,23 @@ export const api = {
 
   // Data Ingestion & Impact Calculator
   getImpactSummary: async (): Promise<any> => {
+    if (isStaticMode()) {
+      const prjs = (await clientMockDb.getProjects()).projects;
+      return calculateStaticImpactMetrics(prjs);
+    }
     return fetchWithAuth('/api/impact/summary');
   },
 
   ingestData: async (csvContent: string, sourceLabel?: string): Promise<any> => {
+    if (isStaticMode()) {
+      const prjs = (await clientMockDb.getProjects()).projects;
+      return {
+        success: true,
+        summary: calculateStaticImpactMetrics(prjs),
+        importedCount: 15,
+        source: sourceLabel || 'Official MoSPI Dataset'
+      };
+    }
     return fetchWithAuth('/api/data/ingest', {
       method: 'POST',
       body: JSON.stringify({ csvContent, sourceLabel: sourceLabel || 'Official Central Portal Export' })

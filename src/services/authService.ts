@@ -1,4 +1,6 @@
 import { User } from '../types/index.js';
+import { isStaticMode } from '../utils/environment.js';
+import { staticAuth } from './staticAuth.js';
 
 const TOKEN_KEY = 'mplads_auth_token';
 const USER_KEY = 'mplads_auth_user';
@@ -73,6 +75,10 @@ export interface LoginResponse {
 
 export const AuthService = {
   login: async (userId: string, password: string): Promise<LoginResponse> => {
+    if (isStaticMode()) {
+      return staticAuth.login(userId, password);
+    }
+
     const trimmedId = (userId || '').trim();
     const cleanPassword = password || '';
 
@@ -125,6 +131,10 @@ export const AuthService = {
   },
 
   getMe: async (): Promise<{ user: User }> => {
+    if (isStaticMode()) {
+      return staticAuth.getMe();
+    }
+
     const token = authStorage.getToken();
     if (!token) {
       authStorage.removeToken();
@@ -161,6 +171,10 @@ export const AuthService = {
   },
 
   logout: async (): Promise<void> => {
+    if (isStaticMode()) {
+      return staticAuth.logout();
+    }
+
     const token = authStorage.getToken();
     try {
       if (token) {

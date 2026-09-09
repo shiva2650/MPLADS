@@ -4,6 +4,7 @@
  */
 
 import { runAuthTests } from './auth.test.js';
+import { runStaticAuthTests } from './static_auth.test.js';
 import { runRbacTests } from './rbac.test.js';
 import { runAnomalyTests } from './anomalies.test.js';
 import { runResilienceAndNotificationTests } from './resilience_and_notifications.test.js';
@@ -16,6 +17,7 @@ async function main() {
   const startTime = Date.now();
 
   try {
+    await runStaticAuthTests();
     await runAuthTests();
     await runRbacTests();
     await runAnomalyTests();

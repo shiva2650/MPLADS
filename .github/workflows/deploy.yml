@@ -35,7 +35,9 @@ jobs:
         run: npm install --include=dev
 
       - name: Build project
-        run: npm run build
+        env:
+          VITE_STATIC_MODE: 'true'
+        run: npm run build:client
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -17,6 +17,7 @@ import {
   sha256Hex
 } from '../data/mockData.js';
 import { authStorage } from './authService.js';
+import { staticAuth } from './staticAuth.js';
 
 export class ClientMockDbService {
   private projects: Project[] = JSON.parse(JSON.stringify(initialProjects));
@@ -202,66 +203,7 @@ export class ClientMockDbService {
 
   // Auth
   async login(userId: string, password: string): Promise<{ token: string; user: User; message: string }> {
-    const rawId = String(userId).trim().toUpperCase();
-    let normalizedId = rawId;
-    if (rawId === 'ADMIN' || rawId === 'COLLECTOR' || rawId === 'DM') {
-      normalizedId = 'ADMIN001';
-    } else if (rawId === 'MP' || rawId === 'MEMBER' || rawId === 'RAJESH') {
-      normalizedId = 'MP001';
-    } else if (rawId === 'AGENCY' || rawId === 'TSUDA' || rawId === 'ENGINEER') {
-      normalizedId = 'AGENCY001';
-    }
-
-    const user = users.find(u => u.userId.toUpperCase() === normalizedId);
-    const rawPassword = String(password).trim();
-    const passwordValid = user && (
-      user.passwordHash === rawPassword ||
-      user.passwordHash.toLowerCase() === rawPassword.toLowerCase() ||
-      rawPassword.toLowerCase() === 'admin' ||
-      rawPassword.toLowerCase() === 'admin123' ||
-      rawPassword.toLowerCase() === 'password' ||
-      rawPassword === 'Admin@123' ||
-      rawPassword === 'MP@123' ||
-      rawPassword === 'Agency@123'
-    );
-
-    if (!user || !passwordValid) {
-      throw new Error('Invalid credentials');
-    }
-
-    const token = `mplads_static_token_${user.userId.toLowerCase()}_${Date.now()}`;
-    const userWithoutPass: User = {
-      id: user.id,
-      userId: user.userId,
-      name: user.name,
-      role: user.role,
-      designation: user.designation,
-      constituency: user.constituency,
-      district: user.district,
-      email: user.email,
-      phone: user.phone,
-      agencyId: user.agencyId,
-      agencyName: user.agencyName
-    };
-
-    authStorage.setToken(token);
-    authStorage.setUser(userWithoutPass);
-
-    this.addAuditLog({
-      userId: user.userId,
-      userName: user.name,
-      userRole: user.role,
-      action: 'USER_LOGIN',
-      targetEntity: 'Auth',
-      targetId: user.userId,
-      ipAddressMasked: '10.14.02.***'
-    });
-
-    return {
-      token,
-      user: userWithoutPass,
-      message: `Welcome, ${user.name}`
-    };
+    return staticAuth.login(userId, password);
   }
 
   async getMe(): Promise<{ user: User }> {
@@ -849,6 +791,77 @@ export class ClientMockDbService {
       state: 'Telangana',
       lastRefreshedAt: new Date().toISOString()
     };
+  }
+
+  // Audit Logs Integrity & Tamper Protection
+  async verifyAuditLogsIntegrity(): Promise<{
+    isValid: boolean;
+    verifiedCount: number;
+    brokenAtId?: string;
+    algorithm: string;
+    genesisHash: string;
+    verifiedAt: string;
+  }> {
+    const logs = [...this.auditLogs].reverse(); // Verify from genesis to latest
+    let currentHash = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
+
+    for (let i = 0; i < logs.length; i++) {
+      const log = logs[i];
+      if (log.prevHash !== currentHash) {
+        return {
+          isValid: false,
+          verifiedCount: i,
+          brokenAtId: log.id,
+          algorithm: 'SHA-256',
+          genesisHash: 'GENESIS_MPLADS_AUDIT_BLOCK_000000',
+          verifiedAt: new Date().toISOString()
+        };
+      }
+
+      const hashPayload = `${log.prevHash}|${log.id}|${log.timestamp}|${log.userId}|${log.userRole}|${log.action}|${log.targetEntity}|${log.targetId}|${log.previousValue || ''}|${log.newValue || ''}|${log.ipAddressMasked}`;
+      const calculatedHash = sha256Hex(hashPayload);
+
+      if (log.entryHash !== calculatedHash) {
+        return {
+          isValid: false,
+          verifiedCount: i,
+          brokenAtId: log.id,
+          algorithm: 'SHA-256',
+          genesisHash: 'GENESIS_MPLADS_AUDIT_BLOCK_000000',
+          verifiedAt: new Date().toISOString()
+        };
+      }
+
+      currentHash = log.entryHash;
+    }
+
+    return {
+      isValid: true,
+      verifiedCount: logs.length,
+      algorithm: 'SHA-256',
+      genesisHash: 'GENESIS_MPLADS_AUDIT_BLOCK_000000',
+      verifiedAt: new Date().toISOString()
+    };
+  }
+
+  async simulateTamper(): Promise<{ success: boolean; result: any; message: string }> {
+    if (this.auditLogs.length >= 2) {
+      this.auditLogs[1].newValue = 'UNAUTHORIZED_TAMPER_MODIFIED_AMOUNT_₹99,99,999';
+      this.saveToStorage();
+    }
+    const verification = await this.verifyAuditLogsIntegrity();
+    return {
+      success: true,
+      result: verification,
+      message: 'Cryptographic tamper simulated: hash mismatch injected into audit block.'
+    };
+  }
+
+  async restoreAuditLogs(): Promise<{ success: boolean }> {
+    this.auditLogs = JSON.parse(JSON.stringify(initialAuditLogs));
+    this.latestLogHash = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
+    this.saveToStorage();
+    return { success: true };
   }
 
   async getPublicProjects(): Promise<{ projects: Project[]; count: number }> {
