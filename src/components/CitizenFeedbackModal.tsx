@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Project } from '../types/index.js';
 import { api } from '../services/api.js';
+import { useLanguage } from '../context/LanguageContext.js';
 import { X, MessageSquareWarning, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 interface CitizenFeedbackModalProps {
@@ -18,6 +19,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
   onClose,
   onSuccess
 }) => {
+  const { language, t } = useLanguage();
   const [projectId, setProjectId] = useState(preselectedProjectId || projects?.[0]?.id || '');
   const [issueType, setIssueType] = useState('Substandard Material Quality');
   const [description, setDescription] = useState('');
@@ -39,12 +41,12 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
   if (!isOpen) return null;
 
   const issueTypes = [
-    'Substandard Material Quality',
-    'Unexplained Delay in Execution',
-    'Location Discrepancy (Work Not At Sanctioned Site)',
-    'Suspected Financial Misappropriation / Incomplete Work',
-    'Work Completed but Not Put to Public Use',
-    'General Grievance / Inquiry'
+    { key: 'Substandard Material Quality', labelEn: 'Substandard Material Quality', labelHi: 'घटिया निर्माण सामग्री की गुणवत्ता' },
+    { key: 'Unexplained Delay in Execution', labelEn: 'Unexplained Delay in Execution', labelHi: 'कार्य निष्पादन में अकारण विलंब' },
+    { key: 'Location Discrepancy (Work Not At Sanctioned Site)', labelEn: 'Location Discrepancy (Work Not At Sanctioned Site)', labelHi: 'स्थान विसंगति (स्वीकृत स्थल पर कार्य नहीं)' },
+    { key: 'Suspected Financial Misappropriation / Incomplete Work', labelEn: 'Suspected Financial Misappropriation / Incomplete Work', labelHi: 'वित्तीय अनियमितता / अधूरा कार्य का संदेह' },
+    { key: 'Work Completed but Not Put to Public Use', labelEn: 'Work Completed but Not Put to Public Use', labelHi: 'कार्य पूर्ण किंतु जनउपयोग हेतु उपलब्ध नहीं' },
+    { key: 'General Grievance / Inquiry', labelEn: 'General Grievance / Inquiry', labelHi: 'सामान्य शिकायत / पूछताछ' }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +67,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
       setSuccessId(res.feedbackId);
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to submit grievance.');
+      setError(err.message || (language === 'hi' ? 'शिकायत दर्ज करने में विफलता।' : 'Failed to submit grievance.'));
     } finally {
       setSubmitting(false);
     }
@@ -81,10 +83,10 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
-                Public Grievance Redressal & Citizen Feedback
+                {language === 'hi' ? 'नागरिक शिकायत निवारण एवं जन प्रतिक्रिया' : 'Public Grievance Redressal & Citizen Feedback'}
               </h2>
               <div className="text-xs text-panel-bg/80">
-                Direct public monitoring channel to District Authority
+                {language === 'hi' ? 'ज़िला प्राधिकरण को सीधे जन निगरानी चैनल' : 'Direct public monitoring channel to District Authority'}
               </div>
             </div>
           </div>
@@ -102,12 +104,16 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-body">Grievance Successfully Registered</h3>
+              <h3 className="text-base font-bold text-slate-body">
+                {language === 'hi' ? 'शिकायत सफलतापूर्वक पंजीकृत हुई' : 'Grievance Successfully Registered'}
+              </h3>
               <div className="font-mono text-xs font-bold text-status-verified mt-1">
-                Acknowledgement Number: {successId}
+                {language === 'hi' ? 'पावती संख्या:' : 'Acknowledgement Number:'} {successId}
               </div>
               <p className="text-xs text-slate-muted mt-2 max-w-sm mx-auto">
-                Your report has been securely routed to the District Authority vigilance desk for physical inspection. Personal identifiers remain strictly protected.
+                {language === 'hi'
+                  ? 'आपकी रिपोर्ट भौतिक निरीक्षण हेतु ज़िला सतर्कता डेस्क को अग्रेषित कर दी गई है। व्यक्तिगत पहचान पूर्णतः गोपनीय रखी जाती है।'
+                  : 'Your report has been securely routed to the District Authority vigilance desk for physical inspection. Personal identifiers remain strictly protected.'}
               </p>
             </div>
             <button
@@ -117,7 +123,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
               }}
               className="px-6 py-2 bg-govt-navy text-white rounded-lg text-xs font-bold hover:bg-govt-navy-light transition-colors cursor-pointer"
             >
-              Done
+              {language === 'hi' ? 'संपन्न' : 'Done'}
             </button>
           </div>
         ) : (
@@ -130,7 +136,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
 
             <div>
               <label className="block font-bold text-slate-body mb-1">
-                Target Developmental Project *
+                {language === 'hi' ? 'लक्षित विकास परियोजना *' : 'Target Developmental Project *'}
               </label>
               <select
                 required
@@ -148,7 +154,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
 
             <div>
               <label className="block font-bold text-slate-body mb-1">
-                Nature of Discrepancy / Grievance *
+                {language === 'hi' ? 'विसंगति / शिकायत का प्रकार *' : 'Nature of Discrepancy / Grievance *'}
               </label>
               <select
                 value={issueType}
@@ -156,21 +162,23 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
                 className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
               >
                 {issueTypes.map(t => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t.key} value={t.key}>
+                    {language === 'hi' ? t.labelHi : t.labelEn}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div>
               <label className="block font-bold text-slate-body mb-1">
-                Detailed Observation & Specific Facts *
+                {language === 'hi' ? 'विस्तृत विवरण एवं तथ्य *' : 'Detailed Observation & Specific Facts *'}
               </label>
               <textarea
                 rows={3}
                 required
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="State specific visual observations, date observed, or quality deficiencies noticed at the site..."
+                placeholder={language === 'hi' ? 'विशिष्ट दृश्य अवलोकन, निरीक्षण तिथि, अथवा निर्माण में देखी गई कमियां दर्ज करें...' : 'State specific visual observations, date observed, or quality deficiencies noticed at the site...'}
                 className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
               />
             </div>
@@ -178,20 +186,20 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block font-bold text-slate-body mb-1">
-                  Citizen Name (Optional)
+                  {language === 'hi' ? 'नागरिक का नाम (वैकल्पिक)' : 'Citizen Name (Optional)'}
                 </label>
                 <input
                   type="text"
                   value={citizenName}
                   onChange={e => setCitizenName(e.target.value)}
-                  placeholder="Anonymous or Name"
+                  placeholder={language === 'hi' ? 'अनाम या आपका नाम' : 'Anonymous or Name'}
                   className="w-full px-3 py-2 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-body mb-1">
-                  Mobile Number (For SMS updates)
+                  {language === 'hi' ? 'मोबाइल नंबर (एसएमएस अपडेट हेतु)' : 'Mobile Number (For SMS updates)'}
                 </label>
                 <input
                   type="tel"
@@ -205,7 +213,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
 
             <div>
               <label className="block font-bold text-slate-body mb-1">
-                Photo Evidence URL (Optional)
+                {language === 'hi' ? 'तस्वीर साक्ष्य लिंक (वैकल्पिक)' : 'Photo Evidence URL (Optional)'}
               </label>
               <input
                 type="url"
@@ -218,7 +226,11 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
 
             <div className="p-2.5 bg-panel-bg border border-slate-border rounded-xl text-[11px] text-govt-navy flex items-center gap-2 font-medium">
               <ShieldCheck className="w-4 h-4 text-govt-navy shrink-0" />
-              <span>Whistleblower protection: Phone numbers are masked and never made public.</span>
+              <span>
+                {language === 'hi'
+                  ? 'व्हिसलब्लोअर सुरक्षा: मोबाइल नंबर गोपनीय रखे जाते हैं तथा कभी सार्वजनिक नहीं किए जाते।'
+                  : 'Whistleblower protection: Phone numbers are masked and never made public.'}
+              </span>
             </div>
 
             <div className="pt-3 border-t border-slate-border flex items-center justify-end gap-3">
@@ -227,7 +239,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg border border-slate-border text-slate-body bg-white hover:bg-panel-bg font-bold cursor-pointer transition-colors"
               >
-                Cancel
+                {t.cancel}
               </button>
               <button
                 type="submit"
@@ -235,7 +247,7 @@ export const CitizenFeedbackModal: React.FC<CitizenFeedbackModalProps> = ({
                 className="px-5 py-2 rounded-lg bg-govt-navy text-white font-bold hover:bg-govt-navy-light disabled:opacity-50 flex items-center gap-2 shadow-xs cursor-pointer transition-colors"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>{submitting ? 'Registering...' : 'Register Grievance'}</span>
+                <span>{submitting ? (language === 'hi' ? 'पंजीकृत हो रहा है...' : 'Registering...') : (language === 'hi' ? 'शिकायत दर्ज करें' : 'Register Grievance')}</span>
               </button>
             </div>
           </form>

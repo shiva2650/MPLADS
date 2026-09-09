@@ -14,6 +14,7 @@ import {
 import { api } from '../services/api.js';
 import { AppNotification } from '../types/index.js';
 import { useAuth } from '../context/AuthContext.js';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface NotificationCenterProps {
   onNavigateToAlerts?: () => void;
@@ -25,6 +26,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   onNavigateToProjects
 }) => {
   const { user, role } = useAuth();
+  const { t, formatDate, translateRole } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -136,17 +138,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
   const formatTimestamp = (timestamp?: string) => {
     if (!timestamp) return 'Recently';
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleDateString('en-IN', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return timestamp;
-    }
+    return formatDate(timestamp, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -159,7 +156,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           if (!isOpen) fetchNotifications();
         }}
         className="relative p-2 rounded-lg text-panel-bg/80 hover:text-white hover:bg-govt-navy-light transition-colors focus:outline-hidden focus:ring-2 focus:ring-govt-saffron"
-        title={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
+        title={unreadCount > 0 ? `${unreadCount} ${t.unreadCountText}` : t.notificationsTitle}
         aria-expanded={isOpen}
       >
         <Bell className="w-5 h-5" />
@@ -182,14 +179,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-govt-navy text-white border-b border-govt-navy-dark">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">Official Notifications</span>
+              <span className="font-semibold text-sm">{t.notificationsTitle}</span>
               {unreadCount > 0 ? (
                 <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-status-flagged text-white">
-                  {unreadCount} new
+                  {t('unreadCountText', { count: unreadCount })}
                 </span>
               ) : (
                 <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-white/15 text-panel-bg/80">
-                  All caught up
+                  {t.allCaughtUpText}
                 </span>
               )}
             </div>
@@ -200,7 +197,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   id="mark-all-read-btn"
                   onClick={handleMarkAllAsRead}
                   className="p-1.5 rounded-md hover:bg-govt-navy-light text-panel-bg/80 hover:text-white text-xs flex items-center gap-1 transition-colors"
-                  title="Mark all notifications as read"
+                  title={t.markAllReadText}
                 >
                   <CheckCheck className="w-4 h-4" />
                 </button>
@@ -210,7 +207,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 onClick={handleResetNotifications}
                 disabled={resetting}
                 className="p-1.5 rounded-md hover:bg-govt-navy-light text-panel-bg/80 hover:text-white text-xs flex items-center gap-1 transition-colors"
-                title="Reset notifications to baseline initial state"
+                title={t.resetBaselineText}
               >
                 <RotateCcw className={`w-4 h-4 ${resetting ? 'animate-spin' : ''}`} />
               </button>
@@ -229,18 +226,18 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             {loading && notifications.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-muted">
                 <div className="w-5 h-5 border-2 border-govt-navy border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                Loading notifications...
+                {t.loadingNotificationsText}
               </div>
             ) : notifications.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-muted">
                 <Bell className="w-8 h-8 text-slate-muted/50 mx-auto mb-2" />
-                <p className="font-medium text-slate-body">No notifications</p>
-                <p className="text-slate-muted mt-0.5">You're all caught up with recent updates</p>
+                <p className="font-medium text-slate-body">{t.emptyNotificationsTitle}</p>
+                <p className="text-slate-muted mt-0.5">{t.emptyNotificationsDesc}</p>
                 <button
                   onClick={handleResetNotifications}
                   className="mt-3 text-xs text-govt-navy font-semibold underline hover:text-govt-navy-light"
                 >
-                  Reset sample notifications
+                  {t.resetBaselineText}
                 </button>
               </div>
             ) : (
@@ -281,7 +278,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             id={`mark-read-btn-${item.id}`}
                             onClick={(e) => handleMarkAsRead(item.id, e)}
                             className="p-0.5 rounded text-slate-muted hover:text-govt-navy hover:bg-white transition-colors"
-                            title="Mark as read"
+                            title={t.markAsReadText}
                           >
                             <CheckCheck className="w-3.5 h-3.5" />
                           </button>
@@ -301,7 +298,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                       <span>{formatTimestamp(item.createdAt)}</span>
                       {item.link && (
                         <span className="text-govt-navy font-medium flex items-center gap-0.5 ml-auto">
-                          View details
+                          {t.viewDetails}
                           <ExternalLink className="w-2.5 h-2.5" />
                         </span>
                       )}
@@ -321,10 +318,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               className="text-govt-navy hover:text-govt-navy-light font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${resetting ? 'animate-spin' : ''}`} />
-              <span>Reset Notifications</span>
+              <span>{t.resetBaselineText}</span>
             </button>
             <span className="text-[11px] text-slate-muted">
-              Role: {role}
+              {t.roleAuthority}: {translateRole(role)}
             </span>
           </div>
         </div>

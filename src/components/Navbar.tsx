@@ -2,21 +2,16 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import {
-  ShieldAlert,
   LogOut,
   UserCheck,
   Building2,
   Landmark,
   Eye,
-  Bell,
   Menu,
   X,
   ChevronDown,
-  Home,
-  AlertTriangle,
   UserCog,
-  Shield,
-  Languages
+  Shield
 } from 'lucide-react';
 import { NotificationCenter } from './NotificationCenter.js';
 
@@ -38,44 +33,40 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLogin
 }) => {
   const { user, role, logout } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, t, translateRole } = useLanguage();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const getRoleDisplay = () => {
     switch (role) {
       case 'MP':
         return {
-          title: 'Member of Parliament',
-          label: 'MP Portal',
-          name: user?.name || 'Shri Rajesh Kumar, MP',
-          detail: 'Hyderabad North Constituency',
+          title: translateRole('MP'),
+          label: language === 'hi' ? 'सांसद पोर्टल' : 'MP Portal',
+          name: user?.name || (language === 'hi' ? 'श्री राजेश कुमार, सांसद' : 'Shri Rajesh Kumar, MP'),
           icon: Landmark,
           theme: 'bg-govt-navy-light text-white border border-white/20'
         };
       case 'ADMIN':
         return {
-          title: 'District Authority / Collector',
-          label: 'District Admin',
-          name: user?.name || 'Dr. Ananya Sharma, IAS',
-          detail: 'Hyderabad District Administration',
+          title: translateRole('ADMIN'),
+          label: language === 'hi' ? 'ज़िला प्राधिकारी' : 'District Admin',
+          name: user?.name || (language === 'hi' ? 'डॉ. अनन्या शर्मा, आईएएस' : 'Dr. Ananya Sharma, IAS'),
           icon: Building2,
           theme: 'bg-govt-navy-dark text-white border border-white/20'
         };
       case 'AGENCY':
         return {
-          title: 'Implementing Agency',
-          label: 'Agency Desk',
+          title: translateRole('AGENCY'),
+          label: language === 'hi' ? 'एजेंसी डेस्क' : 'Agency Desk',
           name: user?.name || 'TSUDA - Hyderabad Zone',
-          detail: 'Municipal & Urban Dev Authority',
           icon: UserCheck,
           theme: 'bg-govt-navy-light text-white border border-white/20'
         };
       default:
         return {
-          title: 'Citizen Transparency Portal',
-          label: 'Public Access',
-          name: 'Public Citizen',
-          detail: 'Citizen Transparency View',
+          title: translateRole('PUBLIC'),
+          label: language === 'hi' ? 'नागरिक पोर्टल' : 'Public Access',
+          name: language === 'hi' ? 'नागरिक' : 'Public Citizen',
           icon: Eye,
           theme: 'bg-govt-navy-dark text-white border border-white/20'
         };
@@ -108,9 +99,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div
               className={`flex items-center gap-2 sm:gap-3 min-w-0 ${onNavigateToHome ? 'cursor-pointer hover:opacity-95' : ''}`}
               onClick={onNavigateToHome}
-              title={onNavigateToHome ? 'Return to Scheme Portal Home' : undefined}
+              title={onNavigateToHome ? t.returnToHome : undefined}
             >
-              {/* Generic Institutional Shield Icon */}
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0 shadow-xs">
                 <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-govt-saffron" />
               </div>
@@ -123,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight flex items-center gap-1.5 sm:gap-2">
                   <span className="truncate">{t.portalName}</span>
                   <span className="text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md bg-govt-saffron text-govt-navy-dark font-bold tracking-normal uppercase shrink-0">
-                    Official
+                    {t.officialBadge}
                   </span>
                 </div>
                 <div className="text-[11px] text-panel-bg/80 font-normal leading-tight hidden xl:block truncate max-w-md">
@@ -138,6 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Bilingual Language Switcher (EN | हिन्दी) */}
             <div className="flex items-center bg-govt-navy-dark rounded-lg p-0.5 border border-white/20 text-xs shrink-0">
               <button
+                id="lang-switch-en-btn"
                 onClick={() => setLanguage('en')}
                 aria-label="Switch to English"
                 className={`px-1.5 sm:px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
@@ -149,6 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 English
               </button>
               <button
+                id="lang-switch-hi-btn"
                 onClick={() => setLanguage('hi')}
                 aria-label="हिन्दी भाषा चुनें"
                 className={`px-1.5 sm:px-2 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
@@ -174,8 +166,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   id="officer-session-menu-btn"
                   onClick={() => setShowRoleMenu(!showRoleMenu)}
                   className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer ${roleInfo.theme}`}
-                  title="Active Officer Session"
-                  aria-label="Active Officer Session"
+                  title={t.activeOfficerSession}
+                  aria-label={t.activeOfficerSession}
                 >
                   <RoleIcon className="w-3.5 h-3.5 shrink-0 text-govt-saffron" />
                   <span className="hidden lg:inline">{roleInfo.label}:</span>
@@ -192,7 +184,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <div className="px-3 py-2 border-b border-slate-border">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-slate-muted">
-                        Authenticated Official
+                        {t.authenticatedOfficial}
                       </div>
                       <div className="text-xs font-bold text-slate-body mt-0.5">
                         {user.name}
@@ -207,12 +199,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     <div className="px-3 py-2 text-[11px] text-slate-muted space-y-1 bg-panel-bg/50">
                       <div className="flex justify-between">
-                        <span>Role Authority:</span>
-                        <span className="font-semibold text-slate-body">{user.role}</span>
+                        <span>{t.roleAuthority}:</span>
+                        <span className="font-semibold text-slate-body">{translateRole(user.role)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Security Protocol:</span>
-                        <span className="font-semibold text-emerald-700">Govt Token Verified</span>
+                        <span>{language === 'hi' ? 'सुरक्षा प्रोटोकॉल:' : 'Security Protocol:'}</span>
+                        <span className="font-semibold text-emerald-700">
+                          {language === 'hi' ? 'सरकारी टोकन सत्यापित' : 'Govt Token Verified'}
+                        </span>
                       </div>
                     </div>
 
@@ -225,7 +219,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full px-2.5 py-1.5 text-left text-xs text-status-flagged hover:bg-red-50 rounded-lg flex items-center gap-2 font-medium cursor-pointer transition-colors"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        <span>Sign Out of Officer Session</span>
+                        <span>{t.signOut}</span>
                       </button>
                     </div>
                   </div>
@@ -237,8 +231,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={onOpenLogin}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-govt-saffron hover:bg-govt-saffron-hover text-govt-navy-dark shadow-xs transition-colors cursor-pointer"
-                  title="Officer / District Authority Login"
-                  aria-label="Officer / Admin Login"
+                  title={t.officerLogin}
+                  aria-label={t.officerLogin}
                 >
                   <UserCog className="w-3.5 h-3.5 shrink-0" />
                   <span>{t.officerLogin}</span>

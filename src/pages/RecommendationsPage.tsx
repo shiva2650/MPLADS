@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Project, UserRole } from '../types/index.js';
 import { StatusBadge, RiskBadge } from '../components/Badges.js';
-import { FilePlus2, CheckCircle2, XCircle, FileText, Calendar, IndianRupee, Sparkles, ArrowLeft } from 'lucide-react';
+import { FilePlus2, ArrowLeft } from 'lucide-react';
 import { api } from '../services/api.js';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface RecommendationsPageProps {
   projects: Project[];
@@ -21,6 +22,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
   onRefresh,
   onBackToDashboard
 }) => {
+  const { language, t, translateCategory } = useLanguage();
   const [sanctionModalProject, setSanctionModalProject] = useState<Project | null>(null);
   const [sanctionAmountLakh, setSanctionAmountLakh] = useState('');
   const [sanctionRemarks, setSanctionRemarks] = useState('');
@@ -49,7 +51,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
       onRefresh();
     } catch (err: any) {
       console.error(err);
-      setSanctionError(err?.message || 'Failed to sanction project. Please verify permissions.');
+      setSanctionError(err?.message || (language === 'hi' ? 'परियोजना स्वीकृत करने में विफलता।' : 'Failed to sanction project. Please verify permissions.'));
     } finally {
       setSubmitting(false);
     }
@@ -65,10 +67,10 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Recommendations
+            {t.home} &gt; {t.recommendations}
           </span>
         </div>
       )}
@@ -76,20 +78,22 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            MP Recommendations & Administrative Sanctions
+            {language === 'hi' ? 'सांसद अनुशंसाएं एवं प्रशासनिक स्वीकृतियां' : 'MP Recommendations & Administrative Sanctions'}
           </h1>
           <p className="text-xs text-gray-500">
-            Work proposal lifecycle from Member of Parliament submission to District Authority technical sanction
+            {language === 'hi'
+              ? 'संसद सदस्य द्वारा कार्य प्रस्ताव प्रस्तुत करने से लेकर ज़िला प्राधिकरण द्वारा तकनीकी स्वीकृति तक का जीवनचक्र'
+              : 'Work proposal lifecycle from Member of Parliament submission to District Authority technical sanction'}
           </p>
         </div>
 
         {(userRole === 'MP' || userRole === 'ADMIN') && (
           <button
             onClick={onOpenRecommend}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-govt-navy text-white rounded-md text-xs font-semibold hover:bg-govt-navy-light shadow-2xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-govt-navy text-white rounded-md text-xs font-semibold hover:bg-govt-navy-light shadow-2xs cursor-pointer"
           >
             <FilePlus2 className="w-4 h-4" />
-            <span>Submit New Recommendation</span>
+            <span>{language === 'hi' ? 'नई अनुशंसा प्रस्तुत करें' : 'Submit New Recommendation'}</span>
           </button>
         )}
       </div>
@@ -98,7 +102,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
       <div className="space-y-3">
         {recommendations.length === 0 ? (
           <div className="bg-white rounded-xl p-8 text-center border border-slate-border text-slate-muted text-xs">
-            No active recommendations currently logged.
+            {language === 'hi' ? 'वर्तमान में कोई सक्रिय अनुशंसा दर्ज नहीं है।' : 'No active recommendations currently logged.'}
           </div>
         ) : (
           recommendations.map(project => {
@@ -123,11 +127,11 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
                   </h3>
 
                   <div className="text-[11px] text-slate-muted space-x-2">
-                    <span>MP: <strong>{project.mpName}</strong></span>
+                    <span>{language === 'hi' ? 'सांसद:' : 'MP:'} <strong>{project.mpName}</strong></span>
                     <span>•</span>
-                    <span>District: {project.district}</span>
+                    <span>{t.district}: {project.district}</span>
                     <span>•</span>
-                    <span>Category: {project.category}</span>
+                    <span>{t.category}: {translateCategory(project.category)}</span>
                   </div>
 
                   <p className="text-[11px] text-slate-muted line-clamp-1">{project.description}</p>
@@ -135,13 +139,15 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
 
                 <div className="flex md:flex-col items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-border/50">
                   <div className="text-left md:text-right font-mono">
-                    <div className="text-[10px] text-slate-muted uppercase">Estimated Proposal</div>
+                    <div className="text-[10px] text-slate-muted uppercase">
+                      {language === 'hi' ? 'अनुमानित प्रस्ताव' : 'Estimated Proposal'}
+                    </div>
                     <div className="text-base font-bold text-slate-body">
-                      ₹{(project.estimatedCost / 100000).toFixed(2)} Lakh
+                      ₹{(project.estimatedCost / 100000).toFixed(2)} {language === 'hi' ? 'लाख' : 'Lakh'}
                     </div>
                     {project.sanctionedAmount > 0 && (
                       <div className="text-[10px] text-status-verified font-semibold">
-                        Sanctioned: ₹{(project.sanctionedAmount / 100000).toFixed(2)}L
+                        {language === 'hi' ? 'स्वीकृत:' : 'Sanctioned:'} ₹{(project.sanctionedAmount / 100000).toFixed(2)}{language === 'hi' ? 'लाख' : 'L'}
                       </div>
                     )}
                   </div>
@@ -149,9 +155,9 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onSelectProject(project)}
-                      className="px-3 py-1.5 border border-slate-border rounded text-xs font-medium text-slate-body hover:bg-panel-bg"
+                      className="px-3 py-1.5 border border-slate-border rounded text-xs font-medium text-slate-body hover:bg-panel-bg cursor-pointer"
                     >
-                      Audit Details
+                      {language === 'hi' ? 'ऑडिट विवरण' : 'Audit Details'}
                     </button>
 
                     {userRole === 'ADMIN' && isPendingSanction && (
@@ -160,9 +166,9 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
                           setSanctionModalProject(project);
                           setSanctionAmountLakh((project.estimatedCost / 100000).toFixed(2));
                         }}
-                        className="px-3 py-1.5 bg-govt-navy hover:bg-govt-navy-light text-white rounded text-xs font-semibold shadow-xs"
+                        className="px-3 py-1.5 bg-govt-navy hover:bg-govt-navy-light text-white rounded text-xs font-semibold shadow-xs cursor-pointer"
                       >
-                        Sanction Work
+                        {language === 'hi' ? 'कार्य स्वीकृत करें' : 'Sanction Work'}
                       </button>
                     )}
                   </div>
@@ -178,7 +184,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl p-6 space-y-4 text-xs">
             <h3 className="text-sm font-bold text-slate-body">
-              District Authority Formal Work Sanction
+              {language === 'hi' ? 'ज़िला प्राधिकरण औपचारिक कार्य स्वीकृति' : 'District Authority Formal Work Sanction'}
             </h3>
             <div className="p-3 bg-panel-bg rounded border border-slate-border">
               <div className="font-mono text-[11px] text-slate-muted">{sanctionModalProject.projectCode}</div>
@@ -193,7 +199,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
               )}
               <div>
                 <label className="block font-semibold text-slate-body mb-1">
-                  Sanctioned Administrative Allocation (₹ in Lakh) *
+                  {language === 'hi' ? 'स्वीकृत प्रशासनिक आवंटन (₹ लाख में) *' : 'Sanctioned Administrative Allocation (₹ in Lakh) *'}
                 </label>
                 <input
                   type="number"
@@ -207,13 +213,13 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
 
               <div>
                 <label className="block font-semibold text-slate-body mb-1">
-                  Administrative Sanction Order Remarks
+                  {language === 'hi' ? 'प्रशासनिक स्वीकृति आदेश टिप्पणी' : 'Administrative Sanction Order Remarks'}
                 </label>
                 <textarea
                   rows={2}
                   value={sanctionRemarks}
                   onChange={e => setSanctionRemarks(e.target.value)}
-                  placeholder="e.g., Feasibility verified by DTEC. Administrative sanction granted in accordance with Para 3.2 of MoSPI Guidelines."
+                  placeholder={language === 'hi' ? 'उदा. डीटीईसी द्वारा व्यवहार्यता सत्यापित। MoSPI दिशानिर्देशों के तहत प्रशासनिक स्वीकृति प्रदान की गई।' : 'e.g., Feasibility verified by DTEC. Administrative sanction granted in accordance with Para 3.2 of MoSPI Guidelines.'}
                   className="w-full px-3 py-2 border border-slate-border rounded-md text-slate-body"
                 />
               </div>
@@ -222,16 +228,18 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setSanctionModalProject(null)}
-                  className="px-4 py-2 border border-slate-border rounded text-slate-body font-medium"
+                  className="px-4 py-2 border border-slate-border rounded text-slate-body font-medium cursor-pointer"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-govt-navy text-white rounded font-semibold hover:bg-govt-navy-light disabled:opacity-50"
+                  className="px-5 py-2 bg-govt-navy text-white rounded font-semibold hover:bg-govt-navy-light disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Sanctioning...' : 'Grant Technical Sanction'}
+                  {submitting
+                    ? (language === 'hi' ? 'स्वीकृति जारी...' : 'Sanctioning...')
+                    : (language === 'hi' ? 'तकनीकी स्वीकृति प्रदान करें' : 'Grant Technical Sanction')}
                 </button>
               </div>
             </form>

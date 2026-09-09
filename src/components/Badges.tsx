@@ -1,6 +1,7 @@
 import React from 'react';
 import { RiskLevel, ProjectStatus, AlertStatus } from '../types/index.js';
 import { ShieldCheck, ShieldAlert, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.js';
 
 export type VerificationState = 'Verified' | 'Under Review' | 'Flagged';
 
@@ -12,6 +13,8 @@ export const VerificationBadge: React.FC<{
   status?: VerificationState | string;
   className?: string;
 }> = ({ status = 'Verified', className = '' }) => {
+  const { translateVerificationState } = useLanguage();
+
   let normalizedStatus: VerificationState = 'Verified';
   if (status === 'Under Review' || status === 'Pending' || status === 'In Review') {
     normalizedStatus = 'Under Review';
@@ -48,7 +51,7 @@ export const VerificationBadge: React.FC<{
       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.bg} ${className}`}
     >
       <IconComponent className="w-3.5 h-3.5 shrink-0" />
-      <span>{normalizedStatus}</span>
+      <span>{translateVerificationState(normalizedStatus)}</span>
     </span>
   );
 };
@@ -59,6 +62,8 @@ export const RiskBadge: React.FC<{
   showIcon?: boolean;
   publicView?: boolean;
 }> = ({ level, score, showIcon = true, publicView = false }) => {
+  const { translateRiskLevel } = useLanguage();
+
   // In public view, convert to plain language without raw algorithmic scores
   if (publicView) {
     if (level === 'LOW') {
@@ -70,48 +75,45 @@ export const RiskBadge: React.FC<{
     }
   }
 
-  const configs: Record<RiskLevel, { bg: string; text: string; border: string; label: string; icon: any }> = {
+  const configs: Record<RiskLevel, { bg: string; text: string; border: string; icon: any }> = {
     LOW: {
       bg: 'bg-panel-bg text-status-verified border-status-verified/30',
       text: 'text-status-verified',
       border: 'border-status-verified/30',
-      label: 'Routine / On Track',
       icon: ShieldCheck
     },
     MEDIUM: {
       bg: 'bg-panel-bg text-status-review border-status-review/30',
       text: 'text-status-review',
       border: 'border-status-review/30',
-      label: 'May Need Review',
       icon: AlertTriangle
     },
     HIGH: {
       bg: 'bg-panel-bg text-status-flagged border-status-flagged/30',
       text: 'text-status-flagged',
       border: 'border-status-flagged/30',
-      label: 'Flagged for Inspection',
       icon: ShieldAlert
     },
     CRITICAL: {
       bg: 'bg-panel-bg text-status-flagged border-status-flagged/50',
       text: 'text-status-flagged',
       border: 'border-status-flagged/50',
-      label: 'Action Required',
       icon: ShieldAlert
     }
   };
 
   const config = configs[level] || configs.LOW;
   const IconComponent = config.icon;
+  const label = translateRiskLevel(level);
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.bg}`}
-      title={`Review Status: ${config.label} ${score !== undefined ? `(Index: ${score})` : ''}`}
+      title={`Review Status: ${label} ${score !== undefined ? `(Index: ${score})` : ''}`}
     >
       {showIcon && <IconComponent className="w-3.5 h-3.5 shrink-0" />}
       <span>
-        {config.label}
+        {label}
         {score !== undefined && (
           <span className="opacity-80 text-[11px] ml-1 font-semibold">({score})</span>
         )}
@@ -121,6 +123,8 @@ export const RiskBadge: React.FC<{
 };
 
 export const StatusBadge: React.FC<{ status: ProjectStatus }> = ({ status }) => {
+  const { translateStatus } = useLanguage();
+
   const statusStyles: Record<ProjectStatus, string> = {
     'Recommended': 'bg-panel-bg text-slate-body border-slate-border',
     'Under Review': 'bg-panel-bg text-status-review border-status-review/30',
@@ -139,12 +143,14 @@ export const StatusBadge: React.FC<{ status: ProjectStatus }> = ({ status }) => 
       }`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 shrink-0" />
-      {status}
+      {translateStatus(status)}
     </span>
   );
 };
 
 export const AlertBadge: React.FC<{ status: AlertStatus }> = ({ status }) => {
+  const { translateAlertStatus } = useLanguage();
+
   const styles: Record<AlertStatus, string> = {
     'New': 'bg-panel-bg text-status-flagged border-status-flagged/30 font-semibold',
     'Under Review': 'bg-panel-bg text-status-review border-status-review/30',
@@ -155,7 +161,7 @@ export const AlertBadge: React.FC<{ status: AlertStatus }> = ({ status }) => {
 
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs border ${styles[status] || 'bg-panel-bg text-slate-body border-slate-border'}`}>
-      {status}
+      {translateAlertStatus(status)}
     </span>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { useLanguage } from '../context/LanguageContext.js';
 import {
   ShieldCheck,
   Lock,
@@ -9,7 +10,8 @@ import {
   ArrowRight,
   ArrowLeft,
   AlertTriangle,
-  WifiOff
+  WifiOff,
+  Languages
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -26,7 +28,7 @@ interface AuthError {
   suggestion?: string;
 }
 
-const parseAuthError = (err: any): AuthError => {
+const parseAuthError = (err: any, isHindi: boolean): AuthError => {
   const rawMsg = (err?.message || String(err || '')).trim();
   const lower = rawMsg.toLowerCase();
 
@@ -39,9 +41,13 @@ const parseAuthError = (err: any): AuthError => {
   ) {
     return {
       type: 'invalid_credentials',
-      title: 'Invalid credentials',
-      message: 'The User ID or password you entered does not match authorized records.',
-      suggestion: 'Please verify your departmental User ID and password.'
+      title: isHindi ? 'अमान्य क्रेडेंशियल्स' : 'Invalid credentials',
+      message: isHindi
+        ? 'आपके द्वारा दर्ज की गई यूज़र आईडी या पासवर्ड अधिकृत रिकॉर्ड से मेल नहीं खाता है।'
+        : 'The User ID or password you entered does not match authorized records.',
+      suggestion: isHindi
+        ? 'कृपया अपनी विभागीय यूज़र आईडी और पासवर्ड सत्यापित करें।'
+        : 'Please verify your departmental User ID and password.'
     };
   }
 
@@ -57,22 +63,29 @@ const parseAuthError = (err: any): AuthError => {
   ) {
     return {
       type: 'server_unreachable',
-      title: 'Server unreachable',
-      message: 'Unable to establish a secure connection with the central authentication service.',
-      suggestion: 'Please check your network connection or verify that the server is online.'
+      title: isHindi ? 'सर्वर अनुपलब्ध' : 'Server unreachable',
+      message: isHindi
+        ? 'केंद्रीय प्रमाणीकरण सेवा से सुरक्षित कनेक्शन स्थापित करने में असमर्थ।'
+        : 'Unable to establish a secure connection with the central authentication service.',
+      suggestion: isHindi
+        ? 'कृपया अपना नेटवर्क कनेक्शन जांचें या सुनिश्चित करें कि सर्वर ऑनलाइन है।'
+        : 'Please check your network connection or verify that the server is online.'
     };
   }
 
   return {
     type: 'unknown',
-    title: 'Authentication Failed',
-    message: rawMsg || 'An unexpected error occurred during the authentication attempt.',
-    suggestion: 'Please verify your credentials and try again.'
+    title: isHindi ? 'प्रमाणीकरण विफल' : 'Authentication Failed',
+    message: rawMsg || (isHindi ? 'प्रमाणीकरण प्रयास के दौरान अप्रत्याशित त्रुटि उत्पन्न हुई।' : 'An unexpected error occurred during the authentication attempt.'),
+    suggestion: isHindi ? 'कृपया अपने क्रेडेंशियल्स सत्यापित करें और पुनः प्रयास करें।' : 'Please verify your credentials and try again.'
   };
 };
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHome, onLoginSuccess }) => {
   const { login } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+
+  const isHindi = language === 'hi';
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -90,7 +103,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
       await login(userId, password);
       onLoginSuccess?.();
     } catch (err: any) {
-      setError(parseAuthError(err));
+      setError(parseAuthError(err, isHindi));
     } finally {
       setLoading(false);
     }
@@ -109,10 +122,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
               <button
                 onClick={onBackToHome}
                 className="p-1.5 rounded-lg bg-panel-bg hover:bg-slate-border text-slate-body text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer mr-1"
-                title="Return to Scheme Home & Public Dashboard"
+                title={isHindi ? 'योजना मुख्य पृष्ठ पर लौटें' : 'Return to Scheme Home & Public Dashboard'}
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Back to Home</span>
+                <span className="hidden sm:inline">{isHindi ? 'मुख्य पृष्ठ' : 'Back to Home'}</span>
               </button>
             )}
             <div className="w-10 h-10 rounded-full bg-govt-navy text-white flex items-center justify-center font-serif text-sm font-bold border-2 border-govt-saffron/50">
@@ -120,28 +133,41 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wider text-slate-muted font-semibold">
-                भारत सरकार | Government of India
+                {t.govIndia}
               </div>
               <div className="text-sm sm:text-base font-bold text-slate-body">
-                Ministry of Statistics and Programme Implementation (MoSPI)
+                {t.mospiTitle}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {onBackToHome && (
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1 bg-panel-bg p-1 rounded-lg border border-slate-border">
+              <Languages className="w-3.5 h-3.5 text-govt-navy ml-1" />
               <button
-                onClick={onBackToHome}
-                className="text-xs font-semibold text-slate-muted hover:text-slate-body sm:hidden cursor-pointer"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded text-xs font-bold transition-colors cursor-pointer ${
+                  language === 'en' ? 'bg-govt-navy text-white shadow-xs' : 'text-slate-muted hover:text-slate-body'
+                }`}
               >
-                Home
+                English
               </button>
-            )}
+              <button
+                onClick={() => setLanguage('hi')}
+                className={`px-2 py-0.5 rounded text-xs font-bold transition-colors cursor-pointer ${
+                  language === 'hi' ? 'bg-govt-navy text-white shadow-xs' : 'text-slate-muted hover:text-slate-body'
+                }`}
+              >
+                हिन्दी
+              </button>
+            </div>
+
             <button
               onClick={onEnterPublic}
               className="text-xs font-bold text-govt-navy hover:text-govt-navy-light underline flex items-center gap-1 cursor-pointer transition-colors"
             >
-              <span>Skip to Citizen Public Transparency Portal</span>
+              <span>{isHindi ? 'नागरिक सार्वजनिक पारदर्शिता पोर्टल' : 'Skip to Citizen Transparency Portal'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -160,16 +186,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                   className="text-[11px] font-medium text-panel-bg/80 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <ArrowLeft className="w-3 h-3" />
-                  <span>Return to Scheme Home</span>
+                  <span>{isHindi ? 'योजना मुख्य पृष्ठ पर लौटें' : 'Return to Scheme Home'}</span>
                 </button>
               </div>
             )}
             <div className="inline-flex p-2.5 rounded-xl bg-white/10 text-white mb-2 border border-white/20">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h1 className="text-lg font-bold tracking-tight">MPLADS AI Integrity & Monitoring</h1>
+            <h1 className="text-lg font-bold tracking-tight">
+              {isHindi ? 'सांसद निधि एआई सत्यनिष्ठा एवं निगरानी प्रणाली' : 'MPLADS AI Integrity & Monitoring'}
+            </h1>
             <p className="text-xs text-panel-bg/80 mt-1">
-              Secure Role-Based Access Control & Anomaly Detection Portal
+              {isHindi
+                ? 'सुरक्षित भूमिका-आधारित पहुंच नियंत्रण एवं विसंगति जांच पोर्टल'
+                : 'Secure Role-Based Access Control & Anomaly Detection Portal'}
             </p>
           </div>
 
@@ -211,7 +241,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
             <div>
               <label className="block font-bold text-slate-body mb-1">
-                Official User ID / Employee Code
+                {isHindi ? 'आधिकारिक यूज़र आईडी / कर्मचारी कोड' : 'Official User ID / Employee Code'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -225,7 +255,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                     setUserId(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="e.g. MP001, ADMIN001, AGENCY001"
+                  placeholder={isHindi ? 'उदा. MP001, ADMIN001, AGENCY001' : 'e.g. MP001, ADMIN001, AGENCY001'}
                   className="w-full pl-9 pr-3 py-2.5 border border-slate-border rounded-lg text-slate-body uppercase font-mono font-bold bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
                 />
               </div>
@@ -233,13 +263,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-slate-body">Security Password</label>
+                <label className="font-bold text-slate-body">
+                  {isHindi ? 'सुरक्षा पासवर्ड' : 'Security Password'}
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(true)}
                   className="text-[11px] text-govt-navy hover:underline font-semibold cursor-pointer"
                 >
-                  Forgot password?
+                  {isHindi ? 'पासवर्ड भूल गए?' : 'Forgot password?'}
                 </button>
               </div>
               <div className="relative">
@@ -254,7 +286,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                     setPassword(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="Enter authorized password"
+                  placeholder={isHindi ? 'अधिकृत पासवर्ड दर्ज करें' : 'Enter authorized password'}
                   className="w-full pl-9 pr-10 py-2.5 border border-slate-border rounded-lg text-slate-body bg-white focus:ring-2 focus:ring-govt-navy focus:border-govt-navy focus:outline-hidden"
                 />
                 <button
@@ -273,16 +305,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
               disabled={loading}
               className="w-full py-2.5 bg-govt-navy text-white font-bold rounded-lg hover:bg-govt-navy-light disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
             >
-              {loading ? 'Authenticating...' : 'Sign In to Secure Portal'}
+              {loading
+                ? (isHindi ? 'प्रमाणीकरण जारी...' : 'Authenticating...')
+                : (isHindi ? 'सुरक्षित पोर्टल में प्रवेश करें' : 'Sign In to Secure Portal')}
             </button>
 
             {/* Department Officer Credential Notice */}
             <div className="pt-4 border-t border-slate-border text-slate-muted">
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-body mb-1">
-                Authorized Department Portals
+                {isHindi ? 'अधिकृत विभागीय पोर्टल' : 'Authorized Department Portals'}
               </div>
               <p className="text-[11px] text-slate-muted leading-relaxed">
-                Registered officers from District Collectorates, Parliamentary Secretariats, and Implementing Authorities may log in using their assigned Government of India service IDs.
+                {isHindi
+                  ? 'ज़िला कलेक्ट्रेट, संसदीय सचिवालय और कार्यान्वयन प्राधिकरणों के पंजीकृत अधिकारी अपनी निर्धारित भारत सरकार सेवा आईडी का उपयोग करके लॉगिन कर सकते हैं।'
+                  : 'Registered officers from District Collectorates, Parliamentary Secretariats, and Implementing Authorities may log in using their assigned Government of India service IDs.'}
               </p>
             </div>
 
@@ -293,7 +329,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
                 onClick={onEnterPublic}
                 className="w-full py-2 bg-panel-bg hover:bg-slate-border text-slate-body font-bold rounded-lg border border-slate-border transition-colors cursor-pointer"
               >
-                Access as Public Citizen (Transparency View)
+                {isHindi ? 'नागरिक के रूप में प्रवेश (पारदर्शिता दृश्य)' : 'Access as Public Citizen (Transparency View)'}
               </button>
             </div>
           </form>
@@ -304,18 +340,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
       {showForgotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-border space-y-3 text-xs">
-            <h3 className="text-sm font-bold text-slate-body">Official Password Reset Protocol</h3>
+            <h3 className="text-sm font-bold text-slate-body">
+              {isHindi ? 'आधिकारिक पासवर्ड रीसेट प्रोटोकॉल' : 'Official Password Reset Protocol'}
+            </h3>
             <p className="text-slate-muted leading-relaxed">
-              Under National Informatics Centre (NIC) security directives, MPLADS officer credentials can only be reset through your registered District Magistrate Administrative Office or Nodal Parliamentary Officer.
+              {isHindi
+                ? 'राष्ट्रीय सूचना विज्ञान केंद्र (NIC) सुरक्षा निर्देशों के तहत, अधिकारी क्रेडेंशियल्स केवल आपके पंजीकृत ज़िला मजिस्ट्रेट प्रशासनिक कार्यालय या नोडल संसदीय अधिकारी के माध्यम से रीसेट किए जा सकते हैं।'
+                : 'Under National Informatics Centre (NIC) security directives, MPLADS officer credentials can only be reset through your registered District Magistrate Administrative Office or Nodal Parliamentary Officer.'}
             </p>
             <div className="p-2.5 bg-slate-50 text-slate-body rounded-xl font-mono text-[11px] border border-slate-border">
-              Contact your Nodal System Administrator or NIC State Centre Helpdesk for credential recovery.
+              {isHindi
+                ? 'क्रेडेंशियल रिकवरी के लिए अपने नोडल सिस्टम एडमिनिस्ट्रेटर या NIC स्टेट सेंटर हेल्पडेस्क से संपर्क करें।'
+                : 'Contact your Nodal System Administrator or NIC State Centre Helpdesk for credential recovery.'}
             </div>
             <button
               onClick={() => setShowForgotModal(false)}
               className="w-full py-2 bg-govt-navy text-white rounded-lg font-bold hover:bg-govt-navy-light transition-colors cursor-pointer"
             >
-              Close
+              {t.close}
             </button>
           </div>
         </div>
@@ -323,8 +365,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onEnterPublic, onBackToHom
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-border py-3 text-center text-xs text-slate-muted">
-        <div>National Informatics Centre (NIC) &copy; {new Date().getFullYear()} Ministry of Statistics & Programme Implementation</div>
-        <div className="text-[10px] text-slate-400 mt-0.5">Government of India • e-SAKSHI MPLADS Verification Engine</div>
+        <div>{isHindi ? 'राष्ट्रीय सूचना विज्ञान केंद्र (NIC)' : 'National Informatics Centre (NIC)'} &copy; {new Date().getFullYear()} {t.mospiTitle}</div>
+        <div className="text-[10px] text-slate-400 mt-0.5">{t.govIndia} • e-SAKSHI MPLADS Verification Engine</div>
       </footer>
     </div>
   );

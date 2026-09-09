@@ -1,14 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Project, UserRole } from '../types/index.js';
 import { RiskBadge, StatusBadge } from '../components/Badges.js';
+import { useLanguage } from '../context/LanguageContext.js';
 import {
   Search,
-  Filter,
   Download,
   FilePlus2,
-  ChevronRight,
-  Sparkles,
-  ArrowUpDown,
   ArrowLeft
 } from 'lucide-react';
 
@@ -27,6 +24,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onNavigateToRecommend,
   onBackToDashboard
 }) => {
+  const { language, t, translateStatus, translateRiskLevel, translateCategory } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -36,10 +34,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Unique lists for filter dropdowns
-  const categories = useMemo(() => ['All', ...Array.from(new Set(projects.map(p => p.category)))], [projects]);
-  const districts = useMemo(() => ['All', ...Array.from(new Set(projects.map(p => p.district)))], [projects]);
-  const statuses = ['All', 'Ongoing', 'Completed', 'Delayed', 'Assigned', 'Sanctioned', 'Recommended'];
-  const risks = ['All', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  const rawCategories = useMemo(() => Array.from(new Set(projects.map(p => p.category))), [projects]);
+  const rawDistricts = useMemo(() => Array.from(new Set(projects.map(p => p.district))), [projects]);
+  const statuses = ['Ongoing', 'Completed', 'Delayed', 'Assigned', 'Sanctioned', 'Recommended'];
+  const risks = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
   // Filter & Sort Logic
   const filteredProjects = useMemo(() => {
@@ -116,10 +114,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Projects
+            {t.home} &gt; {t.projects}
           </span>
         </div>
       )}
@@ -127,9 +125,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-body tracking-tight">MPLADS Works Directory</h1>
+          <h1 className="text-xl font-bold text-slate-body tracking-tight">{t.projectsPageTitle}</h1>
           <p className="text-xs text-slate-muted">
-            Official repository of sanctioned, ongoing, and completed developmental works
+            {t.projectsPageSubtitle}
           </p>
         </div>
 
@@ -139,7 +137,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-border rounded-lg text-xs font-semibold text-slate-body hover:bg-panel-bg shadow-xs transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-muted" />
-            <span>Export CSV</span>
+            <span>{t.exportCsv}</span>
           </button>
 
           {(userRole === 'MP' || userRole === 'ADMIN') && onNavigateToRecommend && (
@@ -148,7 +146,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-govt-navy hover:bg-govt-navy-light text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               <FilePlus2 className="w-3.5 h-3.5" />
-              <span>Recommend Work</span>
+              <span>{t.recommendWork}</span>
             </button>
           )}
         </div>
@@ -165,7 +163,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by project code, title, contractor, village, or address..."
+            placeholder={t.searchProjectsPlaceholder}
             className="w-full pl-9 pr-3 py-2 border border-slate-border rounded-xl text-xs text-slate-body bg-panel-bg focus:bg-white focus:ring-2 focus:ring-govt-navy focus:outline-hidden"
           />
         </div>
@@ -173,53 +171,57 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
         {/* Filter chips row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div>
-            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">Category</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">{t.category}</label>
             <select
               value={categoryFilter}
               onChange={e => setCategoryFilter(e.target.value)}
               className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
-              {categories.map(c => (
-                <option key={c} value={c}>{c}</option>
+              <option value="All">{t.allCategories}</option>
+              {rawCategories.map(c => (
+                <option key={c} value={c}>{translateCategory(c)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">Execution Status</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">{t.status}</label>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
               className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
+              <option value="All">{t.allStatuses}</option>
               {statuses.map(s => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>{translateStatus(s)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">District</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">{t.district}</label>
             <select
               value={districtFilter}
               onChange={e => setDistrictFilter(e.target.value)}
               className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
-              {districts.map(d => (
+              <option value="All">{t.allDistricts}</option>
+              {rawDistricts.map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">AI Risk Level</label>
+            <label className="block text-[11px] font-bold text-slate-muted mb-1 uppercase tracking-wider">{t.riskLevel}</label>
             <select
               value={riskFilter}
               onChange={e => setRiskFilter(e.target.value)}
               className="w-full px-2.5 py-1.5 bg-panel-bg border border-slate-border rounded-lg text-xs text-slate-body"
             >
+              <option value="All">{t.allRiskLevels}</option>
               {risks.map(r => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>{translateRiskLevel(r)}</option>
               ))}
             </select>
           </div>
@@ -229,10 +231,18 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* Filter Stats Summary */}
       <div className="flex items-center justify-between text-xs text-slate-muted px-1">
         <div>
-          Showing <strong>{filteredProjects.length}</strong> of {projects.length} developmental works
+          {language === 'hi' ? (
+            <>
+              {projects.length} विकास कार्यों में से <strong>{filteredProjects.length}</strong> प्रदर्शित
+            </>
+          ) : (
+            <>
+              Showing <strong>{filteredProjects.length}</strong> of {projects.length} developmental works
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-slate-muted">Sort by:</span>
+          <span className="text-slate-muted">{t.sortBy}:</span>
           <button
             onClick={() => {
               setSortField('risk');
@@ -240,7 +250,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             }}
             className={`font-semibold underline cursor-pointer ${sortField === 'risk' ? 'text-slate-body' : 'text-slate-muted'}`}
           >
-            Risk Score ({sortOrder})
+            {t.sortRisk} ({sortOrder})
           </button>
         </div>
       </div>
@@ -251,21 +261,21 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-panel-bg text-slate-muted font-bold uppercase text-[10px] border-b border-slate-border tracking-wider">
               <tr>
-                <th className="p-3">Project Ref</th>
-                <th className="p-3">Work Title & Category</th>
-                <th className="p-3">Location & District</th>
-                <th className="p-3 text-right">Cost (Lakh)</th>
-                <th className="p-3">Physical Progress</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-center">AI Risk</th>
-                <th className="p-3 text-right">Action</th>
+                <th className="p-3">{t.workId}</th>
+                <th className="p-3">{language === 'hi' ? 'कार्य शीर्षक एवं श्रेणी' : 'Work Title & Category'}</th>
+                <th className="p-3">{language === 'hi' ? 'स्थान एवं ज़िला' : 'Location & District'}</th>
+                <th className="p-3 text-right">{language === 'hi' ? 'लागत (लाख)' : 'Cost (Lakh)'}</th>
+                <th className="p-3">{t.physicalProgress}</th>
+                <th className="p-3">{t.status}</th>
+                <th className="p-3 text-center">{language === 'hi' ? 'एआई जोखिम' : 'AI Risk'}</th>
+                <th className="p-3 text-right">{t.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-border">
               {filteredProjects.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-muted text-xs">
-                    No matching projects found for selected filters. Try broadening search criteria.
+                    {t.noProjectsFound}
                   </td>
                 </tr>
               ) : (
@@ -281,7 +291,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
                     <td className="p-3 max-w-xs">
                       <div className="font-bold text-slate-body line-clamp-1">{project.title}</div>
-                      <div className="text-[11px] text-slate-muted mt-0.5">{project.category}</div>
+                      <div className="text-[11px] text-slate-muted mt-0.5">{translateCategory(project.category)}</div>
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
@@ -290,7 +300,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                     </td>
 
                     <td className="p-3 text-right whitespace-nowrap font-mono font-semibold text-slate-body">
-                      ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(2)}L
+                      ₹{((project.sanctionedAmount || project.estimatedCost) / 100000).toFixed(2)} {language === 'hi' ? 'लाख' : 'L'}
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
@@ -327,7 +337,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                         }}
                         className="px-2.5 py-1 text-xs font-bold text-govt-navy bg-panel-bg border border-slate-border rounded-lg hover:bg-white transition-colors cursor-pointer"
                       >
-                        Audit Details
+                        {language === 'hi' ? 'ऑडिट विवरण' : 'Audit Details'}
                       </button>
                     </td>
                   </tr>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
+import { LanguageProvider, useLanguage } from './context/LanguageContext.js';
 import { Project, RiskAlert } from './types/index.js';
 import { useDataService } from './services/dataService.js';
 
@@ -37,6 +38,7 @@ type AppViewMode = 'home' | 'workspace' | 'login';
 
 const MainAppContent: React.FC = () => {
   const { user, currentUser, isPublicMode, enterPublicMode, exitPublicMode, logout, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const effectiveUser = user || currentUser;
 
   // Top-level View Routing:
@@ -111,7 +113,7 @@ const MainAppContent: React.FC = () => {
       <div className="min-h-screen bg-panel-bg flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3 p-6 bg-white rounded-2xl border border-slate-border shadow-xs">
           <RefreshCw className="w-6 h-6 text-govt-navy animate-spin" />
-          <span className="text-xs font-semibold text-slate-muted">Verifying authorized session...</span>
+          <span className="text-xs font-semibold text-slate-muted">{t.verifyingSession}</span>
         </div>
       </div>
     );
@@ -422,14 +424,12 @@ const MainAppContent: React.FC = () => {
       <footer className="bg-white border-t border-slate-border mt-auto py-4 px-6 text-xs text-slate-muted">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-body">MPLADS AI Integrity Portal</span>
+            <span className="font-bold text-slate-body">{t.portalName}</span>
             <span>•</span>
-            <span>National Informatics Centre (NIC)</span>
-            <span>•</span>
-            <span>MoSPI, New Delhi</span>
+            <span>{t.nicGov}</span>
           </div>
           <div className="text-[11px] text-slate-muted">
-            Official Government Institutional Design • Compliant with MoSPI 2023 Guidelines & SIH Standards
+            {t.footerCompliance}
           </div>
         </div>
       </footer>
@@ -439,8 +439,10 @@ const MainAppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainAppContent />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <MainAppContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

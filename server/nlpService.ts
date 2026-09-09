@@ -225,23 +225,32 @@ export function analyzeCitizenGrievance(feedback: CitizenFeedback, project?: Pro
 export async function executeRagChatbotQuery(
   userQuery: string,
   allProjects: Project[],
-  clientIp: string
+  clientIp: string,
+  preferredLanguage?: string
 ): Promise<ChatbotResponse> {
   const startTime = Date.now();
 
   // Rate limiting check
   if (!checkChatbotRateLimit(clientIp)) {
+    const isHindi = preferredLanguage === 'hi';
     return {
-      answer: 'Rate limit exceeded: Please wait a moment before sending another query to ensure portal availability.',
-      detectedLanguage: 'en',
+      answer: isHindi
+        ? 'दर सीमा समाप्त: कृपया प्रणाली की उपलब्धता बनाए रखने के लिए अगला प्रश्न पूछने से पहले कुछ समय प्रतीक्षा करें।'
+        : 'Rate limit exceeded: Please wait a moment before sending another query to ensure portal availability.',
+      detectedLanguage: isHindi ? 'Hindi' : 'English',
       retrievedProjects: [],
       isGrounded: false,
-      disclaimer: 'MPLADS Public Inquiry System rate-limiting policy active.',
+      disclaimer: isHindi
+        ? 'सांसद निधि सार्वजनिक पूछताछ प्रणाली दर सीमा नीति सक्रिय।'
+        : 'MPLADS Public Inquiry System rate-limiting policy active.',
       responseTimeMs: Date.now() - startTime
     };
   }
 
-  const lang = detectLanguage(userQuery);
+  const detected = detectLanguage(userQuery);
+  const lang = (preferredLanguage === 'hi' && detected.code === 'en' && !userQuery.match(/^[a-zA-Z\s]+$/))
+    ? { code: 'hi', name: 'Hindi' }
+    : (preferredLanguage === 'hi' ? { code: 'hi', name: 'Hindi' } : detected);
   const qLower = userQuery.toLowerCase();
 
   // Retrieval Step: Find top matching projects based on query keywords

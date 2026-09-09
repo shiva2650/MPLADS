@@ -18,8 +18,7 @@ import {
   MessageSquareWarning,
   ScrollText,
   Network,
-  Calculator,
-  Lock
+  Calculator
 } from 'lucide-react';
 
 export type NavTab =
@@ -87,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenHelp
 }) => {
   const { role } = useAuth();
-  const { t } = useLanguage();
+  const { t, translateRole, language } = useLanguage();
 
   interface NavItem {
     id: NavTab;
@@ -100,15 +99,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     isOfficerOnly?: boolean;
   }
 
-  // Exact paired icons required by user prompt:
-  // Home -> Home
-  // Projects -> FolderKanban
-  // Fund Tracking -> IndianRupee
-  // Alerts / Reviews -> AlertTriangle
-  // Verification Status -> ShieldCheck
-  // Reports -> FileBarChart
-  // Help / Chatbot -> MessageCircleQuestion
-  // Officer/Admin Login -> UserCog (kept separate)
   const navItems: NavItem[] = [
     // Core Public & Oversight Navigation
     {
@@ -151,74 +141,76 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'feedback',
-      label: 'Citizen Feedback',
+      label: t.feedback,
       icon: MessageSquareWarning,
       badge: unreadFeedbackCount,
       badgeColor: 'bg-status-verified',
       roles: ['MP', 'ADMIN', 'AGENCY', 'PUBLIC']
     },
 
-    // Additional Operational Tools for Authorized Roles (MP / ADMIN / AGENCY)
+    // Mapping
     {
       id: 'map',
-      label: 'Geographic GIS Map',
+      label: t.gisMap,
       icon: MapPin,
       roles: ['MP', 'ADMIN', 'AGENCY', 'PUBLIC'],
-      section: 'Mapping & Location'
+      section: t.mappingLocation
     },
+
+    // Officer Operations
     {
       id: 'recommend',
-      label: 'Recommend Work',
+      label: t.recommendWork,
       icon: FilePlus2,
       roles: ['MP', 'ADMIN'],
-      section: 'Officer Operations',
+      section: t.officerOperations,
       isOfficerOnly: true
     },
     {
       id: 'agency-workdesk',
-      label: 'Agency Billing Desk',
+      label: t.agencyBilling,
       icon: HardHat,
       roles: ['AGENCY', 'ADMIN'],
-      section: 'Officer Operations',
+      section: t.officerOperations,
       isOfficerOnly: true
     },
     {
       id: 'vendors',
-      label: 'Contractor Directory',
+      label: t.contractorDirectory,
       icon: Building,
       roles: ['ADMIN', 'MP'],
-      section: 'Officer Operations',
+      section: t.officerOperations,
       isOfficerOnly: true
     },
 
-    // Forensic / Restricted Tools (Moved behind officer access)
+    // Forensic / Restricted Tools
     {
       id: 'network-fraud',
-      label: 'Contractor Link Graph',
+      label: t.contractorGraph,
       icon: Network,
       roles: TAB_ALLOWED_ROLES['network-fraud'] as UserRole[],
-      section: 'Restricted Forensic Tools',
+      section: t.restrictedTools,
       isOfficerOnly: true
     },
     {
       id: 'audit-logs',
-      label: 'Ledger Audit Trail',
+      label: t.auditTrail,
       icon: ScrollText,
       roles: TAB_ALLOWED_ROLES['audit-logs'] as UserRole[],
-      section: 'Restricted Forensic Tools',
+      section: t.restrictedTools,
       isOfficerOnly: true
     },
     {
       id: 'data-ingestion',
-      label: 'Data Ingestion & Impact',
+      label: t.dataIngestion,
       icon: Calculator,
       roles: TAB_ALLOWED_ROLES['data-ingestion'] as UserRole[],
-      section: 'Restricted Forensic Tools',
+      section: t.restrictedTools,
       isOfficerOnly: true
     }
   ];
 
-  // Filter items according to role. If public, do not show forensic/internal officer tools in the main menu
+  // Filter items according to role
   const visibleItems = navItems.filter(item => {
     if (role === 'PUBLIC') {
       return !item.isOfficerOnly && item.roles.includes('PUBLIC');
@@ -234,16 +226,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="px-4 py-3 bg-panel-bg border-b border-slate-border">
         <div className="flex items-center justify-between">
           <div className="text-[11px] font-bold uppercase tracking-wider text-govt-navy">
-            {role === 'PUBLIC' ? t.publicView : 'Officer Workspace'}
+            {role === 'PUBLIC' ? t.publicView : (language === 'hi' ? 'अधिकारी कार्यक्षेत्र' : 'Officer Workspace')}
           </div>
           {role === 'PUBLIC' && (
-            <span className="w-2 h-2 rounded-full bg-status-verified" title="Public Transparency Active" />
+            <span className="w-2 h-2 rounded-full bg-status-verified" title={t.publicCitizenModeActive} />
           )}
         </div>
         <p className="text-[11px] text-slate-muted mt-0.5">
           {role === 'PUBLIC'
-            ? 'Open citizen oversight & tracking'
-            : `Authenticated as ${role}`}
+            ? (language === 'hi' ? 'नागरिक निगरानी एवं ट्रैकिंग' : 'Open citizen oversight & tracking')
+            : `${language === 'hi' ? 'प्रमाणित:' : 'Authenticated as'} ${translateRole(role)}`}
         </p>
       </div>
 
@@ -258,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="w-full mb-3 flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-govt-navy bg-panel-bg hover:bg-white border border-slate-border transition-colors cursor-pointer"
           >
             <Home className="w-4 h-4 text-govt-navy shrink-0" strokeWidth={2} />
-            <span className="truncate">Portal Home & Overview</span>
+            <span className="truncate">{t.returnToHome}</span>
           </button>
         )}
 
@@ -321,6 +313,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Dedicated Chatbot Trigger */}
         <button
+          id="nav-link-help-chatbot"
           onClick={() => {
             if (onOpenHelp) {
               onOpenHelp();
@@ -336,7 +329,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </nav>
 
-      {/* Officer Login Link for Public Mode (Kept separate at bottom) */}
+      {/* Officer Login Link for Public Mode */}
       {role === 'PUBLIC' && onOpenLogin && (
         <div className="p-3 border-t border-slate-border bg-panel-bg">
           <button
@@ -350,7 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>{t.officerLogin}</span>
           </button>
           <div className="text-[10px] text-slate-muted text-center mt-1.5">
-            District Collectors & MP login
+            {language === 'hi' ? 'ज़िला कलेक्टर एवं सांसद लॉगिन' : 'District Collectors & MP login'}
           </div>
         </div>
       )}
@@ -358,14 +351,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Ministry Compliance Badge */}
       <div className="p-3 m-3 bg-panel-bg rounded-xl border border-slate-border text-[11px] text-slate-muted">
         <div className="text-[10px] text-govt-navy uppercase tracking-wider font-bold mb-1">
-          Government Standards
+          {language === 'hi' ? 'सरकारी मानक' : 'Government Standards'}
         </div>
         <div className="flex items-center gap-2 mb-1.5">
           <div className="w-2 h-2 bg-status-verified rounded-full" />
           <span className="text-xs font-semibold text-slate-body">MoSPI 2023 Guidelines</span>
         </div>
         <div className="text-[10px] text-slate-muted leading-relaxed">
-          Public transparency ledger for constituency asset creation.
+          {t.mpladsFullName}
         </div>
       </div>
     </aside>

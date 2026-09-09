@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CitizenFeedback, Project, UserRole } from '../types/index.js';
-import { MessageSquareWarning, ShieldCheck, CheckCircle2, AlertOctagon, Filter, Phone, Calendar, ArrowLeft } from 'lucide-react';
+import { MessageSquareWarning, Calendar, ArrowLeft } from 'lucide-react';
 import { CitizenFeedbackModal } from '../components/CitizenFeedbackModal.js';
+import { useLanguage } from '../context/LanguageContext.js';
 import { api } from '../services/api.js';
 
 interface CitizenFeedbackPageProps {
@@ -21,6 +22,7 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
   onSelectProject,
   onBackToDashboard
 }) => {
+  const { language, t, translateStatus } = useLanguage();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [reviewingItem, setReviewingItem] = useState<CitizenFeedback | null>(null);
   const [reviewStatus, setReviewStatus] = useState<'Under Review' | 'Verified' | 'Resolved' | 'Rejected'>('Under Review');
@@ -40,7 +42,7 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
       onRefresh();
     } catch (err: any) {
       console.error(err);
-      setModalError(err?.message || 'Failed to update grievance status. Please try again.');
+      setModalError(err?.message || (language === 'hi' ? 'शिकायत स्थिति अद्यतन करने में विफलता। कृपया पुन: प्रयास करें।' : 'Failed to update grievance status. Please try again.'));
     } finally {
       setSubmitting(false);
     }
@@ -56,10 +58,10 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Citizen Feedback
+            {t.home} &gt; {t.grievances}
           </span>
         </div>
       )}
@@ -67,19 +69,21 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            Citizen Grievance Redressal & Public Feedback
+            {language === 'hi' ? 'नागरिक शिकायत निवारण एवं जन प्रतिक्रिया' : 'Citizen Grievance Redressal & Public Feedback'}
           </h1>
           <p className="text-xs text-gray-500">
-            Whistleblower reports and public civil works monitoring directly submitted to District Authority
+            {language === 'hi'
+              ? 'सीधे ज़िला प्रशासन को प्रेषित विसलब्लोअर रिपोर्ट एवं सार्वजनिक निगरानी'
+              : 'Whistleblower reports and public civil works monitoring directly submitted to District Authority'}
           </p>
         </div>
 
         <button
           onClick={() => setShowSubmitModal(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-govt-navy text-white rounded-md text-xs font-semibold hover:bg-govt-navy-light shadow-2xs"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-govt-navy text-white rounded-md text-xs font-semibold hover:bg-govt-navy-light shadow-2xs cursor-pointer"
         >
           <MessageSquareWarning className="w-4 h-4" />
-          <span>Register New Citizen Grievance</span>
+          <span>{language === 'hi' ? 'नई नागरिक शिकायत दर्ज करें' : 'Register New Citizen Grievance'}</span>
         </button>
       </div>
 
@@ -87,7 +91,7 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
       <div className="space-y-3">
         {feedbackList.length === 0 ? (
           <div className="bg-white rounded-xl p-8 text-center border border-gray-200 text-gray-500 text-xs">
-            No public grievances registered in jurisdiction.
+            {language === 'hi' ? 'अधिकार क्षेत्र में कोई सार्वजनिक शिकायत दर्ज नहीं है।' : 'No public grievances registered in jurisdiction.'}
           </div>
         ) : (
           feedbackList.map(item => {
@@ -112,18 +116,21 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {item.status}
+                      {translateStatus(item.status)}
                     </span>
                   </div>
 
                   <div className="text-[11px] text-gray-500 flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    <span>Reported on {new Date(item.submittedAt).toLocaleDateString('en-IN')}</span>
+                    <span>
+                      {language === 'hi' ? 'दर्ज तिथि:' : 'Reported on:'}{' '}
+                      {new Date(item.submittedAt).toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN')}
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-gray-500 text-[11px]">Associated Project:</div>
+                  <div className="text-gray-500 text-[11px]">{language === 'hi' ? 'संबंधित परियोजना:' : 'Associated Project:'}</div>
                   <div
                     onClick={() => project && onSelectProject(project)}
                     className="font-bold text-gray-900 text-sm hover:text-govt-navy cursor-pointer"
@@ -138,9 +145,12 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
 
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-[11px] text-gray-500 border-t border-gray-100">
                   <div className="flex items-center gap-3">
-                    <span>Citizen: <strong>{item.citizenName || 'Concerned Citizen'}</strong></span>
+                    <span>
+                      {language === 'hi' ? 'नागरिक:' : 'Citizen:'}{' '}
+                      <strong>{item.citizenName || (language === 'hi' ? 'जागरूक नागरिक' : 'Concerned Citizen')}</strong>
+                    </span>
                     {item.citizenContactMasked && (
-                      <span className="font-mono">Contact: {item.citizenContactMasked}</span>
+                      <span className="font-mono">{language === 'hi' ? 'संपर्क:' : 'Contact:'} {item.citizenContactMasked}</span>
                     )}
                   </div>
 
@@ -151,16 +161,16 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
                         setReviewStatus(item.status === 'New' ? 'Under Review' : item.status);
                         setAdminNotes(item.adminNotes || '');
                       }}
-                      className="px-3 py-1.5 bg-govt-navy text-white rounded font-semibold text-xs hover:bg-govt-navy-light"
+                      className="px-3 py-1.5 bg-govt-navy text-white rounded font-semibold text-xs hover:bg-govt-navy-light cursor-pointer"
                     >
-                      Update Vigilance Status
+                      {language === 'hi' ? 'सतर्कता स्थिति अद्यतन करें' : 'Update Vigilance Status'}
                     </button>
                   )}
                 </div>
 
                 {item.adminNotes && (
                   <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded text-govt-navy text-[11px]">
-                    <strong>Administrative Inspection Note:</strong> {item.adminNotes}
+                    <strong>{language === 'hi' ? 'प्रशासनिक निरीक्षण टिप्पणी:' : 'Administrative Inspection Note:'}</strong> {item.adminNotes}
                   </div>
                 )}
               </div>
@@ -185,10 +195,10 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 space-y-4 text-xs">
             <h3 className="text-sm font-bold text-gray-900">
-              Update Citizen Grievance Redressal Status
+              {language === 'hi' ? 'नागरिक शिकायत निवारण स्थिति अद्यतन करें' : 'Update Citizen Grievance Redressal Status'}
             </h3>
             <div className="p-2.5 bg-gray-50 rounded border border-gray-200 font-mono text-[11px]">
-              Grievance ID: {reviewingItem.id} ({reviewingItem.issueType})
+              {language === 'hi' ? 'शिकायत आईडी:' : 'Grievance ID:'} {reviewingItem.id} ({reviewingItem.issueType})
             </div>
 
             <form onSubmit={handleStatusSubmit} className="space-y-3">
@@ -198,26 +208,30 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
                 </div>
               )}
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Status Determination</label>
+                <label className="block font-semibold text-gray-700 mb-1">
+                  {language === 'hi' ? 'स्थिति निर्धारण' : 'Status Determination'}
+                </label>
                 <select
                   value={reviewStatus}
                   onChange={e => setReviewStatus(e.target.value as any)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
                 >
-                  <option value="Under Review">Under Review (Inspection Deputed)</option>
-                  <option value="Verified">Verified Defect (Show-cause notice to Agency)</option>
-                  <option value="Resolved">Resolved (Rectification Completed)</option>
-                  <option value="Rejected">Rejected (Unsubstantiated)</option>
+                  <option value="Under Review">{language === 'hi' ? 'समीक्षाधीन (निरीक्षण प्रतिनियुक्त)' : 'Under Review (Inspection Deputed)'}</option>
+                  <option value="Verified">{language === 'hi' ? 'सत्यापित दोष (एजेंसी को कारण बताओ नोटिस)' : 'Verified Defect (Show-cause notice to Agency)'}</option>
+                  <option value="Resolved">{language === 'hi' ? 'निस्तारित (सुधार कार्य पूर्ण)' : 'Resolved (Rectification Completed)'}</option>
+                  <option value="Rejected">{language === 'hi' ? 'अस्वीकृत (अप्रमाणित)' : 'Rejected (Unsubstantiated)'}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Administrative Notes</label>
+                <label className="block font-semibold text-gray-700 mb-1">
+                  {language === 'hi' ? 'प्रशासनिक टिप्पणी' : 'Administrative Notes'}
+                </label>
                 <textarea
                   rows={3}
                   value={adminNotes}
                   onChange={e => setAdminNotes(e.target.value)}
-                  placeholder="Record inspection date, findings, or contractor penalties imposed..."
+                  placeholder={language === 'hi' ? 'निरीक्षण तिथि, निष्कर्ष या ठेकेदार पर लगाए गए जुर्माने का विवरण दर्ज करें...' : 'Record inspection date, findings, or contractor penalties imposed...'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
                 />
               </div>
@@ -226,16 +240,16 @@ export const CitizenFeedbackPage: React.FC<CitizenFeedbackPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setReviewingItem(null)}
-                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 font-medium"
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 font-medium cursor-pointer"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-govt-navy text-white rounded font-semibold hover:bg-govt-navy-light disabled:opacity-50"
+                  className="px-5 py-2 bg-govt-navy text-white rounded font-semibold hover:bg-govt-navy-light disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Updating...' : 'Save Redressal Record'}
+                  {submitting ? (language === 'hi' ? 'अद्यतन जारी...' : 'Updating...') : (language === 'hi' ? 'निवारण रिकॉर्ड सहेजें' : 'Save Redressal Record')}
                 </button>
               </div>
             </form>

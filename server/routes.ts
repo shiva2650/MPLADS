@@ -1180,14 +1180,14 @@ apiRouter.post('/nlp/analyze-feedback', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/chat/query', async (req: Request, res: Response) => {
-  const { query } = req.body;
+  const { query, language } = req.body;
   const cleanQuery = sanitizeString(query || '', 400);
   if (!cleanQuery) {
     return res.status(400).json({ error: 'Query parameter is required.' });
   }
 
   const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
-  const response = await executeRagChatbotQuery(cleanQuery, db.projects, clientIp);
+  const response = await executeRagChatbotQuery(cleanQuery, db.projects, clientIp, language);
   return res.json(response);
 });
 

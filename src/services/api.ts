@@ -348,10 +348,10 @@ export const api = {
   },
 
   // Multilingual RAG Citizen Chatbot
-  queryChatbot: async (query: string): Promise<any> => {
+  queryChatbot: async (query: string, language?: string): Promise<any> => {
     return fetchWithAuth('/api/chat/query', {
       method: 'POST',
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query, language })
     });
   },
 

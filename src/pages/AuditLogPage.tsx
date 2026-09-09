@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
-import { ShieldCheck, Lock, CheckCircle2, AlertTriangle, RefreshCw, Hash, Cpu, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Lock, CheckCircle2, AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
 import { AuditLogEntry } from '../types/index.js';
+import { useLanguage } from '../context/LanguageContext.js';
 
 interface AuditLogPageProps {
   onBackToDashboard?: () => void;
 }
 
 export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard }) => {
+  const { language, t, translateRole } = useLanguage();
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
@@ -51,7 +53,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
     return (
       <div className="p-12 text-center text-xs text-slate-muted flex flex-col items-center justify-center space-y-2">
         <RefreshCw className="w-5 h-5 animate-spin text-govt-navy" />
-        <span>Verifying & loading immutable audit sequence...</span>
+        <span>{language === 'hi' ? 'अपरिवर्तनीय ऑडिट अनुक्रम का सत्यापन एवं लोड किया जा रहा है...' : 'Verifying & loading immutable audit sequence...'}</span>
       </div>
     );
   }
@@ -66,10 +68,10 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-govt-navy bg-white border border-slate-border hover:bg-panel-bg rounded-lg transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>← Back to Overview</span>
+            <span>← {t.backToOverview}</span>
           </button>
           <span className="text-xs text-slate-muted">
-            Dashboard &gt; Audit Log
+            {t.home} &gt; {t.auditLogs}
           </span>
         </div>
       )}
@@ -79,11 +81,13 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-govt-navy" />
             <h1 className="text-xl font-bold text-slate-body tracking-tight">
-              Tamper-Evident System Audit Trail & Security Logs
+              {language === 'hi' ? 'अपरिवर्तनीय सिस्टम ऑडिट ट्रेल एवं सुरक्षा लॉग' : 'Tamper-Evident System Audit Trail & Security Logs'}
             </h1>
           </div>
           <p className="text-xs text-slate-muted mt-0.5">
-            Cryptographically chained SHA-256 ledger recording all administrative, financial, and AI verification events
+            {language === 'hi'
+              ? 'प्रशासनिक, वित्तीय और एआई सत्यापन घटनाओं को रिकॉर्ड करने वाला क्रिप्टोग्राफिक SHA-256 खाता'
+              : 'Cryptographically chained SHA-256 ledger recording all administrative, financial, and AI verification events'}
           </p>
         </div>
 
@@ -97,7 +101,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
           ) : (
             <Lock className="w-4 h-4 text-panel-bg/80" />
           )}
-          <span>{verifying ? 'Validating Hashes...' : 'Verify Cryptographic Integrity'}</span>
+          <span>{verifying ? (language === 'hi' ? 'हैश सत्यापन जारी...' : 'Validating Hashes...') : (language === 'hi' ? 'क्रिप्टोग्राफिक अखंडता सत्यापित करें' : 'Verify Cryptographic Integrity')}</span>
         </button>
       </div>
 
@@ -118,16 +122,20 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
             <div>
               <div className="font-bold">
                 {verificationResult.isValid
-                  ? `Cryptographic Hash Chain Verified: 100% Intact (${verificationResult.verifiedCount} Entries)`
-                  : `Integrity Anomaly: Broken chain detected at ${verificationResult.brokenAtId}`}
+                  ? (language === 'hi'
+                      ? `क्रिप्टोग्राफिक हैश श्रृंखला सत्यापित: 100% सुरक्षित (${verificationResult.verifiedCount} प्रविष्टियां)`
+                      : `Cryptographic Hash Chain Verified: 100% Intact (${verificationResult.verifiedCount} Entries)`)
+                  : (language === 'hi'
+                      ? `सत्यनिष्ठा विसंगति: ${verificationResult.brokenAtId} पर टूटी हुई श्रृंखला पाई गई`
+                      : `Integrity Anomaly: Broken chain detected at ${verificationResult.brokenAtId}`)}
               </div>
               <div className="text-[11px] opacity-80">
-                Algorithm: {verificationResult.algorithm} | Verified At: {new Date(verificationResult.verifiedAt).toLocaleTimeString()}
+                {language === 'hi' ? 'एल्गोरिदम:' : 'Algorithm:'} {verificationResult.algorithm} | {language === 'hi' ? 'सत्यापन समय:' : 'Verified At:'} {new Date(verificationResult.verifiedAt).toLocaleTimeString()}
               </div>
             </div>
           </div>
           <span className="text-[10px] uppercase font-mono tracking-wider font-bold px-2 py-0.5 rounded bg-white/60">
-            Genesis Anchor Validated
+            {language === 'hi' ? 'जेनेसिस एंकर मान्य' : 'Genesis Anchor Validated'}
           </span>
         </div>
       )}
@@ -137,12 +145,12 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
           <table className="w-full text-left text-xs">
             <thead className="bg-panel-bg text-slate-body font-bold uppercase text-[10px] tracking-wider border-b border-slate-border">
               <tr>
-                <th className="p-3">Log ID</th>
-                <th className="p-3">Timestamp</th>
-                <th className="p-3">Actor (Officer)</th>
-                <th className="p-3">Action Type</th>
-                <th className="p-3">Target & Details</th>
-                <th className="p-3">Cryptographic SHA-256 Hash</th>
+                <th className="p-3">{language === 'hi' ? 'लॉग आईडी' : 'Log ID'}</th>
+                <th className="p-3">{language === 'hi' ? 'समय-मुहर' : 'Timestamp'}</th>
+                <th className="p-3">{language === 'hi' ? 'कर्ता (अधिकारी)' : 'Actor (Officer)'}</th>
+                <th className="p-3">{language === 'hi' ? 'कार्रवाई का प्रकार' : 'Action Type'}</th>
+                <th className="p-3">{language === 'hi' ? 'लक्षित विवरण' : 'Target & Details'}</th>
+                <th className="p-3">{language === 'hi' ? 'क्रिप्टोग्राफिक SHA-256 हैश' : 'Cryptographic SHA-256 Hash'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-border">
@@ -152,12 +160,12 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
                     {log.id}
                   </td>
                   <td className="p-3 whitespace-nowrap font-mono text-slate-muted text-[11px]">
-                    {new Date(log.timestamp).toLocaleString('en-IN')}
+                    {new Date(log.timestamp).toLocaleString(language === 'hi' ? 'hi-IN' : 'en-IN')}
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     <div className="font-bold text-slate-body">{log.userName}</div>
                     <div className="text-[10px] text-slate-muted font-mono">
-                      {log.userId} ({log.userRole})
+                      {log.userId} ({translateRole(log.userRole)})
                     </div>
                   </td>
                   <td className="p-3 whitespace-nowrap">
@@ -173,7 +181,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ onBackToDashboard })
                       <div className="text-xs text-slate-700 mt-0.5">{log.newValue}</div>
                     )}
                     {log.previousValue && (
-                      <div className="text-[10px] text-slate-400 mt-0.5">Prev: {log.previousValue}</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">{language === 'hi' ? 'पूर्व:' : 'Prev:'} {log.previousValue}</div>
                     )}
                   </td>
                   <td className="p-3 font-mono text-[10px] text-gray-500 max-w-[200px]">
