@@ -972,63 +972,6 @@ apiRouter.post('/citizen-feedback/:id/status', requireRole(['ADMIN']), (req: Req
   return res.json({ success: true, item, message: `Feedback status updated to ${status}` });
 });
 
-// --- VENDOR / AGENCY RISK ANALYTICS ---
-
-apiRouter.get('/analytics/vendors', requireRole(['ADMIN', 'MP']), (req: Request, res: Response) => {
-  const vendorMap = new Map<string, {
-    name: string;
-    totalProjects: number;
-    totalValue: number;
-    completed: number;
-    delayed: number;
-    highRiskCount: number;
-    categories: Set<string>;
-    districts: Set<string>;
-  }>();
-
-  db.projects.forEach(p => {
-    if (!p.vendorName || p.vendorName.includes('Pending') || p.vendorName.includes('Under')) return;
-
-    if (!vendorMap.has(p.vendorName)) {
-      vendorMap.set(p.vendorName, {
-        name: p.vendorName,
-        totalProjects: 0,
-        totalValue: 0,
-        completed: 0,
-        delayed: 0,
-        highRiskCount: 0,
-        categories: new Set(),
-        districts: new Set()
-      });
-    }
-
-    const v = vendorMap.get(p.vendorName)!;
-    v.totalProjects++;
-    v.totalValue += p.sanctionedAmount || p.estimatedCost;
-    if (p.status === 'Completed') v.completed++;
-    if (p.status === 'Delayed') v.delayed++;
-    if (p.riskAnalysis.overallScore > 60) v.highRiskCount++;
-    v.categories.add(p.category);
-    v.districts.add(p.district);
-  });
-
-  const vendors = Array.from(vendorMap.values()).map(v => ({
-    name: v.name,
-    totalProjects: v.totalProjects,
-    totalValueCr: Number((v.totalValue / 10000000).toFixed(2)),
-    completed: v.completed,
-    delayed: v.delayed,
-    highRiskCount: v.highRiskCount,
-    completionRate: v.totalProjects > 0 ? Math.round((v.completed / v.totalProjects) * 100) : 0,
-    delayRate: v.totalProjects > 0 ? Math.round((v.delayed / v.totalProjects) * 100) : 0,
-    categories: Array.from(v.categories),
-    districts: Array.from(v.districts),
-    riskExposureRating: v.highRiskCount >= 2 ? 'High Concentration' : v.delayed >= 2 ? 'Moderate Delay' : 'Standard Delivery'
-  }));
-
-  return res.json({ vendors });
-});
-
 // --- AUDIT LOGS (ADMIN ONLY) ---
 
 apiRouter.get('/audit-logs', requireRole(['ADMIN']), (req: Request, res: Response) => {
@@ -1344,12 +1287,5 @@ apiRouter.post('/inspections', requireRole(['ADMIN', 'AGENCY']), (req: Request, 
   });
 
   return res.status(201).json({ success: true, inspection: newInspection });
-});
-
-// --- VENDOR REGISTRY & COMPLIANCE ---
-
-apiRouter.get('/vendors', (req: Request, res: Response) => {
-  const vendors = db.getVendors(req.user);
-  return res.json({ vendors, count: vendors.length });
 });
 

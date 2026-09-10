@@ -22,7 +22,6 @@ export interface TranslationDictionary {
   gisMap: string;
   recommendWork: string;
   agencyBilling: string;
-  contractorDirectory: string;
   contractorGraph: string;
   auditTrail: string;
   dataIngestion: string;
@@ -553,7 +552,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     gisMap: 'Geographic GIS Map',
     recommendWork: 'Recommend Work',
     agencyBilling: 'Agency Billing Desk',
-    contractorDirectory: 'Contractor Directory',
     contractorGraph: 'Contractor Link Graph',
     auditTrail: 'Ledger Audit Trail',
     dataIngestion: 'Data Ingestion & Impact',
@@ -1082,7 +1080,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     gisMap: 'भौगोलिक जीआईएस मानचित्र',
     recommendWork: 'नया कार्य अनुशंसित करें',
     agencyBilling: 'एजेंसी कार्यडेस्क',
-    contractorDirectory: 'ठेकेदार निर्देशिका',
     contractorGraph: 'ठेकेदार नेटवर्क विश्लेषण',
     auditTrail: 'लेखापरीक्षा लॉग',
     dataIngestion: 'डेटा अंतर्ग्रहण व प्रभाव',

@@ -7,7 +7,6 @@ import {
   DashboardSummary,
   AppNotification
 } from '../types/index.js';
-import { initialVendors } from '../data/mockData.js';
 import { isStaticMode } from '../utils/environment.js';
 import { AuthService, authStorage } from './authService.js';
 import { clientMockDb } from './clientMockDb.js';
@@ -346,14 +345,6 @@ export const api = {
       return clientMockDb.resetNotifications();
     }
     return fetchWithAuth('/api/notifications/reset', { method: 'POST' });
-  },
-
-  // Vendors
-  getVendors: async (): Promise<{ vendors: any[] }> => {
-    if (isStaticMode()) {
-      return { vendors: initialVendors };
-    }
-    return fetchWithAuth('/api/analytics/vendors');
   },
 
   // Citizen Feedback
