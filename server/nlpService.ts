@@ -308,7 +308,14 @@ export async function executeRagChatbotQuery(
   // Use Google Gemini API if GEMINI_API_KEY is configured
   if (process.env.GEMINI_API_KEY) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
       const prompt = `You are the Official MPLADS Public Transparency AI Assistant for the Government of India.
 A citizen has asked a query: "${userQuery}".
 Detected citizen language: ${lang.name}.
@@ -324,12 +331,20 @@ OFFICIAL PROJECT RECORDS RETRIEVED:
 ${contextSnippet}
 `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt
-      });
-
-      generatedAnswer = response.text || '';
+      for (const modelName of ['gemini-3.8-flash', 'gemini-3.1-flash-lite']) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt
+          });
+          if (response?.text) {
+            generatedAnswer = response.text;
+            break;
+          }
+        } catch (mErr: any) {
+          console.warn(`[nlpService] Model ${modelName} encountered: ${mErr?.message || mErr}. Trying fallback.`);
+        }
+      }
     } catch (err: any) {
       console.warn('Gemini API call fallback to heuristic formatter:', err?.message);
     }

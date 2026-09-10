@@ -43,16 +43,16 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ projects, onBackToDash
     } else if (reportType === 'risk') {
       filename = `MPLADS_AI_Vigilance_Anomalies_${new Date().toISOString().split('T')[0]}.csv`;
       headers = ['Project Code', 'Title', 'District', 'Risk Score', 'Risk Level', 'Cost Score', 'Duplicate Score', 'Delay Probability %', 'Key Observations'];
-      rows = projects.filter(p => p.riskAnalysis.overallScore > 40).map(p => [
+      rows = projects.filter(p => (p.riskAnalysis?.overallScore || 0) > 40).map(p => [
         p.projectCode,
         `"${p.title.replace(/"/g, '""')}"`,
         p.district,
-        p.riskAnalysis.overallScore,
-        p.riskAnalysis.riskLevel,
-        p.riskAnalysis.costAnomalyScore,
-        p.riskAnalysis.duplicateProbability,
-        p.riskAnalysis.delayProbability,
-        `"${p.riskAnalysis.reasons.join('; ').replace(/"/g, '""')}"`
+        p.riskAnalysis?.overallScore || 0,
+        p.riskAnalysis?.riskLevel || 'LOW',
+        p.riskAnalysis?.costAnomalyScore || 0,
+        p.riskAnalysis?.duplicateProbability || 0,
+        p.riskAnalysis?.delayProbability || 0,
+        `"${(p.riskAnalysis?.reasons || []).join('; ').replace(/"/g, '""')}"`
       ]);
     } else if (reportType === 'financial') {
       filename = `MPLADS_Financial_Ledger_${new Date().toISOString().split('T')[0]}.csv`;

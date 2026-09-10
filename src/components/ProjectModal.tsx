@@ -17,6 +17,7 @@ import {
   Compass
 } from 'lucide-react';
 import { api } from '../services/api.js';
+import { normalizeProject } from '../utils/normalization.js';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -28,12 +29,13 @@ interface ProjectModalProps {
 }
 
 export const ProjectModal: React.FC<ProjectModalProps> = ({
-  project,
+  project: rawProject,
   onClose,
   userRole,
   duplicateCandidates = [],
   initialTab = 'overview'
 }) => {
+  const project = rawProject ? normalizeProject(rawProject) : null;
   const { language, t, translateCategory, translateStatus, translateRiskLevel } = useLanguage();
   const [activeTab, setActiveTab] = useState<'overview' | 'ai-risk' | 'photos' | 'financials' | 'documents' | 'audit-report'>(initialTab);
   const [isGeneratingAiReport, setIsGeneratingAiReport] = useState(false);

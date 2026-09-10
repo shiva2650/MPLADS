@@ -17,6 +17,7 @@ import {
   executeStaticChatbotQuery,
   calculateStaticImpactMetrics
 } from './staticServices.js';
+import { normalizeProject, normalizeProjects, normalizeAlerts } from '../utils/normalization.js';
 
 export { AuthService, authStorage };
 
@@ -123,7 +124,9 @@ export const api = {
     search?: string;
   }): Promise<{ projects: Project[]; count: number }> => {
     if (isStaticMode()) {
-      return clientMockDb.getProjects(filters);
+      const res = await clientMockDb.getProjects(filters);
+      const normalized = normalizeProjects(res.projects);
+      return { projects: normalized, count: normalized.length };
     }
 
     const params = new URLSearchParams();
@@ -134,16 +137,22 @@ export const api = {
     if (filters?.search) params.set('search', filters.search);
 
     const query = params.toString() ? `?${params.toString()}` : '';
-    return fetchWithAuth(`/api/projects${query}`);
+    const res = await fetchWithAuth(`/api/projects${query}`);
+    const normalized = normalizeProjects(res?.projects);
+    return { projects: normalized, count: normalized.length };
   },
 
   getProjectById: async (id: string): Promise<{ project: Project; duplicateCandidates?: any[] }> => {
     if (isStaticMode()) {
       const prj = await clientMockDb.getProjectById(id);
       if (!prj) throw new Error('Project not found');
-      return { project: prj, duplicateCandidates: [] };
+      return { project: normalizeProject(prj), duplicateCandidates: [] };
     }
-    return fetchWithAuth(`/api/projects/${id}`);
+    const res = await fetchWithAuth(`/api/projects/${id}`);
+    return {
+      project: normalizeProject(res?.project),
+      duplicateCandidates: res?.duplicateCandidates || []
+    };
   },
 
   recommendProject: async (projectData: Partial<Project>): Promise<{ success: boolean; project: Project }> => {

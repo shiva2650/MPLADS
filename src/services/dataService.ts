@@ -8,6 +8,15 @@ import {
   AlertStatus
 } from '../types/index.js';
 import { api } from './api.js';
+import {
+  normalizeProject,
+  normalizeProjects,
+  normalizeAlert,
+  normalizeAlerts,
+  normalizeCitizenFeedback,
+  normalizeCitizenFeedbackList,
+  normalizeDashboardSummary
+} from '../utils/normalization.js';
 
 type DataChangeListener = () => void;
 
@@ -71,11 +80,10 @@ class DataService {
     search?: string;
   }): Promise<{ projects: Project[]; count: number }> {
     const res = await api.getProjects(filters);
-    if (res && Array.isArray(res.projects)) {
-      this.cache.projects = res.projects;
-      this.cache.lastFetched = Date.now();
-    }
-    return res;
+    const normalizedProjects = normalizeProjects(res?.projects);
+    this.cache.projects = normalizedProjects;
+    this.cache.lastFetched = Date.now();
+    return { projects: normalizedProjects, count: normalizedProjects.length };
   }
 
   /**
@@ -83,7 +91,7 @@ class DataService {
    */
   public async getProjectById(id: string): Promise<Project | null> {
     const res = await api.getProjectById(id);
-    return res.project || null;
+    return res.project ? normalizeProject(res.project) : null;
   }
 
   /**
@@ -94,11 +102,10 @@ class DataService {
     riskLevel?: string;
   }): Promise<{ alerts: RiskAlert[]; count: number }> {
     const res = await api.getAlerts(filters);
-    if (res && Array.isArray(res.alerts)) {
-      this.cache.alerts = res.alerts;
-      this.cache.lastFetched = Date.now();
-    }
-    return res;
+    const normalizedAlerts = normalizeAlerts(res?.alerts);
+    this.cache.alerts = normalizedAlerts;
+    this.cache.lastFetched = Date.now();
+    return { alerts: normalizedAlerts, count: normalizedAlerts.length };
   }
 
   /**
@@ -106,11 +113,10 @@ class DataService {
    */
   public async fetchSummary(): Promise<DashboardSummary> {
     const summary = await api.getDashboardSummary();
-    if (summary) {
-      this.cache.summary = summary;
-      this.cache.lastFetched = Date.now();
-    }
-    return summary;
+    const normalized = normalizeDashboardSummary(summary);
+    this.cache.summary = normalized;
+    this.cache.lastFetched = Date.now();
+    return normalized;
   }
 
   /**
@@ -118,11 +124,10 @@ class DataService {
    */
   public async fetchFeedback(): Promise<{ feedback: CitizenFeedback[]; count: number }> {
     const res = await api.getCitizenFeedback();
-    if (res && Array.isArray(res.feedback)) {
-      this.cache.feedback = res.feedback;
-      this.cache.lastFetched = Date.now();
-    }
-    return res;
+    const normalizedFeedback = normalizeCitizenFeedbackList(res?.feedback);
+    this.cache.feedback = normalizedFeedback;
+    this.cache.lastFetched = Date.now();
+    return { feedback: normalizedFeedback, count: normalizedFeedback.length };
   }
 
   /**
@@ -154,10 +159,10 @@ class DataService {
     ]);
 
     this.cache = {
-      projects: projectsRes.projects || [],
-      alerts: alertsRes.alerts || [],
-      summary: summaryRes || null,
-      feedback: feedbackRes.feedback || [],
+      projects: normalizeProjects(projectsRes?.projects),
+      alerts: normalizeAlerts(alertsRes?.alerts),
+      summary: summaryRes ? normalizeDashboardSummary(summaryRes) : null,
+      feedback: normalizeCitizenFeedbackList(feedbackRes?.feedback),
       lastFetched: Date.now()
     };
 
@@ -178,8 +183,9 @@ class DataService {
     longitude: number;
   }): Promise<{ success: boolean; project: Project }> {
     const res = await api.recommendProject(data);
+    const normalized = normalizeProject(res.project);
     this.notify();
-    return res;
+    return { ...res, project: normalized };
   }
 
   /**
@@ -202,8 +208,9 @@ class DataService {
       data.sanctionedCost ?? data.sanctionedAmount,
       data.remarks ?? data.notes
     );
+    const normalized = normalizeProject(res.project);
     this.notify();
-    return res;
+    return { ...res, project: normalized };
   }
 
   /**
@@ -228,8 +235,9 @@ class DataService {
       startDate: data.startDate,
       expectedCompletionDate: data.expectedCompletionDate || data.targetCompletionDate
     });
+    const normalized = normalizeProject(res.project);
     this.notify();
-    return res;
+    return { ...res, project: normalized };
   }
 
   /**
@@ -262,8 +270,9 @@ class DataService {
       photoLat: data.photoLat,
       photoLon: data.photoLon
     });
+    const normalized = normalizeProject(res.project);
     this.notify();
-    return res;
+    return { ...res, project: normalized };
   }
 
   /**
@@ -278,8 +287,9 @@ class DataService {
     }
   ): Promise<{ success: boolean; payment: any; project: Project }> {
     const res = await api.addPayment(projectId, data);
+    const normalized = normalizeProject(res.project);
     this.notify();
-    return res;
+    return { ...res, project: normalized };
   }
 
   /**
@@ -308,8 +318,9 @@ class DataService {
     }
 
     const res = await api.updateAlertStatus(alertId, finalStatus, finalNotes);
+    const normalized = normalizeAlert(res.alert);
     this.notify();
-    return res;
+    return { ...res, alert: normalized };
   }
 
   /**

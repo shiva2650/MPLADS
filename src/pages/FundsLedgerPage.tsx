@@ -15,8 +15,10 @@ export const FundsLedgerPage: React.FC<FundsLedgerPageProps> = ({ projects, onBa
   // Annual statutory entitlement under MPLADS is ₹5.00 Crore
   const annualEntitlementINR = 50000000;
 
-  const totalSanctionedINR = projects.reduce((acc, p) => acc + (p.sanctionedAmount || 0), 0);
-  const totalUtilizedINR = projects.reduce((acc, p) => acc + (p.fundsUtilized || 0), 0);
+  // Flatten all payments safely
+  const safeProjects = Array.isArray(projects) ? projects : [];
+  const totalSanctionedINR = safeProjects.reduce((acc, p) => acc + (p?.sanctionedAmount || 0), 0);
+  const totalUtilizedINR = safeProjects.reduce((acc, p) => acc + (p?.fundsUtilized || 0), 0);
   const uncommittedINR = Math.max(0, annualEntitlementINR - totalSanctionedINR);
 
   const sanctionedCr = (totalSanctionedINR / 10000000).toFixed(2);
@@ -25,22 +27,24 @@ export const FundsLedgerPage: React.FC<FundsLedgerPageProps> = ({ projects, onBa
   const utilizationPct = totalSanctionedINR > 0 ? Math.round((totalUtilizedINR / totalSanctionedINR) * 100) : 0;
 
   // Flatten all payments
-  const allPayments = projects
+  const allPayments = safeProjects
     .flatMap(p =>
-      p.payments.map(pay => ({
+      (p?.payments || []).map(pay => ({
         ...pay,
-        projectCode: p.projectCode,
-        projectTitle: p.title,
-        district: p.district
+        projectCode: p?.projectCode || '',
+        projectTitle: p?.title || '',
+        district: p?.district || ''
       }))
     )
-    .sort((a, b) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
+    .sort((a, b) => new Date(b.paidAt || 0).getTime() - new Date(a.paidAt || 0).getTime());
 
   // Category breakdown
   const categoryMap = new Map<string, { sanctioned: number; utilized: number }>();
-  projects.forEach(p => {
-    const prev = categoryMap.get(p.category) || { sanctioned: 0, utilized: 0 };
-    categoryMap.set(p.category, {
+  safeProjects.forEach(p => {
+    if (!p) return;
+    const cat = p.category || 'General';
+    const prev = categoryMap.get(cat) || { sanctioned: 0, utilized: 0 };
+    categoryMap.set(cat, {
       sanctioned: prev.sanctioned + (p.sanctionedAmount || 0),
       utilized: prev.utilized + (p.fundsUtilized || 0)
     });

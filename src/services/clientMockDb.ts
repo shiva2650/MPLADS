@@ -18,11 +18,18 @@ import {
 } from '../data/mockData.js';
 import { authStorage } from './authService.js';
 import { staticAuth } from './staticAuth.js';
+import {
+  normalizeProject,
+  normalizeProjects,
+  normalizeAlerts,
+  normalizeCitizenFeedbackList,
+  normalizeDashboardSummary
+} from '../utils/normalization.js';
 
 export class ClientMockDbService {
-  private projects: Project[] = JSON.parse(JSON.stringify(initialProjects));
-  private alerts: RiskAlert[] = JSON.parse(JSON.stringify(initialAlerts));
-  private citizenFeedback: CitizenFeedback[] = JSON.parse(JSON.stringify(initialCitizenFeedback));
+  private projects: Project[] = normalizeProjects(initialProjects);
+  private alerts: RiskAlert[] = normalizeAlerts(initialAlerts);
+  private citizenFeedback: CitizenFeedback[] = normalizeCitizenFeedbackList(initialCitizenFeedback);
   private auditLogs: AuditLogEntry[] = JSON.parse(JSON.stringify(initialAuditLogs));
   private notifications: AppNotification[] = JSON.parse(JSON.stringify(initialNotifications));
   private latestLogHash: string = 'GENESIS_MPLADS_AUDIT_BLOCK_000000';
@@ -38,21 +45,21 @@ export class ClientMockDbService {
       if (savedProjects) {
         const parsed = JSON.parse(savedProjects);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.projects = parsed;
+          this.projects = normalizeProjects(parsed);
         }
       }
       const savedAlerts = localStorage.getItem('mplads_client_alerts');
       if (savedAlerts) {
         const parsed = JSON.parse(savedAlerts);
         if (Array.isArray(parsed)) {
-          this.alerts = parsed;
+          this.alerts = normalizeAlerts(parsed);
         }
       }
       const savedFeedback = localStorage.getItem('mplads_client_feedback');
       if (savedFeedback) {
         const parsed = JSON.parse(savedFeedback);
         if (Array.isArray(parsed)) {
-          this.citizenFeedback = parsed;
+          this.citizenFeedback = normalizeCitizenFeedbackList(parsed);
         }
       }
       const savedNotifs = localStorage.getItem('mplads_client_notifications');
@@ -121,39 +128,42 @@ export class ClientMockDbService {
     const project = this.projects.find(p => p.id === id || p.projectCode === id);
     if (!project) return null;
 
+    const normalized = normalizeProject(project);
+
     if (!user || user.role === 'PUBLIC') {
-      return this.sanitizeProjectForPublic(project);
+      return this.sanitizeProjectForPublic(normalized);
     }
 
     if (user.role === 'MP') {
-      if (project.mpId !== user.userId && project.constituency !== user.constituency) {
+      if (normalized.mpId !== user.userId && normalized.constituency !== user.constituency) {
         return null;
       }
-      return project;
+      return normalized;
     }
 
     if (user.role === 'AGENCY') {
-      if (project.implementingAgencyId !== user.agencyId) {
+      if (normalized.implementingAgencyId !== user.agencyId) {
         return null;
       }
-      return project;
+      return normalized;
     }
 
     if (user.role === 'ADMIN') {
-      if (user.district && project.district !== user.district) {
+      if (user.district && normalized.district !== user.district) {
         return null;
       }
-      return project;
+      return normalized;
     }
 
-    return project;
+    return normalized;
   }
 
-  sanitizeProjectForPublic(p: Project): Project {
+  sanitizeProjectForPublic(raw: Project): Project {
+    const p = normalizeProject(raw);
     return {
       ...p,
       vendorPanMasked: 'CONFIDENTIAL',
-      documents: p.documents.filter(d => !d.isConfidential && (d.type === 'Sanction Order' || d.type === 'Completion Certificate')),
+      documents: (p.documents || []).filter(d => !d.isConfidential && (d.type === 'Sanction Order' || d.type === 'Completion Certificate')),
       riskAnalysis: {
         overallScore: p.riskAnalysis.overallScore,
         riskLevel: p.riskAnalysis.riskLevel,
@@ -167,7 +177,7 @@ export class ClientMockDbService {
         recommendations: [],
         disclaimer: 'Notice: Operational indicators are subject to official field verification.'
       },
-      payments: p.payments.map(pay => ({
+      payments: (p.payments || []).map(pay => ({
         id: pay.id,
         installmentNo: pay.installmentNo,
         amount: pay.amount,

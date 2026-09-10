@@ -681,17 +681,7 @@ export async function generateGeminiAuditReport(project: Project): Promise<strin
     return generateFallbackAuditReport(project);
   }
 
-  try {
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build'
-        }
-      }
-    });
-
-    const prompt = `
+  const prompt = `
 You are an expert Government Public Audit and Integrity Officer reviewing an MPLADS (Member of Parliament Local Area Development Scheme) project under the Ministry of Statistics and Programme Implementation (MoSPI), Government of India.
 
 Analyze this project data:
@@ -717,16 +707,35 @@ Provide a structured, objective, professional Government Technical Audit Brief w
 Ensure an objective, non-accusatory tone adhering to administrative vigilance standards.
 `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt
-    });
+  const ai = new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build'
+      }
+    }
+  });
 
-    return response.text || generateFallbackAuditReport(project);
-  } catch (error) {
-    console.error('Gemini Audit generation error:', error);
-    return generateFallbackAuditReport(project);
+  // Try primary model first, fallback to flash-lite if primary encounters 503 or overload
+  const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+
+  for (const modelName of candidateModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: prompt
+      });
+
+      if (response && response.text) {
+        return response.text;
+      }
+    } catch (err: any) {
+      console.warn(`[aiService] Gemini generation with model ${modelName} encountered: ${err?.message || err}. Attempting fallback.`);
+    }
   }
+
+  // Gracefully fallback to deterministic administrative brief
+  return generateFallbackAuditReport(project);
 }
 
 function generateFallbackAuditReport(project: Project): string {

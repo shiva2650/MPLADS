@@ -304,7 +304,14 @@ export async function verifyImageContentWithAI(
 
   if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.length > 10) {
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
       const base64Data = imageBuffer.toString('base64');
 
       const prompt = `You are a forensic civil engineer and integrity inspector for the Indian Government's MPLADS scheme.
@@ -321,25 +328,35 @@ Examine the image carefully and answer in valid JSON format:
   "analysisNotes": string (1-2 sentences summarizing verification findings)
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType: 'image/jpeg',
-                  data: base64Data
-                }
+      const contents = [
+        {
+          role: 'user',
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Data
               }
-            ]
-          }
-        ]
-      });
+            }
+          ]
+        }
+      ];
 
-      const text = response.text || '';
+      let response;
+      for (const modelName of ['gemini-3.8-flash', 'gemini-3.1-flash-lite']) {
+        try {
+          response = await ai.models.generateContent({
+            model: modelName,
+            contents
+          });
+          if (response?.text) break;
+        } catch (mErr: any) {
+          console.warn(`[EvidenceVerification] Model ${modelName} encountered: ${mErr?.message || mErr}. Trying fallback.`);
+        }
+      }
+
+      const text = response?.text || '';
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
