@@ -34,7 +34,6 @@ export type NavTab =
   | 'map'
   | 'recommend'
   | 'agency-workdesk'
-  | 'vendors'
   | 'audit-logs'
   | 'network-fraud'
   | 'data-ingestion';
@@ -56,7 +55,6 @@ export const TAB_ALLOWED_ROLES: Record<string, (UserRole | 'PUBLIC')[]> = {
   map: ['MP', 'ADMIN', 'AGENCY', 'PUBLIC'],
   recommend: ['MP', 'ADMIN'],
   'agency-workdesk': ['AGENCY', 'ADMIN'],
-  vendors: ['ADMIN', 'MP'],
   'network-fraud': ['ADMIN'],
   'audit-logs': ['ADMIN'],
   'data-ingestion': ['ADMIN', 'MP']
@@ -171,14 +169,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: t.agencyBilling,
       icon: HardHat,
       roles: ['AGENCY', 'ADMIN'],
-      section: t.officerOperations,
-      isOfficerOnly: true
-    },
-    {
-      id: 'vendors',
-      label: t.contractorDirectory,
-      icon: Building,
-      roles: ['ADMIN', 'MP'],
       section: t.officerOperations,
       isOfficerOnly: true
     },

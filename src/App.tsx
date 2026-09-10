@@ -23,7 +23,6 @@ import { AlertManagementPage } from './pages/AlertManagementPage.js';
 import { RecommendationsPage } from './pages/RecommendationsPage.js';
 import { FundsLedgerPage } from './pages/FundsLedgerPage.js';
 import { AgencyWorkdeskPage } from './pages/AgencyWorkdeskPage.js';
-import { VendorAnalyticsPage } from './pages/VendorAnalyticsPage.js';
 import { CitizenFeedbackPage } from './pages/CitizenFeedbackPage.js';
 import { ReportsPage } from './pages/ReportsPage.js';
 import { VerificationStatusPage } from './pages/VerificationStatusPage.js';
@@ -308,12 +307,6 @@ const MainAppContent: React.FC = () => {
                   userRole={effectiveRole}
                   onSelectProject={p => setSelectedProject(p)}
                   onRefresh={fetchData}
-                  onBackToDashboard={() => setCurrentTab('dashboard')}
-                />
-              )}
-
-              {currentTab === 'vendors' && (
-                <VendorAnalyticsPage
                   onBackToDashboard={() => setCurrentTab('dashboard')}
                 />
               )}
